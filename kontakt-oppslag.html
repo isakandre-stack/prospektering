@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bjørnis Prospekteringsmaskin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #09090b;
+  --surface: #111113;
+  --surface2: #18181b;
+  --border: #27272a;
+  --border2: #3f3f46;
+  --accent: #f97316;
+  --accent2: #fb923c;
+  --accent-dim: rgba(249,115,22,0.1);
+  --accent-glow: rgba(249,115,22,0.25);
+  --text: #fafafa;
+  --muted: #71717a;
+  --muted2: #52525b;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --yellow: #fbbf24;
+  --error: #f87171;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+header {
+  margin-bottom: 64px;
+  position: relative;
+}
+
+.bear-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 100px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.bear-badge span { color: var(--accent); }
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(42px, 7vw, 72px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+h1 .line1 { color: var(--text); display: block; }
+h1 .line2 {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--accent);
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 480px;
+  margin-top: 16px;
+}
+
+/* Decorative accent line */
+.accent-line {
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  margin: 24px 0;
+  border-radius: 2px;
+}
+
+/* Upload card */
+.upload-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
+}
+
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.drop-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: 12px;
+  padding: 52px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  background: var(--surface2);
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 0 4px var(--accent-glow), inset 0 0 40px rgba(249,115,22,0.05);
+}
+
+.drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.drop-icon-wrap {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  transition: transform 0.2s;
+}
+
+.drop-zone:hover .drop-icon-wrap {
+  transform: scale(1.05) rotate(-3deg);
+}
+
+.drop-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.drop-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.file-info {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--green);
+}
+
+.file-info .dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px var(--green);
+}
+
+.error-msg {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--error);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: var(--accent);
+  color: #09090b;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 24px;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+}
+
+.btn:hover {
+  background: var(--accent2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.4);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Progress */
+.progress-section {
+  display: none;
+  margin-top: 28px;
+  padding: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.progress-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.progress-bar-bg {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+  box-shadow: 0 0 10px rgba(249,115,22,0.5);
+}
+
+.current-item {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  min-height: 18px;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card:hover { border-color: var(--border2); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Results */
+.results-section { display: none; }
+
+.results-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.results-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.export-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(249,115,22,0.04); }
+
+tbody td {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.orgnr {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.firm-name { font-weight: 500; color: var(--text); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.tag-nettside { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.tag-1881 { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+.tag-brreg { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+.tag-empty { background: rgba(82,82,91,0.3); color: var(--muted2); border: 1px solid var(--border); }
+
+.phone-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.phone-link:hover { opacity: 0.75; }
+
+.empty-val { color: var(--muted2); }
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 15px; height: 15px;
+  border: 2px solid rgba(9,9,11,0.25);
+  border-top-color: #09090b;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Pulse dot */
+.pulse {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Fade in rows */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+tbody tr { animation: fadeIn 0.2s ease both; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="bear-badge">🐻 <span>v1.0</span> &nbsp;|&nbsp; Isak Bjørnstad</div>
+    <h1>
+      <span class="line1">Bjørnis</span>
+      <span class="line2">Prospekteringsmaskin</span>
+    </h1>
+    <div class="accent-line"></div>
+    <p class="subtitle">Last opp en Excel-fil med org.nr og maskinen henter kontaktinfo automatisk fra Brreg, nettside og 1881.</p>
+  </header>
+
+  <div class="upload-card">
+    <div class="section-label">01 &nbsp; Last opp fil</div>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+      <div class="drop-icon-wrap">📊</div>
+      <div class="drop-text">Dra og slipp Excel-filen her</div>
+      <div class="drop-sub">eller klikk for å velge fil &nbsp;·&nbsp; .xlsx / .xls</div>
+    </div>
+
+    <div class="file-info" id="fileInfo">
+      <div class="dot"></div>
+      <span id="fileName"></span>
+      <span style="color: var(--muted); margin-left: auto" id="orgCount"></span>
+    </div>
+
+    <div class="error-msg" id="errorMsg">
+      <span>⚠</span>
+      <span id="errorText"></span>
+    </div>
+
+    <button class="btn" id="startBtn" disabled>
+      <span class="spinner" id="btnSpinner" style="display:none"></span>
+      <span id="btnText">🚀 &nbsp;Start oppslag</span>
+    </button>
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-header">
+        <span class="progress-label"><span class="pulse"></span> &nbsp;Behandler</span>
+        <span class="progress-num" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="current-item" id="currentItem"></div>
+    </div>
+  </div>
+
+  <div class="results-section" id="resultsSection">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="results-card">
+      <div class="results-top">
+        <div class="results-title">Resultater</div>
+        <button class="export-btn" id="exportBtn">
+          ↓ &nbsp;Last ned Excel
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Org.nr</th>
+              <th>Firmanavn</th>
+              <th>Kontaktperson</th>
+              <th>Tittel</th>
+              <th>Telefon</th>
+              <th>Kilde</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = "https://kontakt-api-production.up.railway.app";
+let orgnrs = [], results = [];
+
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+const fileInfo = document.getElementById("fileInfo");
+const fileName = document.getElementById("fileName");
+const orgCount = document.getElementById("orgCount");
+const startBtn = document.getElementById("startBtn");
+const btnText = document.getElementById("btnText");
+const btnSpinner = document.getElementById("btnSpinner");
+const progressSection = document.getElementById("progressSection");
+const progressFill = document.getElementById("progressFill");
+const progressCount = document.getElementById("progressCount");
+const currentItem = document.getElementById("currentItem");
+const resultsSection = document.getElementById("resultsSection");
+const resultsBody = document.getElementById("resultsBody");
+const statsGrid = document.getElementById("statsGrid");
+const errorMsg = document.getElementById("errorMsg");
+const errorText = document.getElementById("errorText");
+
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("drag-over"); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener("change", e => handleFile(e.target.files[0]));
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: "binary" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+      let colIdx = 0;
+      if (data.length > 0) {
+        const headers = data[0].map(h => String(h || "").toLowerCase());
+        const found = headers.findIndex(h => h.includes("org"));
+        if (found >= 0) colIdx = found;
+      }
+
+      orgnrs = data.slice(1)
+        .map(row => String(row[colIdx] || "").replace(/[\s\.]/g, ""))
+        .filter(n => n.length >= 8);
+
+      if (orgnrs.length === 0) {
+        showError("Fant ingen org.nr. Sjekk at kolonnen heter 'Org.nr' eller 'Organisasjonsnr'.");
+        return;
+      }
+
+      hideError();
+      fileName.textContent = file.name;
+      orgCount.textContent = `${orgnrs.length} selskaper`;
+      fileInfo.style.display = "flex";
+      startBtn.disabled = false;
+    } catch {
+      showError("Kunne ikke lese filen. Sjekk at det er en gyldig .xlsx-fil.");
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+startBtn.addEventListener("click", async () => {
+  if (!orgnrs.length) return;
+  results = [];
+  resultsBody.innerHTML = "";
+  resultsSection.style.display = "none";
+  startBtn.disabled = true;
+  btnSpinner.style.display = "inline-block";
+  btnText.textContent = "Jobber...";
+  progressSection.style.display = "block";
+
+  for (let i = 0; i < orgnrs.length; i++) {
+    const orgnr = orgnrs[i];
+    progressCount.textContent = `${i + 1} / ${orgnrs.length}`;
+    progressFill.style.width = `${((i + 1) / orgnrs.length) * 100}%`;
+    currentItem.textContent = `↳ ${orgnr}`;
+
+    try {
+      const res = await fetch(`${API_BASE}/lookup?orgnr=${orgnr}`);
+      const data = await res.json();
+      results.push(data);
+      addRow(data);
+    } catch {
+      const row = { "Org.nr": orgnr, Firmanavn: "", Kontaktperson: "", Tittel: "", Telefon: "", Kilde: "feil" };
+      results.push(row);
+      addRow(row);
+    }
+
+    if (i === 0) resultsSection.style.display = "block";
+  }
+
+  currentItem.textContent = "✓ Ferdig!";
+  btnSpinner.style.display = "none";
+  btnText.textContent = "🚀 \u00a0Start oppslag";
+  startBtn.disabled = false;
+  updateStats();
+});
+
+function addRow(d) {
+  const tr = document.createElement("tr");
+  const kilde = (d["Kilde"] || "").toLowerCase();
+  let tagClass = "tag-empty";
+  if (kilde.includes("nettside")) tagClass = "tag-nettside";
+  else if (kilde.includes("1881")) tagClass = "tag-1881";
+  else if (kilde.includes("brønn") || kilde.includes("br")) tagClass = "tag-brreg";
+
+  const phone = d["Telefon"]
+    ? `<a class="phone-link" href="tel:${d["Telefon"]}">${d["Telefon"]}</a>`
+    : `<span class="empty-val">—</span>`;
+
+  const kontakt = d["Kontaktperson"] || `<span class="empty-val">—</span>`;
+
+  tr.innerHTML = `
+    <td class="orgnr">${d["Org.nr"] || ""}</td>
+    <td class="firm-name">${d["Firmanavn"] || ""}</td>
+    <td>${kontakt}</td>
+    <td style="color:var(--muted);font-size:12px">${d["Tittel"] || ""}</td>
+    <td>${phone}</td>
+    <td><span class="tag ${tagClass}">${d["Kilde"] || "—"}</span></td>
+  `;
+  resultsBody.appendChild(tr);
+}
+
+function updateStats() {
+  const total = results.length;
+  const withPhone = results.filter(r => r["Telefon"]).length;
+  const withContact = results.filter(r => r["Kontaktperson"]).length;
+  const pct = total ? Math.round((withPhone / total) * 100) : 0;
+
+  statsGrid.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Totalt</div></div>
+    <div class="stat-card"><div class="stat-num">${withContact}</div><div class="stat-label">Kontaktperson</div></div>
+    <div class="stat-card"><div class="stat-num">${withPhone}</div><div class="stat-label">Telefon funnet</div></div>
+    <div class="stat-card"><div class="stat-num">${pct}%</div><div class="stat-label">Treffrate</div></div>
+  `;
+}
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const ws = XLSX.utils.json_to_sheet(results.map(r => ({
+    "Org.nr": r["Org.nr"], "Firmanavn": r["Firmanavn"],
+    "Kontaktperson": r["Kontaktperson"], "Tittel": r["Tittel"],
+    "Telefon": r["Telefon"], "Kilde": r["Kilde"]
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Kontakter");
+  XLSX.writeFile(wb, "bjornis-kontakter.xlsx");
+});
+
+function showError(msg) { errorText.textContent = msg; errorMsg.style.display = "flex"; startBtn.disabled = true; }
+function hideError() { errorMsg.style.display = "none"; }
+</script>
+</body>
+</html>
