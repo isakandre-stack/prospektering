@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — dialr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--border:#22222e;--border2:#2e2e3e;
+  --text:#f0f0f5;--muted:#6b6b80;--muted2:#4a4a5a;--accent:#7c6af7;--accent2:#9b8cff;
+  --accent-bg:rgba(124,106,247,0.08);--accent-border:rgba(124,106,247,0.25);
+  --green:#34d399;--blue:#60a5fa;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+.page{max-width:1100px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:80px;}
+.logo{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);text-decoration:none;}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:24px;}
+.nav-link{font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s;}
+.nav-link:hover,.nav-link.active{color:var(--text)}
+.nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;}
+.nav-cta:hover{background:var(--accent2)}
+
+.hero{text-align:center;margin-bottom:72px;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:12px;color:var(--accent2);font-family:'DM Mono',monospace;letter-spacing:0.05em;margin-bottom:28px;}
+h1{font-size:clamp(36px,5vw,58px);font-weight:600;letter-spacing:-0.03em;line-height:1.08;margin-bottom:20px;}
+h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;}
+.hero-sub{font-size:18px;color:var(--muted);font-weight:300;max-width:460px;margin:0 auto;line-height:1.6;}
+
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:640px;margin:0 auto 80px;}
+@media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
+
+.contact-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;transition:border-color 0.2s;text-decoration:none;display:block;}
+.contact-card:hover{border-color:var(--border2)}
+.contact-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;}
+.icon-mail{background:rgba(124,106,247,0.1);border:1px solid var(--accent-border);}
+.icon-li{background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);}
+.contact-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.contact-value{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;}
+.contact-desc{font-size:13px;color:var(--muted);line-height:1.5;}
+
+.faq-section{max-width:640px;margin:0 auto;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--accent);text-transform:uppercase;margin-bottom:40px;text-align:center;}
+.faq-list{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--bg2);}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-item:last-child{border-bottom:none}
+.faq-q{width:100%;padding:20px 24px;background:transparent;border:none;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:15px;font-weight:500;color:var(--text);font-family:'Inter',sans-serif;transition:background 0.15s;gap:16px;}
+.faq-q:hover{background:var(--bg3)}
+.faq-arrow{color:var(--muted);font-size:18px;flex-shrink:0;transition:transform 0.2s;}
+.faq-item.open .faq-arrow{transform:rotate(45deg)}
+.faq-a{display:none;padding:0 24px 20px;font-size:14px;color:var(--muted);line-height:1.7;}
+.faq-item.open .faq-a{display:block}
+
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
+.footer-logo span{color:var(--accent)}
+.footer-note{font-size:12px;color:var(--muted2);}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav>
+  <a class="logo" href="index.html">dial<span>r</span></a>
+  <div class="nav-links">
+    <a class="nav-link" href="hvordan.html">Slik fungerer det</a>
+    <a class="nav-link" href="pris.html">Pris</a>
+    <a class="nav-link" href="om.html">Om oss</a>
+    <a class="nav-link active" href="kontakt.html">Kontakt</a>
+    <a class="nav-cta" href="index.html">Prøv dialr</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="eyebrow">👋 &nbsp;Si hei</div>
+  <h1>Ta kontakt<br><em>når som helst</em></h1>
+  <p class="hero-sub">Spørsmål om tilgang, pris eller bare vil si hei? Vi svarer raskt.</p>
+</div>
+
+<div class="contact-grid">
+  <a class="contact-card" href="mailto:isakandre@gmail.com">
+    <div class="contact-icon icon-mail">✉️</div>
+    <div class="contact-label">E-post</div>
+    <div class="contact-value">isakandre@gmail.com</div>
+    <div class="contact-desc">Send en e-post, vi svarer innen én arbeidsdag.</div>
+  </a>
+  <a class="contact-card" href="https://www.linkedin.com/in/isak-andre-bjornstad" target="_blank">
+    <div class="contact-icon icon-li">💼</div>
+    <div class="contact-label">LinkedIn</div>
+    <div class="contact-value">Isak André Bjørnstad</div>
+    <div class="contact-desc">Send en melding på LinkedIn for raskest svar.</div>
+  </a>
+</div>
+
+<div class="faq-section">
+  <div class="section-label">Vanlige spørsmål</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Hvordan får jeg tilgang til dialr?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Ta kontakt på LinkedIn eller e-post, så sender vi deg en personlig lisensnøkkel. Du er i gang innen få minutter.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Hva koster det?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">249 kr per måned, ubegrenset bruk. Ingen bindingstid. Se prisside for mer detaljer.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Kan jeg prøve dialr gratis?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Ta kontakt på LinkedIn, så finner vi en løsning for å la deg prøve det ut.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Tilbyr dere teamlisenser?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Ja, ta kontakt så setter vi opp noe som passer for ditt team.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
+</footer>
+</div>
+<script>function toggleFaq(btn){btn.closest('.faq-item').classList.toggle('open')}</script>
+</body>
+</html>
