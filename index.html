@@ -3,913 +3,1010 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bjørnis Prospekteringsmaskin</title>
+<title>dialr — Finn direktenummeret</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
 
-:root {
-  --bg: #09090b;
-  --surface: #111113;
-  --surface2: #18181b;
-  --border: #27272a;
-  --border2: #3f3f46;
-  --accent: #f97316;
-  --accent2: #fb923c;
-  --accent-dim: rgba(249,115,22,0.1);
-  --accent-glow: rgba(249,115,22,0.25);
-  --text: #fafafa;
-  --muted: #71717a;
-  --muted2: #52525b;
-  --green: #4ade80;
-  --blue: #60a5fa;
-  --yellow: #fbbf24;
-  --error: #f87171;
+:root{
+  --bg:#0a0a0f;
+  --bg2:#111118;
+  --bg3:#18181f;
+  --border:#22222e;
+  --border2:#2e2e3e;
+  --text:#f0f0f5;
+  --muted:#6b6b80;
+  --muted2:#4a4a5a;
+  --accent:#7c6af7;
+  --accent2:#9b8cff;
+  --accent-bg:rgba(124,106,247,0.08);
+  --accent-border:rgba(124,106,247,0.25);
+  --green:#34d399;
+  --green-bg:rgba(52,211,153,0.08);
+  --green-border:rgba(52,211,153,0.2);
+  --red:#f87171;
+  --yellow:#fbbf24;
+  --blue:#60a5fa;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
+/* Subtle noise overlay */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:0.4;
 }
 
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 60px 24px 80px;
-  position: relative;
-  z-index: 1;
+.page{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 24px 80px;
+  position:relative;
+  z-index:1;
 }
 
-header { margin-bottom: 64px; }
-
-.bear-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border: 1px solid var(--border2);
-  border-radius: 100px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 24px;
+/* NAV */
+nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:24px 0;
+  border-bottom:1px solid var(--border);
+  margin-bottom:80px;
 }
 
-.bear-badge span { color: var(--accent); }
-
-h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(42px, 7vw, 72px);
-  font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  margin-bottom: 20px;
+.logo{
+  font-family:'DM Mono',monospace;
+  font-size:20px;
+  font-weight:500;
+  color:var(--text);
+  letter-spacing:-0.02em;
 }
 
-h1 .line1 { color: var(--text); display: block; }
-h1 .line2 {
-  display: block;
-  color: transparent;
-  -webkit-text-stroke: 1.5px var(--accent);
-  font-weight: 800;
+.logo span{color:var(--accent)}
+
+.nav-badge{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:100px;
+  font-size:12px;
+  color:var(--muted);
+  font-family:'DM Mono',monospace;
 }
 
-.subtitle {
-  font-size: 16px;
-  color: var(--muted);
-  font-weight: 300;
-  line-height: 1.6;
-  max-width: 480px;
-  margin-top: 16px;
+.status-dot{
+  width:6px;height:6px;
+  background:var(--green);
+  border-radius:50%;
+  box-shadow:0 0 6px var(--green);
+  animation:pulse 2s ease-in-out infinite;
 }
 
-.accent-line {
-  width: 60px;
-  height: 3px;
-  background: var(--accent);
-  margin: 24px 0;
-  border-radius: 2px;
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* HERO */
+.hero{
+  text-align:center;
+  margin-bottom:72px;
 }
 
-/* Tabs */
-.tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 4px;
-  width: fit-content;
+.hero-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 16px;
+  background:var(--accent-bg);
+  border:1px solid var(--accent-border);
+  border-radius:100px;
+  font-size:12px;
+  color:var(--accent2);
+  font-family:'DM Mono',monospace;
+  letter-spacing:0.05em;
+  margin-bottom:28px;
 }
 
-.tab {
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  transition: all 0.2s;
-  letter-spacing: 0.01em;
+h1{
+  font-size:clamp(40px,6vw,68px);
+  font-weight:600;
+  letter-spacing:-0.03em;
+  line-height:1.05;
+  color:var(--text);
+  margin-bottom:20px;
 }
 
-.tab.active {
-  background: var(--accent);
-  color: #09090b;
+h1 em{
+  font-style:normal;
+  color:transparent;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;
+  background-clip:text;
 }
 
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* Cards */
-.upload-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 36px;
-  margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
+.hero-sub{
+  font-size:18px;
+  color:var(--muted);
+  font-weight:300;
+  max-width:520px;
+  margin:0 auto 40px;
+  line-height:1.6;
 }
 
-.upload-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
+.hero-stats{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:32px;
+  flex-wrap:wrap;
 }
 
-.section-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  color: var(--accent);
-  text-transform: uppercase;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.hero-stat{
+  text-align:center;
 }
 
-.section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+.hero-stat-num{
+  font-size:28px;
+  font-weight:600;
+  color:var(--text);
+  font-family:'DM Mono',monospace;
+  letter-spacing:-0.02em;
 }
 
-/* Single lookup */
-.single-input-wrap {
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
+.hero-stat-label{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
 }
 
-.orgnr-input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1.5px solid var(--border2);
-  border-radius: 10px;
-  padding: 16px 20px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 16px;
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  letter-spacing: 0.05em;
+.hero-stat-divider{
+  width:1px;
+  height:36px;
+  background:var(--border2);
 }
 
-.orgnr-input::placeholder { color: var(--muted2); }
-
-.orgnr-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+/* MAIN APP */
+.app-shell{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:24px;
 }
 
-/* Result box */
-.single-result {
-  display: none;
-  margin-top: 24px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
+.app-header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:16px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg3);
 }
 
-.result-row {
-  display: flex;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  align-items: center;
-  gap: 16px;
+.app-dot{
+  width:10px;height:10px;
+  border-radius:50%;
+  background:var(--border2);
 }
 
-.result-row:last-child { border-bottom: none; }
+.app-dot:nth-child(1){background:#ff5f57}
+.app-dot:nth-child(2){background:#febc2e}
+.app-dot:nth-child(3){background:#28c840}
 
-.result-key {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  width: 130px;
-  flex-shrink: 0;
+.app-tabs{
+  display:flex;
+  gap:2px;
+  padding:16px 24px 0;
+  background:var(--bg2);
 }
 
-.result-val {
-  font-size: 14px;
-  color: var(--text);
-  font-weight: 500;
+.app-tab{
+  padding:10px 20px;
+  border-radius:10px 10px 0 0;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  transition:all 0.15s;
+  border:1px solid transparent;
+  border-bottom:none;
+  position:relative;
+  bottom:-1px;
 }
 
-.result-val.phone {
-  font-family: 'IBM Plex Mono', monospace;
-  color: var(--accent);
-  font-size: 16px;
+.app-tab.active{
+  background:var(--bg3);
+  color:var(--text);
+  border-color:var(--border);
+  border-bottom-color:var(--bg3);
 }
 
-.result-val.empty { color: var(--muted2); font-weight: 400; }
+.app-tab:not(.active):hover{color:var(--text)}
 
-/* Drop zone */
-.drop-zone {
-  border: 1.5px dashed var(--border2);
-  border-radius: 12px;
-  padding: 52px 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-  position: relative;
-  background: var(--surface2);
+.app-body{
+  background:var(--bg3);
+  border-top:1px solid var(--border);
+  padding:32px;
 }
 
-.drop-zone:hover, .drop-zone.drag-over {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-  box-shadow: 0 0 0 4px var(--accent-glow), inset 0 0 40px rgba(249,115,22,0.05);
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* SINGLE LOOKUP */
+.search-row{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
 }
 
-.drop-zone input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
+.search-input{
+  flex:1;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:0 20px;
+  height:52px;
+  font-family:'DM Mono',monospace;
+  font-size:17px;
+  color:var(--text);
+  outline:none;
+  letter-spacing:0.05em;
+  transition:border-color 0.15s, box-shadow 0.15s;
 }
 
-.drop-icon-wrap {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 20px;
-  background: var(--accent-dim);
-  border: 1px solid rgba(249,115,22,0.3);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  transition: transform 0.2s;
+.search-input::placeholder{color:var(--muted2);font-size:15px;letter-spacing:0}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,247,0.15)}
+
+.search-btn{
+  height:52px;
+  padding:0 28px;
+  background:var(--accent);
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.15s;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+  font-family:'Inter',sans-serif;
 }
 
-.drop-zone:hover .drop-icon-wrap { transform: scale(1.05) rotate(-3deg); }
-.drop-text { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-.drop-sub { font-size: 13px; color: var(--muted); }
+.search-btn:hover{background:var(--accent2);transform:translateY(-1px)}
+.search-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 
-.file-info {
-  display: none;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 14px 18px;
-  background: rgba(74,222,128,0.08);
-  border: 1px solid rgba(74,222,128,0.25);
-  border-radius: 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: var(--green);
+/* Result card */
+.result-card{
+  display:none;
+  margin-top:20px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
 }
 
-.file-info .dot {
-  width: 6px; height: 6px;
-  background: var(--green);
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 0 8px var(--green);
+.result-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
 }
 
-.error-msg {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 12px 16px;
-  background: rgba(248,113,113,0.08);
-  border: 1px solid rgba(248,113,113,0.25);
-  border-radius: 8px;
-  font-size: 13px;
-  color: var(--error);
+.result-company{
+  font-size:16px;
+  font-weight:600;
+  color:var(--text);
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 32px;
-  background: var(--accent);
-  color: #09090b;
-  border: none;
-  border-radius: 10px;
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.01em;
-  position: relative;
-  overflow: hidden;
-  white-space: nowrap;
+.result-orgnr{
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  color:var(--muted);
 }
 
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+.result-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
 }
 
-.btn:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249,115,22,0.4); }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.progress-section {
-  display: none;
-  margin-top: 28px;
-  padding: 20px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+.result-cell{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  border-right:1px solid var(--border);
 }
 
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+.result-cell:nth-child(even){border-right:none}
+.result-cell:nth-last-child(-n+2){border-bottom:none}
+
+.result-label{
+  font-size:11px;
+  color:var(--muted);
+  font-family:'DM Mono',monospace;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:6px;
 }
 
-.progress-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.result-value{
+  font-size:14px;
+  font-weight:500;
+  color:var(--text);
 }
 
-.progress-num {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  color: var(--accent);
-  font-weight: 500;
+.result-value.phone{
+  font-family:'DM Mono',monospace;
+  font-size:18px;
+  color:var(--accent2);
+  font-weight:500;
 }
 
-.progress-bar-bg {
-  height: 6px;
-  background: var(--border);
-  border-radius: 3px;
-  overflow: hidden;
+.result-value.empty{color:var(--muted2);font-weight:400}
+
+.source-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 10px;
+  border-radius:100px;
+  font-size:11px;
+  font-family:'DM Mono',monospace;
 }
 
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 3px;
-  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
-  width: 0%;
-  box-shadow: 0 0 10px rgba(249,115,22,0.5);
+.source-nettside{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid var(--green-border)}
+.source-1881{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+.source-brreg{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
+.source-empty{background:rgba(74,74,90,0.3);color:var(--muted2);border:1px solid var(--border2)}
+
+/* BULK */
+.drop-zone{
+  border:1.5px dashed var(--border2);
+  border-radius:14px;
+  padding:48px 32px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+  background:var(--bg2);
 }
 
-.current-item {
-  margin-top: 10px;
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  min-height: 18px;
+.drop-zone:hover,.drop-zone.over{
+  border-color:var(--accent);
+  background:var(--accent-bg);
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+.drop-zone input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
 }
 
-@media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px 16px;
-  position: relative;
-  overflow: hidden;
+.drop-icon{
+  width:56px;height:56px;
+  margin:0 auto 16px;
+  background:var(--accent-bg);
+  border:1px solid var(--accent-border);
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  transition:transform 0.2s;
 }
 
-.stat-card::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--accent);
-  opacity: 0.4;
+.drop-zone:hover .drop-icon{transform:scale(1.05) rotate(-4deg)}
+.drop-title{font-size:15px;font-weight:500;margin-bottom:4px}
+.drop-sub{font-size:13px;color:var(--muted)}
+
+.file-pill{
+  display:none;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+  padding:12px 16px;
+  background:var(--green-bg);
+  border:1px solid var(--green-border);
+  border-radius:10px;
+  font-size:13px;
+  color:var(--green);
+  font-family:'DM Mono',monospace;
 }
 
-.stat-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--accent);
-  line-height: 1;
-  margin-bottom: 6px;
+.file-pill-dot{
+  width:6px;height:6px;
+  background:var(--green);
+  border-radius:50%;
+  box-shadow:0 0 6px var(--green);
+  flex-shrink:0;
 }
 
-.stat-label {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.err-pill{
+  display:none;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+  padding:12px 16px;
+  background:rgba(248,113,113,0.08);
+  border:1px solid rgba(248,113,113,0.2);
+  border-radius:10px;
+  font-size:13px;
+  color:var(--red);
 }
 
-.results-section { display: none; }
-
-.results-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
+.run-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:20px;
+  height:48px;
+  padding:0 28px;
+  background:var(--accent);
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.15s;
+  font-family:'Inter',sans-serif;
 }
 
-.results-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
+.run-btn:hover{background:var(--accent2);transform:translateY(-1px)}
+.run-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+
+/* Progress */
+.progress-wrap{
+  display:none;
+  margin-top:24px;
+  padding:20px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:12px;
 }
 
-.results-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
+.progress-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
 }
 
-.export-btn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 20px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text);
-  border-radius: 8px;
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+.progress-lbl{
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-.export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
-.table-wrap { overflow-x: auto; }
-
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-
-thead th {
-  text-align: left;
-  padding: 12px 16px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted2);
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+.progress-count{
+  font-family:'DM Mono',monospace;
+  font-size:13px;
+  color:var(--accent2);
 }
 
-tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; animation: fadeIn 0.2s ease both; }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(249,115,22,0.04); }
-tbody td { padding: 14px 16px; vertical-align: middle; }
-
-.orgnr-cell { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
-.firm-name { font-weight: 500; color: var(--text); }
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 100px;
-  font-size: 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
+.bar-bg{
+  height:4px;
+  background:var(--border2);
+  border-radius:2px;
+  overflow:hidden;
 }
 
-.tag-nettside { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
-.tag-1881 { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
-.tag-brreg { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
-.tag-empty { background: rgba(82,82,91,0.3); color: var(--muted2); border: 1px solid var(--border); }
-
-.phone-link { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent); text-decoration: none; }
-.phone-link:hover { opacity: 0.75; }
-.empty-val { color: var(--muted2); }
-
-.spinner {
-  display: inline-block;
-  width: 15px; height: 15px;
-  border: 2px solid rgba(9,9,11,0.25);
-  border-top-color: #09090b;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  flex-shrink: 0;
+.bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:2px;
+  width:0;
+  transition:width 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
-.spinner-orange {
-  display: inline-block;
-  width: 18px; height: 18px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+.progress-cur{
+  margin-top:8px;
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  color:var(--muted);
+  min-height:18px;
 }
 
-.pulse {
-  display: inline-block;
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  animation: pulse 1.4s ease-in-out infinite;
+/* Results table */
+.results-wrap{display:none;margin-top:20px}
+
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:16px;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+
+.stat-box{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+}
+
+.stat-n{
+  font-family:'DM Mono',monospace;
+  font-size:28px;
+  font-weight:500;
+  color:var(--accent2);
+  line-height:1;
+  margin-bottom:4px;
+}
+
+.stat-l{
+  font-size:11px;
+  color:var(--muted);
+  font-family:'DM Mono',monospace;
+  letter-spacing:0.07em;
+  text-transform:uppercase;
+}
+
+.table-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.table-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+}
+
+.table-title{
+  font-size:14px;
+  font-weight:600;
+  color:var(--text);
+}
+
+.dl-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 16px;
+  background:transparent;
+  border:1px solid var(--border2);
+  border-radius:8px;
+  color:var(--muted);
+  font-size:12px;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+
+.dl-btn:hover{border-color:var(--accent);color:var(--accent2)}
+
+.tbl-wrap{overflow-x:auto}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+
+thead th{
+  text-align:left;
+  padding:10px 16px;
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+
+tbody tr{
+  border-bottom:1px solid var(--border);
+  transition:background 0.1s;
+}
+
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(124,106,247,0.04)}
+tbody td{padding:13px 16px;vertical-align:middle}
+
+.td-orgnr{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.td-firm{font-weight:500}
+.td-phone{font-family:'DM Mono',monospace;color:var(--accent2)}
+.td-empty{color:var(--muted2)}
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 9px;
+  border-radius:100px;
+  font-size:10px;
+  font-family:'DM Mono',monospace;
+}
+
+/* Spinner */
+.spin{
+  display:inline-block;
+  width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.2);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin 0.55s linear infinite;
+}
+
+.spin-purple{
+  display:inline-block;
+  width:16px;height:16px;
+  border:2px solid var(--border2);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.55s linear infinite;
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@keyframes rowIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+tbody tr{animation:rowIn 0.18s ease both}
+
+/* FOOTER */
+footer{
+  margin-top:64px;
+  padding-top:24px;
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.footer-logo{
+  font-family:'DM Mono',monospace;
+  font-size:14px;
+  color:var(--muted);
+}
+
+.footer-logo span{color:var(--accent)}
+
+.footer-note{
+  font-size:12px;
+  color:var(--muted2);
+}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="page">
 
-  <header>
-    <div class="bear-badge">🐻 <span>v1.1</span> &nbsp;|&nbsp; Isak Bjørnstad</div>
-    <h1>
-      <span class="line1">Bjørnis</span>
-      <span class="line2">Prospekteringsmaskin</span>
-    </h1>
-    <div class="accent-line"></div>
-    <p class="subtitle">Slå opp ett selskap direkte, eller last opp en Excel-fil for masseoppslag.</p>
-  </header>
+<nav>
+  <div class="logo">dial<span>r</span></div>
+  <div class="nav-links" style="display:flex;align-items:center;gap:24px;"><a href="om.html" style="font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Slik fungerer det</a></div><div class="nav-badge">
+    <div class="status-dot"></div>
+    Live
+  </div>
+</nav>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('single')">🔍 &nbsp;Enkeltoppslag</button>
-    <button class="tab" onclick="switchTab('bulk')">📊 &nbsp;Masseoppslag</button>
+<div class="hero">
+  <div class="hero-eyebrow">🎯 &nbsp;Finn direktenummeret</div>
+  <h1>Kom forbi<br><em>sentralbordet</em></h1>
+  <p class="hero-sub">Slå opp org.nr og få direktenummer til daglig leder eller økonomisjef — automatisk.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">3</div>
+      <div class="hero-stat-label">Kilder sjekkes</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">~15s</div>
+      <div class="hero-stat-label">Per oppslag</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">∞</div>
+      <div class="hero-stat-label">Masseoppslag</div>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell">
+  <div class="app-header">
+    <div class="app-dot"></div>
+    <div class="app-dot"></div>
+    <div class="app-dot"></div>
   </div>
 
-  <!-- Single lookup -->
-  <div class="tab-content active" id="tab-single">
-    <div class="upload-card">
-      <div class="section-label">Slå opp org.nr</div>
-      <div class="single-input-wrap">
-        <input class="orgnr-input" id="singleInput" type="text" placeholder="eks. 974760843" maxlength="12">
-        <button class="btn" id="singleBtn" onclick="doSingleLookup()">
-          <span class="spinner" id="singleSpinner" style="display:none"></span>
-          <span id="singleBtnText">Søk</span>
+  <div class="app-tabs">
+    <button class="app-tab active" id="tab-single-btn" onclick="switchTab('single')">Enkeltoppslag</button>
+    <button class="app-tab" id="tab-bulk-btn" onclick="switchTab('bulk')">Masseoppslag</button>
+  </div>
+
+  <div class="app-body">
+
+    <!-- SINGLE -->
+    <div class="tab-panel active" id="panel-single">
+      <div class="search-row">
+        <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+        <button class="search-btn" id="singleBtn" onclick="doSingle()">
+          <span class="spin" id="sSpin" style="display:none"></span>
+          <span id="sBtnTxt">Søk opp</span>
         </button>
       </div>
 
-      <div class="error-msg" id="singleError">
-        <span>⚠</span><span id="singleErrorText"></span>
+      <div class="err-pill" id="sErr">
+        <span>⚠</span><span id="sErrTxt"></span>
       </div>
 
-      <div class="single-result" id="singleResult">
-        <div class="result-row">
-          <div class="result-key">Org.nr</div>
-          <div class="result-val" id="res-orgnr"></div>
+      <div class="result-card" id="resultCard">
+        <div class="result-header">
+          <div class="result-company" id="resFirm"></div>
+          <div class="result-orgnr" id="resOrgnr"></div>
         </div>
-        <div class="result-row">
-          <div class="result-key">Firmanavn</div>
-          <div class="result-val" id="res-firma"></div>
-        </div>
-        <div class="result-row">
-          <div class="result-key">Kontaktperson</div>
-          <div class="result-val" id="res-kontakt"></div>
-        </div>
-        <div class="result-row">
-          <div class="result-key">Tittel</div>
-          <div class="result-val" id="res-tittel"></div>
-        </div>
-        <div class="result-row">
-          <div class="result-key">Telefon</div>
-          <div class="result-val phone" id="res-tlf"></div>
-        </div>
-        <div class="result-row">
-          <div class="result-key">Kilde</div>
-          <div class="result-val" id="res-kilde"></div>
+        <div class="result-grid">
+          <div class="result-cell">
+            <div class="result-label">Kontaktperson</div>
+            <div class="result-value" id="resKontakt"></div>
+          </div>
+          <div class="result-cell">
+            <div class="result-label">Tittel</div>
+            <div class="result-value" id="resTittel"></div>
+          </div>
+          <div class="result-cell">
+            <div class="result-label">Telefon</div>
+            <div class="result-value phone" id="resTlf"></div>
+          </div>
+          <div class="result-cell">
+            <div class="result-label">Kilde</div>
+            <div class="result-value" id="resKilde"></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Bulk lookup -->
-  <div class="tab-content" id="tab-bulk">
-    <div class="upload-card">
-      <div class="section-label">Last opp Excel</div>
-
+    <!-- BULK -->
+    <div class="tab-panel" id="panel-bulk">
       <div class="drop-zone" id="dropZone">
         <input type="file" id="fileInput" accept=".xlsx,.xls">
-        <div class="drop-icon-wrap">📊</div>
-        <div class="drop-text">Dra og slipp Excel-filen her</div>
-        <div class="drop-sub">eller klikk for å velge fil &nbsp;·&nbsp; .xlsx / .xls</div>
+        <div class="drop-icon">📊</div>
+        <div class="drop-title">Dra og slipp Excel-fil her</div>
+        <div class="drop-sub">eller klikk for å velge &nbsp;·&nbsp; .xlsx / .xls</div>
       </div>
 
-      <div class="file-info" id="fileInfo">
-        <div class="dot"></div>
-        <span id="fileName"></span>
-        <span style="color: var(--muted); margin-left: auto" id="orgCount"></span>
+      <div class="file-pill" id="filePill">
+        <div class="file-pill-dot"></div>
+        <span id="fName"></span>
+        <span style="margin-left:auto;color:var(--muted)" id="fCount"></span>
       </div>
 
-      <div class="error-msg" id="bulkError">
-        <span>⚠</span><span id="bulkErrorText"></span>
+      <div class="err-pill" id="bErr">
+        <span>⚠</span><span id="bErrTxt"></span>
       </div>
 
-      <button class="btn" id="startBtn" disabled>
-        <span class="spinner" id="btnSpinner" style="display:none"></span>
-        <span id="btnText">🚀 &nbsp;Start oppslag</span>
+      <button class="run-btn" id="runBtn" disabled>
+        <span class="spin" id="rSpin" style="display:none"></span>
+        <span id="rTxt">Start oppslag</span>
       </button>
 
-      <div class="progress-section" id="progressSection">
-        <div class="progress-header">
-          <span class="progress-label"><span class="pulse"></span> &nbsp;Behandler</span>
-          <span class="progress-num" id="progressCount">0 / 0</span>
+      <div class="progress-wrap" id="progWrap">
+        <div class="progress-top">
+          <div class="progress-lbl">
+            <div class="status-dot"></div>
+            Behandler
+          </div>
+          <div class="progress-count" id="progCount">0 / 0</div>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progressFill"></div>
+        <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+        <div class="progress-cur" id="progCur"></div>
+      </div>
+
+      <div class="results-wrap" id="resultsWrap">
+        <div class="stats-row" id="statsRow"></div>
+        <div class="table-card">
+          <div class="table-top">
+            <div class="table-title">Resultater</div>
+            <button class="dl-btn" id="dlBtn">↓ &nbsp;Last ned Excel</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Org.nr</th>
+                  <th>Firmanavn</th>
+                  <th>Kontaktperson</th>
+                  <th>Tittel</th>
+                  <th>Telefon</th>
+                  <th>Kilde</th>
+                </tr>
+              </thead>
+              <tbody id="tBody"></tbody>
+            </table>
+          </div>
         </div>
-        <div class="current-item" id="currentItem"></div>
       </div>
     </div>
 
-    <div class="results-section" id="resultsSection">
-      <div class="stats-grid" id="statsGrid"></div>
-      <div class="results-card">
-        <div class="results-top">
-          <div class="results-title">Resultater</div>
-          <button class="export-btn" id="exportBtn">↓ &nbsp;Last ned Excel</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Org.nr</th>
-                <th>Firmanavn</th>
-                <th>Kontaktperson</th>
-                <th>Tittel</th>
-                <th>Telefon</th>
-                <th>Kilde</th>
-              </tr>
-            </thead>
-            <tbody id="resultsBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
   </div>
+</div>
+
+<footer>
+  <div class="footer-logo">dial<span>r</span>.no</div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
+</footer>
 
 </div>
 
 <script>
-const API_BASE = "https://kontakt-api-production.up.railway.app";
-let orgnrs = [], results = [];
+const API = "https://kontakt-api-production.up.railway.app";
+let orgnrs=[], results=[];
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  event.target.classList.add('active');
+function switchTab(t){
+  document.querySelectorAll('.app-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+t+'-btn').classList.add('active');
+  document.getElementById('panel-'+t).classList.add('active');
 }
 
-// Single lookup
-const singleInput = document.getElementById("singleInput");
-singleInput.addEventListener("keydown", e => { if (e.key === "Enter") doSingleLookup(); });
+const sInput=document.getElementById('singleInput');
+sInput.addEventListener('keydown',e=>{if(e.key==='Enter')doSingle()});
 
-async function doSingleLookup() {
-  const orgnr = singleInput.value.replace(/[\s\.]/g, "");
-  if (orgnr.length < 8) { showSingleError("Skriv inn et gyldig org.nr (9 siffer)."); return; }
-
-  hideSingleError();
-  document.getElementById("singleResult").style.display = "none";
-  document.getElementById("singleSpinner").style.display = "inline-block";
-  document.getElementById("singleBtnText").textContent = "Henter...";
-  document.getElementById("singleBtn").disabled = true;
-
-  try {
-    const res = await fetch(`${API_BASE}/lookup?orgnr=${orgnr}`);
-    const d = await res.json();
-
-    document.getElementById("res-orgnr").textContent = d["Org.nr"] || orgnr;
-    document.getElementById("res-firma").textContent = d["Firmanavn"] || "—";
-
-    const kontakt = d["Kontaktperson"];
-    const kontaktEl = document.getElementById("res-kontakt");
-    kontaktEl.textContent = kontakt || "—";
-    kontaktEl.className = "result-val" + (kontakt ? "" : " empty");
-
-    const tittel = d["Tittel"];
-    const tittelEl = document.getElementById("res-tittel");
-    tittelEl.textContent = tittel || "—";
-    tittelEl.className = "result-val" + (tittel ? "" : " empty");
-
-    const tlf = d["Telefon"];
-    const tlfEl = document.getElementById("res-tlf");
-    if (tlf) {
-      tlfEl.innerHTML = `<a class="phone-link" href="tel:${tlf}">${tlf}</a>`;
-    } else {
-      tlfEl.textContent = "—";
-      tlfEl.className = "result-val empty";
-    }
-
-    const kilde = d["Kilde"] || "—";
-    const kildeEl = document.getElementById("res-kilde");
-    kildeEl.textContent = kilde;
-
-    document.getElementById("singleResult").style.display = "block";
-  } catch {
-    showSingleError("Noe gikk galt. Sjekk at API-et kjører.");
-  }
-
-  document.getElementById("singleSpinner").style.display = "none";
-  document.getElementById("singleBtnText").textContent = "Søk";
-  document.getElementById("singleBtn").disabled = false;
+async function doSingle(){
+  const org=sInput.value.replace(/[\s\.]/g,'');
+  if(org.length<8){showSErr('Skriv inn et gyldig org.nr (9 siffer)');return}
+  hideSErr();
+  document.getElementById('resultCard').style.display='none';
+  document.getElementById('sSpin').style.display='inline-block';
+  document.getElementById('sBtnTxt').textContent='Henter...';
+  document.getElementById('singleBtn').disabled=true;
+  try{
+    const r=await fetch(`${API}/lookup?orgnr=${org}`);
+    const d=await r.json();
+    document.getElementById('resFirm').textContent=d['Firmanavn']||'Ukjent firma';
+    document.getElementById('resOrgnr').textContent=d['Org.nr']||org;
+    const setVal=(id,val)=>{const el=document.getElementById(id);el.textContent=val||'—';el.className='result-value'+(val?'':' empty')};
+    setVal('resKontakt',d['Kontaktperson']);
+    setVal('resTittel',d['Tittel']);
+    const tlf=d['Telefon'];
+    const tEl=document.getElementById('resTlf');
+    if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className='result-value phone';}
+    else{tEl.textContent='—';tEl.className='result-value empty';}
+    const kilde=d['Kilde']||'';
+    const kEl=document.getElementById('resKilde');
+    kEl.innerHTML=`<span class="tag ${tagClass(kilde)}">${kilde||'—'}</span>`;
+    document.getElementById('resultCard').style.display='block';
+  }catch{showSErr('Noe gikk galt. Prøv igjen.')}
+  document.getElementById('sSpin').style.display='none';
+  document.getElementById('sBtnTxt').textContent='Søk opp';
+  document.getElementById('singleBtn').disabled=false;
 }
 
-function showSingleError(msg) { document.getElementById("singleErrorText").textContent = msg; document.getElementById("singleError").style.display = "flex"; }
-function hideSingleError() { document.getElementById("singleError").style.display = "none"; }
+function tagClass(k){
+  const l=k.toLowerCase();
+  if(l.includes('nettside'))return'tag source-nettside';
+  if(l.includes('1881'))return'tag source-1881';
+  if(l.includes('brønn')||l.includes('br'))return'tag source-brreg';
+  return'tag source-empty';
+}
 
-// Bulk lookup
-const fileInput = document.getElementById("fileInput");
-const dropZone = document.getElementById("dropZone");
+function showSErr(m){document.getElementById('sErrTxt').textContent=m;document.getElementById('sErr').style.display='flex'}
+function hideSErr(){document.getElementById('sErr').style.display='none'}
 
-dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
-dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
-dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("drag-over"); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener("change", e => handleFile(e.target.files[0]));
+const dz=document.getElementById('dropZone');
+const fi=document.getElementById('fileInput');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');handleFile(e.dataTransfer.files[0])});
+fi.addEventListener('change',e=>handleFile(e.target.files[0]));
 
-function handleFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const wb = XLSX.read(e.target.result, { type: "binary" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-
-      let colIdx = 0;
-      if (data.length > 0) {
-        const headers = data[0].map(h => String(h || "").toLowerCase());
-        const found = headers.findIndex(h => h.includes("org"));
-        if (found >= 0) colIdx = found;
-      }
-
-      orgnrs = data.slice(1)
-        .map(row => String(row[colIdx] || "").replace(/[\s\.]/g, ""))
-        .filter(n => n.length >= 8);
-
-      if (!orgnrs.length) { showBulkError("Fant ingen org.nr. Sjekk kolonnenavn."); return; }
-
-      hideBulkError();
-      document.getElementById("fileName").textContent = file.name;
-      document.getElementById("orgCount").textContent = `${orgnrs.length} selskaper`;
-      document.getElementById("fileInfo").style.display = "flex";
-      document.getElementById("startBtn").disabled = false;
-    } catch { showBulkError("Kunne ikke lese filen."); }
+function handleFile(file){
+  if(!file)return;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1});
+      let col=0;
+      if(data.length>0){const h=data[0].map(x=>String(x||'').toLowerCase());const f=h.findIndex(x=>x.includes('org'));if(f>=0)col=f;}
+      orgnrs=data.slice(1).map(r=>String(r[col]||'').replace(/[\s\.]/g,'')).filter(n=>n.length>=8);
+      if(!orgnrs.length){showBErr('Fant ingen org.nr. Sjekk kolonnenavn.');return}
+      hideBErr();
+      document.getElementById('fName').textContent=file.name;
+      document.getElementById('fCount').textContent=`${orgnrs.length} selskaper`;
+      document.getElementById('filePill').style.display='flex';
+      document.getElementById('runBtn').disabled=false;
+    }catch{showBErr('Kunne ikke lese filen.')}
   };
-  reader.readAsBinaryString(file);
+  rd.readAsBinaryString(file);
 }
 
-document.getElementById("startBtn").addEventListener("click", async () => {
-  if (!orgnrs.length) return;
-  results = [];
-  document.getElementById("resultsBody").innerHTML = "";
-  document.getElementById("resultsSection").style.display = "none";
-  document.getElementById("startBtn").disabled = true;
-  document.getElementById("btnSpinner").style.display = "inline-block";
-  document.getElementById("btnText").textContent = "Jobber...";
-  document.getElementById("progressSection").style.display = "block";
-
-  for (let i = 0; i < orgnrs.length; i++) {
-    const orgnr = orgnrs[i];
-    document.getElementById("progressCount").textContent = `${i + 1} / ${orgnrs.length}`;
-    document.getElementById("progressFill").style.width = `${((i + 1) / orgnrs.length) * 100}%`;
-    document.getElementById("currentItem").textContent = `↳ ${orgnr}`;
-
-    try {
-      const res = await fetch(`${API_BASE}/lookup?orgnr=${orgnr}`);
-      const data = await res.json();
-      results.push(data);
-      addRow(data);
-    } catch {
-      const row = { "Org.nr": orgnr, Firmanavn: "", Kontaktperson: "", Tittel: "", Telefon: "", Kilde: "feil" };
-      results.push(row);
-      addRow(row);
+document.getElementById('runBtn').addEventListener('click',async()=>{
+  if(!orgnrs.length)return;
+  results=[];
+  document.getElementById('tBody').innerHTML='';
+  document.getElementById('resultsWrap').style.display='none';
+  document.getElementById('runBtn').disabled=true;
+  document.getElementById('rSpin').style.display='inline-block';
+  document.getElementById('rTxt').textContent='Jobber...';
+  document.getElementById('progWrap').style.display='block';
+  for(let i=0;i<orgnrs.length;i++){
+    const o=orgnrs[i];
+    document.getElementById('progCount').textContent=`${i+1} / ${orgnrs.length}`;
+    document.getElementById('barFill').style.width=`${((i+1)/orgnrs.length)*100}%`;
+    document.getElementById('progCur').textContent=`↳ Slår opp ${o}`;
+    try{
+      const r=await fetch(`${API}/lookup?orgnr=${o}`);
+      const d=await r.json();
+      results.push(d);addRow(d);
+    }catch{
+      const row={'Org.nr':o,Firmanavn:'',Kontaktperson:'',Tittel:'',Telefon:'',Kilde:'feil'};
+      results.push(row);addRow(row);
     }
-
-    if (i === 0) document.getElementById("resultsSection").style.display = "block";
+    if(i===0)document.getElementById('resultsWrap').style.display='block';
   }
-
-  document.getElementById("currentItem").textContent = "✓ Ferdig!";
-  document.getElementById("btnSpinner").style.display = "none";
-  document.getElementById("btnText").textContent = "🚀 \u00a0Start oppslag";
-  document.getElementById("startBtn").disabled = false;
+  document.getElementById('progCur').textContent='✓ Ferdig!';
+  document.getElementById('rSpin').style.display='none';
+  document.getElementById('rTxt').textContent='Start oppslag';
+  document.getElementById('runBtn').disabled=false;
   updateStats();
 });
 
-function addRow(d) {
-  const tr = document.createElement("tr");
-  const kilde = (d["Kilde"] || "").toLowerCase();
-  let tagClass = "tag-empty";
-  if (kilde.includes("nettside")) tagClass = "tag-nettside";
-  else if (kilde.includes("1881")) tagClass = "tag-1881";
-  else if (kilde.includes("brønn") || kilde.includes("br")) tagClass = "tag-brreg";
-
-  const phone = d["Telefon"]
-    ? `<a class="phone-link" href="tel:${d["Telefon"]}">${d["Telefon"]}</a>`
-    : `<span class="empty-val">—</span>`;
-
-  tr.innerHTML = `
-    <td class="orgnr-cell">${d["Org.nr"] || ""}</td>
-    <td class="firm-name">${d["Firmanavn"] || ""}</td>
-    <td>${d["Kontaktperson"] || '<span class="empty-val">—</span>'}</td>
-    <td style="color:var(--muted);font-size:12px">${d["Tittel"] || ""}</td>
-    <td>${phone}</td>
-    <td><span class="tag ${tagClass}">${d["Kilde"] || "—"}</span></td>
+function addRow(d){
+  const tr=document.createElement('tr');
+  const ph=d['Telefon']?`<a href="tel:${d['Telefon']}" style="color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace">${d['Telefon']}</a>`:`<span class="td-empty">—</span>`;
+  tr.innerHTML=`
+    <td class="td-orgnr">${d['Org.nr']||''}</td>
+    <td class="td-firm">${d['Firmanavn']||''}</td>
+    <td>${d['Kontaktperson']||'<span class="td-empty">—</span>'}</td>
+    <td style="color:var(--muted);font-size:12px">${d['Tittel']||''}</td>
+    <td>${ph}</td>
+    <td><span class="${tagClass(d['Kilde']||'')}">${d['Kilde']||'—'}</span></td>
   `;
-  document.getElementById("resultsBody").appendChild(tr);
+  document.getElementById('tBody').appendChild(tr);
 }
 
-function updateStats() {
-  const total = results.length;
-  const withPhone = results.filter(r => r["Telefon"]).length;
-  const withContact = results.filter(r => r["Kontaktperson"]).length;
-  const pct = total ? Math.round((withPhone / total) * 100) : 0;
-
-  document.getElementById("statsGrid").innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Totalt</div></div>
-    <div class="stat-card"><div class="stat-num">${withContact}</div><div class="stat-label">Kontaktperson</div></div>
-    <div class="stat-card"><div class="stat-num">${withPhone}</div><div class="stat-label">Telefon funnet</div></div>
-    <div class="stat-card"><div class="stat-num">${pct}%</div><div class="stat-label">Treffrate</div></div>
+function updateStats(){
+  const t=results.length;
+  const p=results.filter(r=>r['Telefon']).length;
+  const k=results.filter(r=>r['Kontaktperson']).length;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat-box"><div class="stat-n">${t}</div><div class="stat-l">Totalt</div></div>
+    <div class="stat-box"><div class="stat-n">${k}</div><div class="stat-l">Kontakt funnet</div></div>
+    <div class="stat-box"><div class="stat-n">${p}</div><div class="stat-l">Telefon funnet</div></div>
+    <div class="stat-box"><div class="stat-n">${t?Math.round(p/t*100):0}%</div><div class="stat-l">Treffrate</div></div>
   `;
 }
 
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const ws = XLSX.utils.json_to_sheet(results.map(r => ({
-    "Org.nr": r["Org.nr"], "Firmanavn": r["Firmanavn"],
-    "Kontaktperson": r["Kontaktperson"], "Tittel": r["Tittel"],
-    "Telefon": r["Telefon"], "Kilde": r["Kilde"]
-  })));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Kontakter");
-  XLSX.writeFile(wb, "bjornis-kontakter.xlsx");
+document.getElementById('dlBtn').addEventListener('click',()=>{
+  const ws=XLSX.utils.json_to_sheet(results.map(r=>({'Org.nr':r['Org.nr'],'Firmanavn':r['Firmanavn'],'Kontaktperson':r['Kontaktperson'],'Tittel':r['Tittel'],'Telefon':r['Telefon'],'Kilde':r['Kilde']})));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Kontakter');
+  XLSX.writeFile(wb,'dialr-kontakter.xlsx');
 });
 
-function showBulkError(msg) { document.getElementById("bulkErrorText").textContent = msg; document.getElementById("bulkError").style.display = "flex"; document.getElementById("startBtn").disabled = true; }
-function hideBulkError() { document.getElementById("bulkError").style.display = "none"; }
+function showBErr(m){document.getElementById('bErrTxt').textContent=m;document.getElementById('bErr').style.display='flex';document.getElementById('runBtn').disabled=true}
+function hideBErr(){document.getElementById('bErr').style.display='none'}
 </script>
 </body>
 </html>
