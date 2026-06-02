@@ -37,7 +37,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Background grid */
 body::before {
   content: '';
   position: fixed;
@@ -58,11 +57,7 @@ body::before {
   z-index: 1;
 }
 
-/* Header */
-header {
-  margin-bottom: 64px;
-  position: relative;
-}
+header { margin-bottom: 64px; }
 
 .bear-badge {
   display: inline-flex;
@@ -107,7 +102,6 @@ h1 .line2 {
   margin-top: 16px;
 }
 
-/* Decorative accent line */
 .accent-line {
   width: 60px;
   height: 3px;
@@ -116,7 +110,41 @@ h1 .line2 {
   border-radius: 2px;
 }
 
-/* Upload card */
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.tab {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: #09090b;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards */
 .upload-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -155,6 +183,79 @@ h1 .line2 {
   background: var(--border);
 }
 
+/* Single lookup */
+.single-input-wrap {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.orgnr-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.orgnr-input::placeholder { color: var(--muted2); }
+
+.orgnr-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Result box */
+.single-result {
+  display: none;
+  margin-top: 24px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.result-row {
+  display: flex;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  gap: 16px;
+}
+
+.result-row:last-child { border-bottom: none; }
+
+.result-key {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.result-val {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.result-val.phone {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.result-val.empty { color: var(--muted2); font-weight: 400; }
+
+/* Drop zone */
 .drop-zone {
   border: 1.5px dashed var(--border2);
   border-radius: 12px;
@@ -193,21 +294,9 @@ h1 .line2 {
   transition: transform 0.2s;
 }
 
-.drop-zone:hover .drop-icon-wrap {
-  transform: scale(1.05) rotate(-3deg);
-}
-
-.drop-text {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-
-.drop-sub {
-  font-size: 13px;
-  color: var(--muted);
-}
+.drop-zone:hover .drop-icon-wrap { transform: scale(1.05) rotate(-3deg); }
+.drop-text { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.drop-sub { font-size: 13px; color: var(--muted); }
 
 .file-info {
   display: none;
@@ -258,10 +347,10 @@ h1 .line2 {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 24px;
   letter-spacing: 0.01em;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .btn::after {
@@ -271,20 +360,9 @@ h1 .line2 {
   background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
 }
 
-.btn:hover {
-  background: var(--accent2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(249,115,22,0.4);
-}
+.btn:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249,115,22,0.4); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Progress */
 .progress-section {
   display: none;
   margin-top: 28px;
@@ -307,6 +385,9 @@ h1 .line2 {
   color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .progress-num {
@@ -340,7 +421,6 @@ h1 .line2 {
   min-height: 18px;
 }
 
-/* Stats */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -348,9 +428,7 @@ h1 .line2 {
   margin-bottom: 20px;
 }
 
-@media (max-width: 600px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .stat-card {
   background: var(--surface);
@@ -359,10 +437,7 @@ h1 .line2 {
   padding: 20px 16px;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s;
 }
-
-.stat-card:hover { border-color: var(--border2); }
 
 .stat-card::before {
   content: '';
@@ -390,7 +465,6 @@ h1 .line2 {
   text-transform: uppercase;
 }
 
-/* Results */
 .results-section { display: none; }
 
 .results-card {
@@ -412,7 +486,6 @@ h1 .line2 {
   font-family: 'Syne', sans-serif;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.02em;
 }
 
 .export-btn {
@@ -431,19 +504,11 @@ h1 .line2 {
   transition: all 0.2s;
 }
 
-.export-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-dim);
-}
+.export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
 .table-wrap { overflow-x: auto; }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 thead th {
   text-align: left;
@@ -458,31 +523,17 @@ thead th {
   white-space: nowrap;
 }
 
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.12s;
-}
-
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; animation: fadeIn 0.2s ease both; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: rgba(249,115,22,0.04); }
+tbody td { padding: 14px 16px; vertical-align: middle; }
 
-tbody td {
-  padding: 14px 16px;
-  vertical-align: middle;
-}
-
-.orgnr {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: var(--muted);
-}
-
+.orgnr-cell { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
 .firm-name { font-weight: 500; color: var(--text); }
 
 .tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   padding: 3px 10px;
   border-radius: 100px;
   font-size: 10px;
@@ -496,18 +547,10 @@ tbody td {
 .tag-brreg { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
 .tag-empty { background: rgba(82,82,91,0.3); color: var(--muted2); border: 1px solid var(--border); }
 
-.phone-link {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  color: var(--accent);
-  text-decoration: none;
-  transition: opacity 0.15s;
-}
+.phone-link { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent); text-decoration: none; }
 .phone-link:hover { opacity: 0.75; }
-
 .empty-val { color: var(--muted2); }
 
-/* Spinner */
 .spinner {
   display: inline-block;
   width: 15px; height: 15px;
@@ -518,9 +561,15 @@ tbody td {
   flex-shrink: 0;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-orange {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
 
-/* Pulse dot */
 .pulse {
   display: inline-block;
   width: 8px; height: 8px;
@@ -529,94 +578,136 @@ tbody td {
   animation: pulse 1.4s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-
-/* Fade in rows */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-tbody tr { animation: fadeIn 0.2s ease both; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 <div class="container">
 
   <header>
-    <div class="bear-badge">🐻 <span>v1.0</span> &nbsp;|&nbsp; Isak Bjørnstad</div>
+    <div class="bear-badge">🐻 <span>v1.1</span> &nbsp;|&nbsp; Isak Bjørnstad</div>
     <h1>
       <span class="line1">Bjørnis</span>
       <span class="line2">Prospekteringsmaskin</span>
     </h1>
     <div class="accent-line"></div>
-    <p class="subtitle">Last opp en Excel-fil med org.nr og maskinen henter kontaktinfo automatisk fra Brreg, nettside og 1881.</p>
+    <p class="subtitle">Slå opp ett selskap direkte, eller last opp en Excel-fil for masseoppslag.</p>
   </header>
 
-  <div class="upload-card">
-    <div class="section-label">01 &nbsp; Last opp fil</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('single')">🔍 &nbsp;Enkeltoppslag</button>
+    <button class="tab" onclick="switchTab('bulk')">📊 &nbsp;Masseoppslag</button>
+  </div>
 
-    <div class="drop-zone" id="dropZone">
-      <input type="file" id="fileInput" accept=".xlsx,.xls">
-      <div class="drop-icon-wrap">📊</div>
-      <div class="drop-text">Dra og slipp Excel-filen her</div>
-      <div class="drop-sub">eller klikk for å velge fil &nbsp;·&nbsp; .xlsx / .xls</div>
-    </div>
-
-    <div class="file-info" id="fileInfo">
-      <div class="dot"></div>
-      <span id="fileName"></span>
-      <span style="color: var(--muted); margin-left: auto" id="orgCount"></span>
-    </div>
-
-    <div class="error-msg" id="errorMsg">
-      <span>⚠</span>
-      <span id="errorText"></span>
-    </div>
-
-    <button class="btn" id="startBtn" disabled>
-      <span class="spinner" id="btnSpinner" style="display:none"></span>
-      <span id="btnText">🚀 &nbsp;Start oppslag</span>
-    </button>
-
-    <div class="progress-section" id="progressSection">
-      <div class="progress-header">
-        <span class="progress-label"><span class="pulse"></span> &nbsp;Behandler</span>
-        <span class="progress-num" id="progressCount">0 / 0</span>
+  <!-- Single lookup -->
+  <div class="tab-content active" id="tab-single">
+    <div class="upload-card">
+      <div class="section-label">Slå opp org.nr</div>
+      <div class="single-input-wrap">
+        <input class="orgnr-input" id="singleInput" type="text" placeholder="eks. 974760843" maxlength="12">
+        <button class="btn" id="singleBtn" onclick="doSingleLookup()">
+          <span class="spinner" id="singleSpinner" style="display:none"></span>
+          <span id="singleBtnText">Søk</span>
+        </button>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressFill"></div>
+
+      <div class="error-msg" id="singleError">
+        <span>⚠</span><span id="singleErrorText"></span>
       </div>
-      <div class="current-item" id="currentItem"></div>
+
+      <div class="single-result" id="singleResult">
+        <div class="result-row">
+          <div class="result-key">Org.nr</div>
+          <div class="result-val" id="res-orgnr"></div>
+        </div>
+        <div class="result-row">
+          <div class="result-key">Firmanavn</div>
+          <div class="result-val" id="res-firma"></div>
+        </div>
+        <div class="result-row">
+          <div class="result-key">Kontaktperson</div>
+          <div class="result-val" id="res-kontakt"></div>
+        </div>
+        <div class="result-row">
+          <div class="result-key">Tittel</div>
+          <div class="result-val" id="res-tittel"></div>
+        </div>
+        <div class="result-row">
+          <div class="result-key">Telefon</div>
+          <div class="result-val phone" id="res-tlf"></div>
+        </div>
+        <div class="result-row">
+          <div class="result-key">Kilde</div>
+          <div class="result-val" id="res-kilde"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="results-section" id="resultsSection">
-    <div class="stats-grid" id="statsGrid"></div>
-    <div class="results-card">
-      <div class="results-top">
-        <div class="results-title">Resultater</div>
-        <button class="export-btn" id="exportBtn">
-          ↓ &nbsp;Last ned Excel
-        </button>
+  <!-- Bulk lookup -->
+  <div class="tab-content" id="tab-bulk">
+    <div class="upload-card">
+      <div class="section-label">Last opp Excel</div>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls">
+        <div class="drop-icon-wrap">📊</div>
+        <div class="drop-text">Dra og slipp Excel-filen her</div>
+        <div class="drop-sub">eller klikk for å velge fil &nbsp;·&nbsp; .xlsx / .xls</div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Org.nr</th>
-              <th>Firmanavn</th>
-              <th>Kontaktperson</th>
-              <th>Tittel</th>
-              <th>Telefon</th>
-              <th>Kilde</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
+
+      <div class="file-info" id="fileInfo">
+        <div class="dot"></div>
+        <span id="fileName"></span>
+        <span style="color: var(--muted); margin-left: auto" id="orgCount"></span>
+      </div>
+
+      <div class="error-msg" id="bulkError">
+        <span>⚠</span><span id="bulkErrorText"></span>
+      </div>
+
+      <button class="btn" id="startBtn" disabled>
+        <span class="spinner" id="btnSpinner" style="display:none"></span>
+        <span id="btnText">🚀 &nbsp;Start oppslag</span>
+      </button>
+
+      <div class="progress-section" id="progressSection">
+        <div class="progress-header">
+          <span class="progress-label"><span class="pulse"></span> &nbsp;Behandler</span>
+          <span class="progress-num" id="progressCount">0 / 0</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="current-item" id="currentItem"></div>
+      </div>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="results-card">
+        <div class="results-top">
+          <div class="results-title">Resultater</div>
+          <button class="export-btn" id="exportBtn">↓ &nbsp;Last ned Excel</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Org.nr</th>
+                <th>Firmanavn</th>
+                <th>Kontaktperson</th>
+                <th>Tittel</th>
+                <th>Telefon</th>
+                <th>Kilde</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -627,23 +718,73 @@ tbody tr { animation: fadeIn 0.2s ease both; }
 const API_BASE = "https://kontakt-api-production.up.railway.app";
 let orgnrs = [], results = [];
 
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Single lookup
+const singleInput = document.getElementById("singleInput");
+singleInput.addEventListener("keydown", e => { if (e.key === "Enter") doSingleLookup(); });
+
+async function doSingleLookup() {
+  const orgnr = singleInput.value.replace(/[\s\.]/g, "");
+  if (orgnr.length < 8) { showSingleError("Skriv inn et gyldig org.nr (9 siffer)."); return; }
+
+  hideSingleError();
+  document.getElementById("singleResult").style.display = "none";
+  document.getElementById("singleSpinner").style.display = "inline-block";
+  document.getElementById("singleBtnText").textContent = "Henter...";
+  document.getElementById("singleBtn").disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/lookup?orgnr=${orgnr}`);
+    const d = await res.json();
+
+    document.getElementById("res-orgnr").textContent = d["Org.nr"] || orgnr;
+    document.getElementById("res-firma").textContent = d["Firmanavn"] || "—";
+
+    const kontakt = d["Kontaktperson"];
+    const kontaktEl = document.getElementById("res-kontakt");
+    kontaktEl.textContent = kontakt || "—";
+    kontaktEl.className = "result-val" + (kontakt ? "" : " empty");
+
+    const tittel = d["Tittel"];
+    const tittelEl = document.getElementById("res-tittel");
+    tittelEl.textContent = tittel || "—";
+    tittelEl.className = "result-val" + (tittel ? "" : " empty");
+
+    const tlf = d["Telefon"];
+    const tlfEl = document.getElementById("res-tlf");
+    if (tlf) {
+      tlfEl.innerHTML = `<a class="phone-link" href="tel:${tlf}">${tlf}</a>`;
+    } else {
+      tlfEl.textContent = "—";
+      tlfEl.className = "result-val empty";
+    }
+
+    const kilde = d["Kilde"] || "—";
+    const kildeEl = document.getElementById("res-kilde");
+    kildeEl.textContent = kilde;
+
+    document.getElementById("singleResult").style.display = "block";
+  } catch {
+    showSingleError("Noe gikk galt. Sjekk at API-et kjører.");
+  }
+
+  document.getElementById("singleSpinner").style.display = "none";
+  document.getElementById("singleBtnText").textContent = "Søk";
+  document.getElementById("singleBtn").disabled = false;
+}
+
+function showSingleError(msg) { document.getElementById("singleErrorText").textContent = msg; document.getElementById("singleError").style.display = "flex"; }
+function hideSingleError() { document.getElementById("singleError").style.display = "none"; }
+
+// Bulk lookup
 const fileInput = document.getElementById("fileInput");
 const dropZone = document.getElementById("dropZone");
-const fileInfo = document.getElementById("fileInfo");
-const fileName = document.getElementById("fileName");
-const orgCount = document.getElementById("orgCount");
-const startBtn = document.getElementById("startBtn");
-const btnText = document.getElementById("btnText");
-const btnSpinner = document.getElementById("btnSpinner");
-const progressSection = document.getElementById("progressSection");
-const progressFill = document.getElementById("progressFill");
-const progressCount = document.getElementById("progressCount");
-const currentItem = document.getElementById("currentItem");
-const resultsSection = document.getElementById("resultsSection");
-const resultsBody = document.getElementById("resultsBody");
-const statsGrid = document.getElementById("statsGrid");
-const errorMsg = document.getElementById("errorMsg");
-const errorText = document.getElementById("errorText");
 
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
@@ -670,38 +811,33 @@ function handleFile(file) {
         .map(row => String(row[colIdx] || "").replace(/[\s\.]/g, ""))
         .filter(n => n.length >= 8);
 
-      if (orgnrs.length === 0) {
-        showError("Fant ingen org.nr. Sjekk at kolonnen heter 'Org.nr' eller 'Organisasjonsnr'.");
-        return;
-      }
+      if (!orgnrs.length) { showBulkError("Fant ingen org.nr. Sjekk kolonnenavn."); return; }
 
-      hideError();
-      fileName.textContent = file.name;
-      orgCount.textContent = `${orgnrs.length} selskaper`;
-      fileInfo.style.display = "flex";
-      startBtn.disabled = false;
-    } catch {
-      showError("Kunne ikke lese filen. Sjekk at det er en gyldig .xlsx-fil.");
-    }
+      hideBulkError();
+      document.getElementById("fileName").textContent = file.name;
+      document.getElementById("orgCount").textContent = `${orgnrs.length} selskaper`;
+      document.getElementById("fileInfo").style.display = "flex";
+      document.getElementById("startBtn").disabled = false;
+    } catch { showBulkError("Kunne ikke lese filen."); }
   };
   reader.readAsBinaryString(file);
 }
 
-startBtn.addEventListener("click", async () => {
+document.getElementById("startBtn").addEventListener("click", async () => {
   if (!orgnrs.length) return;
   results = [];
-  resultsBody.innerHTML = "";
-  resultsSection.style.display = "none";
-  startBtn.disabled = true;
-  btnSpinner.style.display = "inline-block";
-  btnText.textContent = "Jobber...";
-  progressSection.style.display = "block";
+  document.getElementById("resultsBody").innerHTML = "";
+  document.getElementById("resultsSection").style.display = "none";
+  document.getElementById("startBtn").disabled = true;
+  document.getElementById("btnSpinner").style.display = "inline-block";
+  document.getElementById("btnText").textContent = "Jobber...";
+  document.getElementById("progressSection").style.display = "block";
 
   for (let i = 0; i < orgnrs.length; i++) {
     const orgnr = orgnrs[i];
-    progressCount.textContent = `${i + 1} / ${orgnrs.length}`;
-    progressFill.style.width = `${((i + 1) / orgnrs.length) * 100}%`;
-    currentItem.textContent = `↳ ${orgnr}`;
+    document.getElementById("progressCount").textContent = `${i + 1} / ${orgnrs.length}`;
+    document.getElementById("progressFill").style.width = `${((i + 1) / orgnrs.length) * 100}%`;
+    document.getElementById("currentItem").textContent = `↳ ${orgnr}`;
 
     try {
       const res = await fetch(`${API_BASE}/lookup?orgnr=${orgnr}`);
@@ -714,13 +850,13 @@ startBtn.addEventListener("click", async () => {
       addRow(row);
     }
 
-    if (i === 0) resultsSection.style.display = "block";
+    if (i === 0) document.getElementById("resultsSection").style.display = "block";
   }
 
-  currentItem.textContent = "✓ Ferdig!";
-  btnSpinner.style.display = "none";
-  btnText.textContent = "🚀 \u00a0Start oppslag";
-  startBtn.disabled = false;
+  document.getElementById("currentItem").textContent = "✓ Ferdig!";
+  document.getElementById("btnSpinner").style.display = "none";
+  document.getElementById("btnText").textContent = "🚀 \u00a0Start oppslag";
+  document.getElementById("startBtn").disabled = false;
   updateStats();
 });
 
@@ -736,17 +872,15 @@ function addRow(d) {
     ? `<a class="phone-link" href="tel:${d["Telefon"]}">${d["Telefon"]}</a>`
     : `<span class="empty-val">—</span>`;
 
-  const kontakt = d["Kontaktperson"] || `<span class="empty-val">—</span>`;
-
   tr.innerHTML = `
-    <td class="orgnr">${d["Org.nr"] || ""}</td>
+    <td class="orgnr-cell">${d["Org.nr"] || ""}</td>
     <td class="firm-name">${d["Firmanavn"] || ""}</td>
-    <td>${kontakt}</td>
+    <td>${d["Kontaktperson"] || '<span class="empty-val">—</span>'}</td>
     <td style="color:var(--muted);font-size:12px">${d["Tittel"] || ""}</td>
     <td>${phone}</td>
     <td><span class="tag ${tagClass}">${d["Kilde"] || "—"}</span></td>
   `;
-  resultsBody.appendChild(tr);
+  document.getElementById("resultsBody").appendChild(tr);
 }
 
 function updateStats() {
@@ -755,7 +889,7 @@ function updateStats() {
   const withContact = results.filter(r => r["Kontaktperson"]).length;
   const pct = total ? Math.round((withPhone / total) * 100) : 0;
 
-  statsGrid.innerHTML = `
+  document.getElementById("statsGrid").innerHTML = `
     <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Totalt</div></div>
     <div class="stat-card"><div class="stat-num">${withContact}</div><div class="stat-label">Kontaktperson</div></div>
     <div class="stat-card"><div class="stat-num">${withPhone}</div><div class="stat-label">Telefon funnet</div></div>
@@ -774,8 +908,8 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   XLSX.writeFile(wb, "bjornis-kontakter.xlsx");
 });
 
-function showError(msg) { errorText.textContent = msg; errorMsg.style.display = "flex"; startBtn.disabled = true; }
-function hideError() { errorMsg.style.display = "none"; }
+function showBulkError(msg) { document.getElementById("bulkErrorText").textContent = msg; document.getElementById("bulkError").style.display = "flex"; document.getElementById("startBtn").disabled = true; }
+function hideBulkError() { document.getElementById("bulkError").style.display = "none"; }
 </script>
 </body>
 </html>
