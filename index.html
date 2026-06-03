@@ -160,7 +160,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
         <a href="vilkar.html">Vilkår for bruk</a>
       </div>
     </div>
-    <button onclick="logout()" style="padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">Logg ut</button>
+    <a id="loginNavBtn" href="login.html" class="nav-cta">Logg inn</a>
+    <button id="logoutNavBtn" onclick="logout()" style="display:none;padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">Logg ut</button>
   </div>
 </nav>
 
@@ -190,7 +191,10 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 </div>
 
 <!-- FULL ACCESS -->
-<div id="app-full" style="display:none;">
+<div id="loginRequired" style="display:none;align-items:center;gap:12px;padding:14px 20px;background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.3);border-radius:10px;margin-bottom:16px;font-size:14px;color:var(--accent2);">
+  🔒 Du må <a href="login.html" style="color:var(--accent2);font-weight:600;text-decoration:underline;">opprette en bruker</a> for å kunne bruke dette.
+</div>
+<div id="app-full" style="display:block;">
   <div class="app-shell">
     <div class="app-header">
       <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
@@ -272,32 +276,36 @@ const API = "https://kontakt-api-production.up.railway.app";
 let orgnrs = [], results = [], currentMsgData = null;
 
 // SUPABASE AUTH
-const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+const SUPABASE_URL = "DIN_SUPABASE_URL";
+const SUPABASE_KEY = "DIN_SUPABASE_ANON_KEY";
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let isLoggedIn = false;
+
 async function checkAuth() {
   const { data: { session } } = await sb.auth.getSession();
-  if(!session) {
-    window.location.href = 'login.html';
-    return;
+  if(session) {
+    const { data: profile } = await sb.from('profiles').select('approved').eq('email', session.user.email).single();
+    if(profile && profile.approved) {
+      isLoggedIn = true;
+      document.getElementById("loginNavBtn").style.display = "none";
+      document.getElementById("logoutNavBtn").style.display = "flex";
+    }
   }
-  const { data: profile } = await sb.from('profiles').select('approved').eq('email', session.user.email).single();
-  if(!profile || !profile.approved) {
-    await sb.auth.signOut();
-    window.location.href = 'login.html';
-    return;
-  }
-  document.getElementById("auth-loading").style.display = "none";
-  document.getElementById("app-full").style.display = "block";
 }
 
 checkAuth();
 
 async function logout() {
   await sb.auth.signOut();
-  window.location.href = 'login.html';
+  isLoggedIn = false;
+  window.location.reload();
+}
+
+function requireLogin() {
+  document.getElementById("loginRequired").style.display = "flex";
+  setTimeout(() => document.getElementById("loginRequired").style.display = "none", 4000);
 }
 
 // TABS
@@ -313,6 +321,7 @@ document.getElementById("singleInput").addEventListener("keydown",e=>{if(e.key==
 document.getElementById("singleInput2").addEventListener("keydown",e=>{if(e.key==="Enter")doSingle("singleInput2","sSpin2","sBtnTxt2","singleBtn2","sErr2","sErrTxt2","resultCard2","resFirm2","resOrgnr2","resKontakt2","resTittel2","resTlf2","resKilde2")});
 
 async function doSingle(inputId,spinId,btnTxtId,btnId,errId,errTxtId,cardId,firmId,orgnrId,kontaktId,tittelId,tlfId,kildeId){
+  if(!isLoggedIn){requireLogin();return;}
   const org = document.getElementById(inputId).value.replace(/[\s.]/g,"");
   if(org.length<8){document.getElementById(errTxtId).textContent="Skriv inn et gyldig org.nr";document.getElementById(errId).style.display="flex";return;}
   document.getElementById(errId).style.display="none";
@@ -370,6 +379,7 @@ function handleFile(file){
   rd.readAsBinaryString(file);
 }
 document.getElementById("runBtn").addEventListener("click",async()=>{
+  if(!isLoggedIn){requireLogin();return;}
   if(!orgnrs.length)return;
   results=[];document.getElementById("tBody").innerHTML="";document.getElementById("resultsWrap").style.display="none";
   document.getElementById("runBtn").disabled=true;document.getElementById("rSpin").style.display="inline-block";document.getElementById("rTxt").textContent="Jobber...";
