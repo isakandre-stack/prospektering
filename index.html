@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>dialr — Finn direktenummeret til daglig leder</title>
-<meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk.">
+<meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
 <meta name="robots" content="index, follow">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -35,8 +34,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
 .dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
 .dropdown.open .dropdown-menu{display:block;}
-.nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;}
+.nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;white-space:nowrap;}
 .nav-cta:hover{background:var(--accent2)}
+.nav-logout{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:none;}
+.nav-logout:hover{border-color:var(--accent);color:var(--accent2)}
 .hero{text-align:center;margin-bottom:56px;}
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:12px;color:var(--accent2);font-family:'DM Mono',monospace;letter-spacing:0.05em;margin-bottom:28px;}
 h1{font-size:clamp(40px,6vw,68px);font-weight:600;letter-spacing:-0.03em;line-height:1.05;color:var(--text);margin-bottom:20px;}
@@ -46,16 +47,8 @@ h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(
 .hero-stat-num{font-size:28px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
 .hero-stat-label{font-size:12px;color:var(--muted);margin-top:2px;text-align:center;}
 .hero-stat-divider{width:1px;height:36px;background:var(--border2);}
-.lock-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:48px 32px;text-align:center;margin-bottom:20px;}
-.lock-icon{width:56px;height:56px;margin:0 auto 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;}
-.lock-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;}
-.lock-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
-.lock-row{display:flex;gap:10px;max-width:360px;margin:0 auto;}
-.lock-input{flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:0 18px;height:48px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);outline:none;letter-spacing:0.08em;transition:border-color 0.15s;}
-.lock-input:focus{border-color:var(--accent);}
-.lock-btn{height:48px;padding:0 24px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;}
-.lock-btn:hover{background:var(--accent2)}
-.lock-err{margin-top:10px;font-size:13px;color:var(--red);min-height:18px;}
+.login-required{display:none;align-items:center;gap:12px;padding:14px 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:10px;margin-bottom:16px;font-size:14px;color:var(--accent2);}
+.login-required a{color:var(--accent2);font-weight:600;text-decoration:underline;}
 .app-shell{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:24px;}
 .app-header{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg3);}
 .app-dot{width:10px;height:10px;border-radius:50%;}
@@ -102,6 +95,7 @@ h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(
 .progress-cur{margin-top:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:18px;}
 .results-wrap{display:none;margin-top:20px}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
 .stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;}
 .stat-n{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--accent2);line-height:1;margin-bottom:4px;}
 .stat-l{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.07em;text-transform:uppercase;}
@@ -123,9 +117,7 @@ tbody td{padding:13px 16px;vertical-align:middle}
 .source-1881{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
 .source-brreg{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
 .source-empty{background:rgba(74,74,90,0.3);color:var(--muted2);border:1px solid var(--border2)}
-.msg-textarea{width:100%;background:transparent;border:none;padding:20px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);line-height:1.7;resize:vertical;min-height:220px;outline:none;}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.55s linear infinite;}
-.status-dot{width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes rowIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 tbody tr{animation:rowIn 0.18s ease both}
@@ -160,8 +152,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
         <a href="vilkar.html">Vilkår for bruk</a>
       </div>
     </div>
-    <a id="loginNavBtn" href="login.html" class="nav-cta">Logg inn</a>
-    <button id="logoutNavBtn" onclick="logout()" style="display:none;padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">Logg ut</button>
+    <a class="nav-cta" href="login.html" id="loginNavBtn">Logg inn</a>
+    <button class="nav-logout" id="logoutNavBtn" onclick="doLogout()">Logg ut</button>
   </div>
 </nav>
 
@@ -178,74 +170,67 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   </div>
 </div>
 
-<!-- LOCK -->
-<!-- FULL ACCESS -->
-<div id="loginRequired" style="display:none;align-items:center;gap:12px;padding:14px 20px;background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.3);border-radius:10px;margin-bottom:16px;font-size:14px;color:var(--accent2);">
-  🔒 Du må <a href="login.html" style="color:var(--accent2);font-weight:600;text-decoration:underline;">opprette en bruker</a> for å kunne bruke dette.
+<div class="login-required" id="loginRequired">
+  🔒 Du må <a href="login.html">opprette en bruker</a> for å kunne bruke dette.
 </div>
-<div id="app-full" style="display:block;">
-  <div class="app-shell">
-    <div class="app-header">
-      <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
-    </div>
-    <div class="app-tabs">
-      <button class="app-tab active" id="ftab-single" onclick="switchFTab('single')">Enkeltoppslag</button>
-      <button class="app-tab" id="ftab-bulk" onclick="switchFTab('bulk')">Masseoppslag</button>
-    </div>
-    <div class="app-body">
 
-      <!-- ENKELT -->
-      <div class="tab-panel active" id="fpanel-single">
-        <div class="search-row">
-          <input class="search-input" id="singleInput2" type="text" placeholder="Organisasjonsnummer" maxlength="12">
-          <button class="search-btn" id="singleBtn2" onclick="doSingle('singleInput2','sSpin2','sBtnTxt2','singleBtn2','sErr2','sErrTxt2','resultCard2','resFirm2','resOrgnr2','resKontakt2','resTittel2','resTlf2','resKilde2')">
-            <span class="spin" id="sSpin2" style="display:none"></span>
-            <span id="sBtnTxt2">Søk opp</span>
-          </button>
-        </div>
-        <div class="err-pill" id="sErr2" style="display:none"><span>⚠</span><span id="sErrTxt2"></span></div>
-        <div class="result-card" id="resultCard2">
-          <div class="result-header"><div class="result-company" id="resFirm2"></div><div class="result-orgnr" id="resOrgnr2"></div></div>
-          <div class="result-grid">
-            <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt2"></div></div>
-            <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel2"></div></div>
-            <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value" id="resTlf2"></div></div>
-            <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde2"></div></div>
-          </div>
-        </div>
-      </div>
+<div class="app-shell">
+  <div class="app-header">
+    <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
+  </div>
+  <div class="app-tabs">
+    <button class="app-tab active" id="ftab-single" onclick="switchTab('single')">Enkeltoppslag</button>
+    <button class="app-tab" id="ftab-bulk" onclick="switchTab('bulk')">Masseoppslag</button>
+  </div>
+  <div class="app-body">
 
-      <!-- MASSE -->
-      <div class="tab-panel" id="fpanel-bulk">
-        <div class="drop-zone" id="dropZone">
-          <input type="file" id="fileInput" accept=".xlsx,.xls">
-          <div class="drop-icon">📊</div>
-          <div class="drop-title">Dra og slipp Excel-fil her</div>
-          <div class="drop-sub">eller klikk for å velge</div>
-        </div>
-        <div class="file-pill" id="filePill"><div class="file-pill-dot"></div><span id="fName"></span><span style="margin-left:auto;color:var(--muted)" id="fCount"></span></div>
-        <div class="err-pill" id="bErr" style="display:none"><span>⚠</span><span id="bErrTxt"></span></div>
-        <button class="run-btn" id="runBtn" disabled>
-          <span class="spin" id="rSpin" style="display:none"></span>
-          <span id="rTxt">Start oppslag</span>
+    <div class="tab-panel active" id="fpanel-single">
+      <div class="search-row">
+        <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+        <button class="search-btn" id="singleBtn" onclick="doSingle()">
+          <span class="spin" id="sSpin" style="display:none"></span>
+          <span id="sBtnTxt">Søk opp</span>
         </button>
-        <div class="progress-wrap" id="progWrap">
-          <div class="progress-top"><div class="progress-lbl">Behandler</div><div class="progress-count" id="progCount">0 / 0</div></div>
-          <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
-          <div class="progress-cur" id="progCur"></div>
-        </div>
-        <div class="results-wrap" id="resultsWrap">
-          <div class="stats-row" id="statsRow"></div>
-          <div class="table-card">
-            <div class="table-top"><div class="table-title">Resultater</div><button class="dl-btn" id="dlBtn">&#8595; Last ned Excel</button></div>
-            <div class="tbl-wrap"><table><thead><tr><th>Org.nr</th><th>Firmanavn</th><th>Kontaktperson</th><th>Tittel</th><th>Telefon</th><th>Kilde</th></tr></thead><tbody id="tBody"></tbody></table></div>
-          </div>
+      </div>
+      <div class="err-pill" id="sErr" style="display:none"><span>⚠</span><span id="sErrTxt"></span></div>
+      <div class="result-card" id="resultCard">
+        <div class="result-header"><div class="result-company" id="resFirm"></div><div class="result-orgnr" id="resOrgnr"></div></div>
+        <div class="result-grid">
+          <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt"></div></div>
+          <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel"></div></div>
+          <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value" id="resTlf"></div></div>
+          <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde"></div></div>
         </div>
       </div>
-
     </div>
 
+    <div class="tab-panel" id="fpanel-bulk">
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls">
+        <div class="drop-icon">📊</div>
+        <div class="drop-title">Dra og slipp Excel-fil her</div>
+        <div class="drop-sub">eller klikk for å velge</div>
+      </div>
+      <div class="file-pill" id="filePill"><div class="file-pill-dot"></div><span id="fName"></span><span style="margin-left:auto;color:var(--muted)" id="fCount"></span></div>
+      <div class="err-pill" id="bErr" style="display:none"><span>⚠</span><span id="bErrTxt"></span></div>
+      <button class="run-btn" id="runBtn" disabled>
+        <span class="spin" id="rSpin" style="display:none"></span>
+        <span id="rTxt">Start oppslag</span>
+      </button>
+      <div class="progress-wrap" id="progWrap">
+        <div class="progress-top"><div class="progress-lbl">Behandler</div><div class="progress-count" id="progCount">0 / 0</div></div>
+        <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+        <div class="progress-cur" id="progCur"></div>
+      </div>
+      <div class="results-wrap" id="resultsWrap">
+        <div class="stats-row" id="statsRow"></div>
+        <div class="table-card">
+          <div class="table-top"><div class="table-title">Resultater</div><button class="dl-btn" id="dlBtn">&#8595; Last ned Excel</button></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Org.nr</th><th>Firmanavn</th><th>Kontaktperson</th><th>Tittel</th><th>Telefon</th><th>Kilde</th></tr></thead><tbody id="tBody"></tbody></table></div>
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -262,79 +247,92 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 
 <script>
 const API = "https://kontakt-api-production.up.railway.app";
-let orgnrs = [], results = [], currentMsgData = null;
-
-// SUPABASE AUTH
-const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let isLoggedIn = false;
-
-async function checkAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  if(session) {
-    const { data: profile } = await sb.from('profiles').select('approved').eq('email', session.user.email).single();
-    if(profile && profile.approved) {
-      isLoggedIn = true;
-      document.getElementById("loginNavBtn").style.display = "none";
-      document.getElementById("logoutNavBtn").style.display = "flex";
-    }
-  }
-}
-
-checkAuth();
-
-async function logout() {
-  await sb.auth.signOut();
-  isLoggedIn = false;
-  window.location.reload();
-}
-
-function requireLogin() {
-  document.getElementById("loginRequired").style.display = "flex";
-  setTimeout(() => document.getElementById("loginRequired").style.display = "none", 4000);
-}
+let orgnrs = [], results = [], isLoggedIn = false;
 
 // TABS
-function switchFTab(t){
-  document.querySelectorAll("#app-full .app-tab").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll("#app-full .tab-panel").forEach(p=>p.classList.remove("active"));
+function switchTab(t){
+  document.querySelectorAll(".app-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
   document.getElementById("ftab-"+t).classList.add("active");
   document.getElementById("fpanel-"+t).classList.add("active");
 }
 
-// SINGLE LOOKUP
-document.getElementById("singleInput").addEventListener("keydown",e=>{if(e.key==="Enter")doSingle("singleInput","sSpin","sBtnTxt","singleBtn","sErr","sErrTxt","resultCard","resFirm","resOrgnr","resKontakt","resTittel","resTlf","resKilde")});
-document.getElementById("singleInput2").addEventListener("keydown",e=>{if(e.key==="Enter")doSingle("singleInput2","sSpin2","sBtnTxt2","singleBtn2","sErr2","sErrTxt2","resultCard2","resFirm2","resOrgnr2","resKontakt2","resTittel2","resTlf2","resKilde2")});
+// DROPDOWN
+document.querySelectorAll(".dropdown-btn").forEach(btn=>{
+  btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const dd=btn.closest(".dropdown");
+    const wasOpen=dd.classList.contains("open");
+    document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open"));
+    if(!wasOpen)dd.classList.add("open");
+  });
+});
+document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
 
-async function doSingle(inputId,spinId,btnTxtId,btnId,errId,errTxtId,cardId,firmId,orgnrId,kontaktId,tittelId,tlfId,kildeId){
+// AUTH CHECK
+function requireLogin(){
+  const el=document.getElementById("loginRequired");
+  el.style.display="flex";
+  setTimeout(()=>el.style.display="none",4000);
+}
+
+// Load Supabase and check auth
+(function(){
+  const script=document.createElement("script");
+  script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  script.onload=async function(){
+    const SUPABASE_URL="DIN_SUPABASE_URL";
+    const SUPABASE_KEY="DIN_SUPABASE_ANON_KEY";
+    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    window._sb=sb;
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){
+      const {data:profile}=await sb.from("profiles").select("approved").eq("email",session.user.email).single();
+      if(profile&&profile.approved){
+        isLoggedIn=true;
+        document.getElementById("loginNavBtn").style.display="none";
+        document.getElementById("logoutNavBtn").style.display="block";
+      }
+    }
+  };
+  document.head.appendChild(script);
+})();
+
+async function doLogout(){
+  if(window._sb) await window._sb.auth.signOut();
+  isLoggedIn=false;
+  document.getElementById("loginNavBtn").style.display="flex";
+  document.getElementById("logoutNavBtn").style.display="none";
+}
+
+// SINGLE
+document.getElementById("singleInput").addEventListener("keydown",e=>{if(e.key==="Enter")doSingle()});
+async function doSingle(){
   if(!isLoggedIn){requireLogin();return;}
-  const org = document.getElementById(inputId).value.replace(/[\s.]/g,"");
-  if(org.length<8){document.getElementById(errTxtId).textContent="Skriv inn et gyldig org.nr";document.getElementById(errId).style.display="flex";return;}
-  document.getElementById(errId).style.display="none";
-  document.getElementById(cardId).style.display="none";
-  document.getElementById(spinId).style.display="inline-block";
-  document.getElementById(btnTxtId).textContent="Henter...";
-  document.getElementById(btnId).disabled=true;
+  const org=document.getElementById("singleInput").value.replace(/[\s.]/g,"");
+  if(org.length<8){document.getElementById("sErrTxt").textContent="Skriv inn et gyldig org.nr";document.getElementById("sErr").style.display="flex";return;}
+  document.getElementById("sErr").style.display="none";
+  document.getElementById("resultCard").style.display="none";
+  document.getElementById("sSpin").style.display="inline-block";
+  document.getElementById("sBtnTxt").textContent="Henter...";
+  document.getElementById("singleBtn").disabled=true;
   try{
     const r=await fetch(`${API}/lookup?orgnr=${org}`);
     const d=await r.json();
-    document.getElementById(firmId).textContent=d["Firmanavn"]||"Ukjent";
-    document.getElementById(orgnrId).textContent=d["Org.nr"]||org;
-    setVal(kontaktId,d["Kontaktperson"]);
-    setVal(tittelId,d["Tittel"]);
+    document.getElementById("resFirm").textContent=d["Firmanavn"]||"Ukjent";
+    document.getElementById("resOrgnr").textContent=d["Org.nr"]||org;
+    setVal("resKontakt",d["Kontaktperson"]);
+    setVal("resTittel",d["Tittel"]);
     const tlf=d["Telefon"];
-    const tEl=document.getElementById(tlfId);
+    const tEl=document.getElementById("resTlf");
     if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className="result-value phone";}
     else{tEl.textContent="Ikke funnet";tEl.className="result-value empty";}
-    document.getElementById(kildeId).innerHTML=`<span class="tag ${tagClass(d["Kilde"]||"")}">${d["Kilde"]||"Ukjent"}</span>`;
-    document.getElementById(cardId).style.display="block";
-  }catch{document.getElementById(errTxtId).textContent="Noe gikk galt.";document.getElementById(errId).style.display="flex";}
-  document.getElementById(spinId).style.display="none";
-  document.getElementById(btnTxtId).textContent="Søk opp";
-  document.getElementById(btnId).disabled=false;
+    document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde"]||"")}">${d["Kilde"]||"Ukjent"}</span>`;
+    document.getElementById("resultCard").style.display="block";
+  }catch{document.getElementById("sErrTxt").textContent="Noe gikk galt.";document.getElementById("sErr").style.display="flex";}
+  document.getElementById("sSpin").style.display="none";
+  document.getElementById("sBtnTxt").textContent="Søk opp";
+  document.getElementById("singleBtn").disabled=false;
 }
 
 function setVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="result-value"+(val?"":" empty");}
@@ -346,6 +344,7 @@ dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")})
 dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
 dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");handleFile(e.dataTransfer.files[0])});
 document.getElementById("fileInput").addEventListener("change",e=>handleFile(e.target.files[0]));
+
 function handleFile(file){
   if(!file)return;
   const rd=new FileReader();
@@ -367,6 +366,7 @@ function handleFile(file){
   };
   rd.readAsBinaryString(file);
 }
+
 document.getElementById("runBtn").addEventListener("click",async()=>{
   if(!isLoggedIn){requireLogin();return;}
   if(!orgnrs.length)return;
@@ -386,36 +386,23 @@ document.getElementById("runBtn").addEventListener("click",async()=>{
   document.getElementById("rSpin").style.display="none";document.getElementById("rTxt").textContent="Start oppslag";document.getElementById("runBtn").disabled=false;
   updateStats();
 });
+
 function addRow(d){
   const tr=document.createElement("tr");
   const ph=d["Telefon"]?`<a href="tel:${d["Telefon"]}" style="color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace">${d["Telefon"]}</a>`:`<span class="td-empty">Ikke funnet</span>`;
   tr.innerHTML=`<td class="td-orgnr">${d["Org.nr"]||""}</td><td class="td-firm">${d["Firmanavn"]||""}</td><td>${d["Kontaktperson"]||'<span class="td-empty">Ikke funnet</span>'}</td><td style="color:var(--muted);font-size:12px">${d["Tittel"]||""}</td><td>${ph}</td><td><span class="${tagClass(d["Kilde"]||"")}">${d["Kilde"]||"Ukjent"}</span></td>`;
   document.getElementById("tBody").appendChild(tr);
 }
+
 function updateStats(){
   const t=results.length,p=results.filter(r=>r["Telefon"]).length,k=results.filter(r=>r["Kontaktperson"]).length;
   document.getElementById("statsRow").innerHTML=`<div class="stat-box"><div class="stat-n">${t}</div><div class="stat-l">Totalt</div></div><div class="stat-box"><div class="stat-n">${k}</div><div class="stat-l">Kontakt funnet</div></div><div class="stat-box"><div class="stat-n">${p}</div><div class="stat-l">Telefon funnet</div></div><div class="stat-box"><div class="stat-n">${t?Math.round(p/t*100):0}%</div><div class="stat-l">Treffrate</div></div>`;
 }
+
 document.getElementById("dlBtn").addEventListener("click",()=>{
   const ws=XLSX.utils.json_to_sheet(results.map(r=>({"Org.nr":r["Org.nr"],"Firmanavn":r["Firmanavn"],"Kontaktperson":r["Kontaktperson"],"Tittel":r["Tittel"],"Telefon":r["Telefon"],"Kilde":r["Kilde"]})));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Kontakter");XLSX.writeFile(wb,"dialr-kontakter.xlsx");
 });
-
-
-// DROPDOWN
-function initDropdowns(){
-  document.querySelectorAll(".dropdown-btn").forEach(btn=>{
-    btn.addEventListener("click",e=>{
-      e.stopPropagation();
-      const dd=btn.closest(".dropdown");
-      const wasOpen=dd.classList.contains("open");
-      document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open"));
-      if(!wasOpen)dd.classList.add("open");
-    });
-  });
-  document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
-}
-initDropdowns();
 </script>
 </body>
 </html>
