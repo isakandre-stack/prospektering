@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>dialr — Finn direktenummeret til daglig leder</title>
 <meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
 <meta name="keywords" content="prospektering Norge, finn direktenummer, kontaktinfo daglig leder, cold calling verktøy, møtebooking">
@@ -25,12 +26,10 @@
   --green:#34d399;--green-bg:rgba(52,211,153,0.08);--green-border:rgba(52,211,153,0.2);
   --red:#f87171;--yellow:#fbbf24;--blue:#60a5fa;
 }
-*{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
 body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
 .page{max-width:960px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
 
-/* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:60px;}
 .logo{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);text-decoration:none;letter-spacing:-0.02em;}
 .logo span{color:var(--accent)}
@@ -46,7 +45,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;white-space:nowrap;}
 .nav-cta:hover{background:var(--accent2)}
 
-/* HERO */
 .hero{text-align:center;margin-bottom:56px;}
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:12px;color:var(--accent2);font-family:'DM Mono',monospace;letter-spacing:0.05em;margin-bottom:28px;}
 h1{font-size:clamp(40px,6vw,68px);font-weight:600;letter-spacing:-0.03em;line-height:1.05;color:var(--text);margin-bottom:20px;}
@@ -58,43 +56,47 @@ h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(
 .hero-stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
 .hero-stat-divider{width:1px;height:36px;background:var(--border2);}
 
-/* APP SHELL */
+.lock-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:48px 32px;text-align:center;margin-bottom:20px;}
+.lock-icon{width:56px;height:56px;margin:0 auto 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.lock-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.lock-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
+.lock-row{display:flex;gap:10px;max-width:360px;margin:0 auto;}
+.lock-input{flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:0 18px;height:48px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);outline:none;letter-spacing:0.08em;transition:border-color 0.15s;}
+.lock-input:focus{border-color:var(--accent);}
+.lock-btn{height:48px;padding:0 24px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;}
+.lock-btn:hover{background:var(--accent2)}
+.lock-err{margin-top:10px;font-size:13px;color:var(--red);min-height:18px;}
+
 .app-shell{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:24px;}
 .app-header{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg3);}
-.app-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);}
+.app-dot{width:10px;height:10px;border-radius:50%;}
 .app-dot:nth-child(1){background:#ff5f57}.app-dot:nth-child(2){background:#febc2e}.app-dot:nth-child(3){background:#28c840}
 .app-tabs{display:flex;gap:2px;padding:16px 24px 0;background:var(--bg2);}
-.app-tab{padding:10px 20px;border-radius:10px 10px 0 0;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all 0.15s;border:1px solid transparent;border-bottom:none;position:relative;bottom:-1px;}
+.app-tab{padding:10px 20px;border-radius:10px 10px 0 0;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;border-bottom:none;position:relative;bottom:-1px;background:transparent;color:var(--muted);transition:all 0.15s;}
 .app-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border);border-bottom-color:var(--bg3);}
 .app-tab:not(.active):hover{color:var(--text)}
 .app-body{background:var(--bg3);border-top:1px solid var(--border);padding:32px;}
 .tab-panel{display:none}.tab-panel.active{display:block}
 
-/* SINGLE */
 .search-row{display:flex;gap:10px;align-items:stretch;}
 .search-input{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:0 20px;height:52px;font-family:'DM Mono',monospace;font-size:17px;color:var(--text);outline:none;letter-spacing:0.05em;transition:border-color 0.15s,box-shadow 0.15s;}
 .search-input::placeholder{color:var(--muted2);font-size:15px;letter-spacing:0}
 .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,247,0.15)}
 .search-btn{height:52px;padding:0 28px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;white-space:nowrap;font-family:'Inter',sans-serif;}
 .search-btn:hover{background:var(--accent2);transform:translateY(-1px)}.search-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
 .result-card{display:none;margin-top:20px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
 .result-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
 .result-company{font-size:16px;font-weight:600;color:var(--text);}
 .result-orgnr{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
-.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;}
 .result-cell{padding:16px 20px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
 .result-cell:nth-child(even){border-right:none}.result-cell:nth-last-child(-n+2){border-bottom:none}
 .result-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
 .result-value{font-size:14px;font-weight:500;color:var(--text);}
-.result-value.phone{font-family:'DM Mono',monospace;font-size:18px;color:var(--accent2);font-weight:500;}
+.result-value.phone{font-family:'DM Mono',monospace;font-size:18px;color:var(--accent2);}
 .result-value.empty{color:var(--muted2);font-weight:400}
-.source-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-family:'DM Mono',monospace;}
-.source-nettside{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
-.source-1881{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
-.source-brreg{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
-.source-empty{background:rgba(74,74,90,0.3);color:var(--muted2);border:1px solid var(--border2)}
 
-/* BULK */
 .drop-zone{border:1.5px dashed var(--border2);border-radius:14px;padding:48px 32px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg2);}
 .drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:var(--accent-bg);}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
@@ -111,7 +113,7 @@ h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(
 .progress-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
 .progress-count{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent2);}
 .bar-bg{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
-.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;width:0;transition:width 0.3s cubic-bezier(0.4,0,0.2,1);}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;width:0;transition:width 0.3s ease;}
 .progress-cur{margin-top:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:18px;}
 .results-wrap{display:none;margin-top:20px}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
@@ -121,8 +123,8 @@ h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(
 .stat-l{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.07em;text-transform:uppercase;}
 .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
 .table-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);}
-.table-title{font-size:14px;font-weight:600;color:var(--text);}
-.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.15s;}
+.table-title{font-size:14px;font-weight:600;}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif;}
 .dl-btn:hover{border-color:var(--accent);color:var(--accent2)}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -131,21 +133,20 @@ tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;}
 tbody tr:last-child{border-bottom:none}tbody tr:hover{background:rgba(124,106,247,0.04)}
 tbody td{padding:13px 16px;vertical-align:middle}
 .td-orgnr{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
-.td-firm{font-weight:500}.td-phone{font-family:'DM Mono',monospace;color:var(--accent2)}.td-empty{color:var(--muted2)}
+.td-firm{font-weight:500}.td-empty{color:var(--muted2)}
 .tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:10px;font-family:'DM Mono',monospace;}
+.source-nettside{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.source-1881{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+.source-brreg{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
+.source-empty{background:rgba(74,74,90,0.3);color:var(--muted2);border:1px solid var(--border2)}
 
-/* LOCK */
-#lock-gate{margin-bottom:20px}
-
-/* SPINNER */
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.55s linear infinite;}
-.status-dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s ease-in-out infinite;display:inline-block;}
+.status-dot{width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block;animation:pulse 2s ease-in-out infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-@keyframes rowIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rowIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 tbody tr{animation:rowIn 0.18s ease both}
 
-/* FOOTER */
 footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
 .footer-logo span{color:var(--accent)}
@@ -194,69 +195,25 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   </div>
 </div>
 
-<div id="lock-gate" style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:48px 32px;text-align:center;margin-bottom:20px;">
-  <div style="width:56px;height:56px;margin:0 auto 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>
-  <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;">Skriv inn passord for å begynne å bruke</div>
-  <div style="font-size:14px;color:var(--muted);margin-bottom:28px;">Har du ikke tilgang? Ta kontakt med Isak.</div>
-  <div style="display:flex;gap:10px;max-width:360px;margin:0 auto;">
-    <input id="gateInput" type="password" placeholder="Tilgangskode" autocomplete="off"
-      style="flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:0 18px;height:48px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);outline:none;letter-spacing:0.08em;transition:border-color 0.15s;"
-      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'"
-      onkeydown="if(event.key==='Enter')unlockApp()">
-    <button onclick="unlockApp()"
-      style="height:48px;padding:0 24px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;"
-      onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">Lås opp</button>
+<!-- LOCK GATE -->
+<div class="lock-box" id="lock-gate">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">Skriv inn passord for å begynne å bruke</div>
+  <div class="lock-sub">Har du ikke tilgang? Ta kontakt med Isak.</div>
+  <div class="lock-row">
+    <input class="lock-input" id="gateInput" type="password" placeholder="Tilgangskode" autocomplete="off" onkeydown="if(event.key==='Enter')unlockApp()">
+    <button class="lock-btn" onclick="unlockApp()">Lås opp</button>
   </div>
-  <div id="gateErr" style="margin-top:10px;font-size:13px;color:var(--red);min-height:18px;"></div>
+  <div class="lock-err" id="gateErr"></div>
 </div>
 
+<!-- SINGLE ONLY (Bjørnis) -->
 <div id="app-single" style="display:none;">
-<div class="app-shell">
-  <div class="app-header">
-    <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
-  </div>
-  <div style="padding:32px;">
-    <div class="search-row">
-      <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
-      <button class="search-btn" id="singleBtn" onclick="doSingle()">
-        <span class="spin" id="sSpin" style="display:none"></span>
-        <span id="sBtnTxt">Søk opp</span>
-      </button>
+  <div class="app-shell">
+    <div class="app-header">
+      <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
     </div>
-    <div class="err-pill" id="sErr"><span>⚠</span><span id="sErrTxt"></span></div>
-    <div class="result-card" id="resultCard">
-      <div class="result-header">
-        <div class="result-company" id="resFirm"></div>
-        <div class="result-orgnr" id="resOrgnr"></div>
-      </div>
-      <div class="result-grid">
-        <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt"></div></div>
-        <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel"></div></div>
-        <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value phone" id="resTlf"></div></div>
-        <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde"></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-<div id="app-full" style="display:none;">
-<div class="app-shell">
-  <div class="app-header">
-    <div class="app-dot"></div>
-    <div class="app-dot"></div>
-    <div class="app-dot"></div>
-  </div>
-
-  <div class="app-tabs">
-    <button class="app-tab active" id="tab-single-btn" onclick="switchTab('single')">Enkeltoppslag</button>
-    <button class="app-tab" id="tab-bulk-btn" onclick="switchTab('bulk')">Masseoppslag</button>
-  </div>
-
-  <div class="app-body">
-
-    <!-- SINGLE -->
-    <div class="tab-panel active" id="panel-single">
+    <div class="app-body">
       <div class="search-row">
         <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
         <button class="search-btn" id="singleBtn" onclick="doSingle()">
@@ -264,103 +221,107 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
           <span id="sBtnTxt">Søk opp</span>
         </button>
       </div>
-
-      <div class="err-pill" id="sErr">
-        <span>⚠</span><span id="sErrTxt"></span>
-      </div>
-
+      <div class="err-pill" id="sErr" style="display:none"><span>⚠</span><span id="sErrTxt"></span></div>
       <div class="result-card" id="resultCard">
         <div class="result-header">
           <div class="result-company" id="resFirm"></div>
           <div class="result-orgnr" id="resOrgnr"></div>
         </div>
         <div class="result-grid">
-          <div class="result-cell">
-            <div class="result-label">Kontaktperson</div>
-            <div class="result-value" id="resKontakt"></div>
-          </div>
-          <div class="result-cell">
-            <div class="result-label">Tittel</div>
-            <div class="result-value" id="resTittel"></div>
-          </div>
-          <div class="result-cell">
-            <div class="result-label">Telefon</div>
-            <div class="result-value phone" id="resTlf"></div>
-          </div>
-          <div class="result-cell">
-            <div class="result-label">Kilde</div>
-            <div class="result-value" id="resKilde"></div>
-          </div>
+          <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt"></div></div>
+          <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel"></div></div>
+          <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value phone" id="resTlf"></div></div>
+          <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde"></div></div>
         </div>
       </div>
     </div>
-
-    <!-- BULK -->
-    <div class="tab-panel" id="panel-bulk">
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".xlsx,.xls">
-        <div class="drop-icon">📊</div>
-        <div class="drop-title">Dra og slipp Excel-fil her</div>
-        <div class="drop-sub">eller klikk for å velge &nbsp;·&nbsp; .xlsx / .xls</div>
-      </div>
-
-      <div class="file-pill" id="filePill">
-        <div class="file-pill-dot"></div>
-        <span id="fName"></span>
-        <span style="margin-left:auto;color:var(--muted)" id="fCount"></span>
-      </div>
-
-      <div class="err-pill" id="bErr">
-        <span>⚠</span><span id="bErrTxt"></span>
-      </div>
-
-      <button class="run-btn" id="runBtn" disabled>
-        <span class="spin" id="rSpin" style="display:none"></span>
-        <span id="rTxt">Start oppslag</span>
-      </button>
-
-      <div class="progress-wrap" id="progWrap">
-        <div class="progress-top">
-          <div class="progress-lbl">
-            <div class="status-dot"></div>
-            Behandler
-          </div>
-          <div class="progress-count" id="progCount">0 / 0</div>
-        </div>
-        <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
-        <div class="progress-cur" id="progCur"></div>
-      </div>
-
-      <div class="results-wrap" id="resultsWrap">
-        <div class="stats-row" id="statsRow"></div>
-        <div class="table-card">
-          <div class="table-top">
-            <div class="table-title">Resultater</div>
-            <button class="dl-btn" id="dlBtn">↓ &nbsp;Last ned Excel</button>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Org.nr</th>
-                  <th>Firmanavn</th>
-                  <th>Kontaktperson</th>
-                  <th>Tittel</th>
-                  <th>Telefon</th>
-                  <th>Kilde</th>
-                </tr>
-              </thead>
-              <tbody id="tBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-</div></div><!-- end app-full -->
+<!-- FULL ACCESS (Bjørnis1) -->
+<div id="app-full" style="display:none;">
+  <div class="app-shell">
+    <div class="app-header">
+      <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
+    </div>
+    <div class="app-tabs">
+      <button class="app-tab active" id="tab-single-btn" onclick="switchTab('single')">Enkeltoppslag</button>
+      <button class="app-tab" id="tab-bulk-btn" onclick="switchTab('bulk')">Masseoppslag</button>
+    </div>
+    <div class="app-body">
+
+      <div class="tab-panel active" id="panel-single">
+        <div class="search-row">
+          <input class="search-input" id="singleInput2" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+          <button class="search-btn" id="singleBtn2" onclick="doSingle2()">
+            <span class="spin" id="sSpin2" style="display:none"></span>
+            <span id="sBtnTxt2">Søk opp</span>
+          </button>
+        </div>
+        <div class="err-pill" id="sErr2" style="display:none"><span>⚠</span><span id="sErrTxt2"></span></div>
+        <div class="result-card" id="resultCard2">
+          <div class="result-header">
+            <div class="result-company" id="resFirm2"></div>
+            <div class="result-orgnr" id="resOrgnr2"></div>
+          </div>
+          <div class="result-grid">
+            <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt2"></div></div>
+            <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel2"></div></div>
+            <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value phone" id="resTlf2"></div></div>
+            <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde2"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-bulk">
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+          <div class="drop-icon">📊</div>
+          <div class="drop-title">Dra og slipp Excel-fil her</div>
+          <div class="drop-sub">eller klikk for å velge &nbsp;·&nbsp; .xlsx / .xls</div>
+        </div>
+        <div class="file-pill" id="filePill">
+          <div class="file-pill-dot"></div>
+          <span id="fName"></span>
+          <span style="margin-left:auto;color:var(--muted)" id="fCount"></span>
+        </div>
+        <div class="err-pill" id="bErr" style="display:none"><span>⚠</span><span id="bErrTxt"></span></div>
+        <button class="run-btn" id="runBtn" disabled>
+          <span class="spin" id="rSpin" style="display:none"></span>
+          <span id="rTxt">Start oppslag</span>
+        </button>
+        <div class="progress-wrap" id="progWrap">
+          <div class="progress-top">
+            <div class="progress-lbl"><div class="status-dot"></div>&nbsp; Behandler</div>
+            <div class="progress-count" id="progCount">0 / 0</div>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+          <div class="progress-cur" id="progCur"></div>
+        </div>
+        <div class="results-wrap" id="resultsWrap">
+          <div class="stats-row" id="statsRow"></div>
+          <div class="table-card">
+            <div class="table-top">
+              <div class="table-title">Resultater</div>
+              <button class="dl-btn" id="dlBtn">&#8595; &nbsp;Last ned Excel</button>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Org.nr</th><th>Firmanavn</th><th>Kontaktperson</th><th>Tittel</th><th>Telefon</th><th>Kilde</th>
+                  </tr>
+                </thead>
+                <tbody id="tBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <footer>
   <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
@@ -377,6 +338,31 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 const API = "https://kontakt-api-production.up.railway.app";
 let orgnrs=[], results=[];
 
+// PASSWORD
+const PW_SINGLE = "Bjørnis";
+const PW_FULL = "Bjørnis1";
+
+function unlockApp(){
+  const v = document.getElementById("gateInput").value;
+  if(v === PW_FULL){
+    document.getElementById("lock-gate").style.display="none";
+    document.getElementById("app-full").style.display="block";
+    sessionStorage.setItem("dialr-auth","full");
+  } else if(v === PW_SINGLE){
+    document.getElementById("lock-gate").style.display="none";
+    document.getElementById("app-single").style.display="block";
+    sessionStorage.setItem("dialr-auth","single");
+  } else {
+    document.getElementById("gateErr").textContent="Feil kode. Prøv igjen.";
+    document.getElementById("gateInput").value="";
+  }
+}
+
+const stored = sessionStorage.getItem("dialr-auth");
+if(stored==="full"){document.getElementById("lock-gate").style.display="none";document.getElementById("app-full").style.display="block";}
+else if(stored==="single"){document.getElementById("lock-gate").style.display="none";document.getElementById("app-single").style.display="block";}
+
+// TABS
 function switchTab(t){
   document.querySelectorAll('.app-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -384,188 +370,167 @@ function switchTab(t){
   document.getElementById('panel-'+t).classList.add('active');
 }
 
-const sInput=document.getElementById('singleInput');
-sInput.addEventListener('keydown',e=>{if(e.key==='Enter')doSingle()});
+// SINGLE LOOKUP (Bjørnis level)
+const sInput = document.getElementById("singleInput");
+if(sInput) sInput.addEventListener("keydown",e=>{if(e.key==="Enter")doSingle()});
 
 async function doSingle(){
-  const org=sInput.value.replace(/[\s\.]/g,'');
-  if(org.length<8){showSErr('Skriv inn et gyldig org.nr (9 siffer)');return}
-  hideSErr();
-  document.getElementById('resultCard').style.display='none';
-  document.getElementById('sSpin').style.display='inline-block';
-  document.getElementById('sBtnTxt').textContent='Henter...';
-  document.getElementById('singleBtn').disabled=true;
+  const org=(document.getElementById("singleInput").value||"").replace(/[\s\.]/g,"");
+  if(org.length<8){showErr("sErr","sErrTxt","Skriv inn et gyldig org.nr");return}
+  hideEl("sErr");
+  document.getElementById("resultCard").style.display="none";
+  document.getElementById("sSpin").style.display="inline-block";
+  document.getElementById("sBtnTxt").textContent="Henter...";
+  document.getElementById("singleBtn").disabled=true;
+  await fetchAndShow(org,"resFirm","resOrgnr","resKontakt","resTittel","resTlf","resKilde","resultCard");
+  document.getElementById("sSpin").style.display="none";
+  document.getElementById("sBtnTxt").textContent="Søk opp";
+  document.getElementById("singleBtn").disabled=false;
+}
+
+// SINGLE LOOKUP (Bjørnis1 level)
+const sInput2 = document.getElementById("singleInput2");
+if(sInput2) sInput2.addEventListener("keydown",e=>{if(e.key==="Enter")doSingle2()});
+
+async function doSingle2(){
+  const org=(document.getElementById("singleInput2").value||"").replace(/[\s\.]/g,"");
+  if(org.length<8){showErr("sErr2","sErrTxt2","Skriv inn et gyldig org.nr");return}
+  hideEl("sErr2");
+  document.getElementById("resultCard2").style.display="none";
+  document.getElementById("sSpin2").style.display="inline-block";
+  document.getElementById("sBtnTxt2").textContent="Henter...";
+  document.getElementById("singleBtn2").disabled=true;
+  await fetchAndShow(org,"resFirm2","resOrgnr2","resKontakt2","resTittel2","resTlf2","resKilde2","resultCard2");
+  document.getElementById("sSpin2").style.display="none";
+  document.getElementById("sBtnTxt2").textContent="Søk opp";
+  document.getElementById("singleBtn2").disabled=false;
+}
+
+async function fetchAndShow(org,firmId,orgnrId,kontaktId,tittelId,tlfId,kildeId,cardId){
   try{
     const r=await fetch(`${API}/lookup?orgnr=${org}`);
     const d=await r.json();
-    document.getElementById('resFirm').textContent=d['Firmanavn']||'Ukjent firma';
-    document.getElementById('resOrgnr').textContent=d['Org.nr']||org;
-    const setVal=(id,val)=>{const el=document.getElementById(id);el.textContent=val||' ';el.className='result-value'+(val?'':' empty')};
-    setVal('resKontakt',d['Kontaktperson']);
-    setVal('resTittel',d['Tittel']);
-    const tlf=d['Telefon'];
-    const tEl=document.getElementById('resTlf');
-    if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className='result-value phone';}
-    else{tEl.textContent=' ';tEl.className='result-value empty';}
-    const kilde=d['Kilde']||'';
-    const kEl=document.getElementById('resKilde');
-    kEl.innerHTML=`<span class="tag ${tagClass(kilde)}">${kilde||' '}</span>`;
-    document.getElementById('resultCard').style.display='block';
-  }catch{showSErr('Noe gikk galt. Prøv igjen.')}
-  document.getElementById('sSpin').style.display='none';
-  document.getElementById('sBtnTxt').textContent='Søk opp';
-  document.getElementById('singleBtn').disabled=false;
+    document.getElementById(firmId).textContent=d["Firmanavn"]||"Ukjent firma";
+    document.getElementById(orgnrId).textContent=d["Org.nr"]||org;
+    setVal(kontaktId,d["Kontaktperson"]);
+    setVal(tittelId,d["Tittel"]);
+    const tlf=d["Telefon"];
+    const tEl=document.getElementById(tlfId);
+    if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className="result-value phone";}
+    else{tEl.textContent="Ikke funnet";tEl.className="result-value empty";}
+    const kilde=d["Kilde"]||"";
+    document.getElementById(kildeId).innerHTML=`<span class="tag ${tagClass(kilde)}">${kilde||"Ukjent"}</span>`;
+    document.getElementById(cardId).style.display="block";
+  }catch{
+    document.getElementById(kildeId).textContent="Feil ved oppslag";
+    document.getElementById(cardId).style.display="block";
+  }
 }
 
-function tagClass(k){
-  const l=k.toLowerCase();
-  if(l.includes('nettside'))return'tag source-nettside';
-  if(l.includes('1881'))return'tag source-1881';
-  if(l.includes('brønn')||l.includes('br'))return'tag source-brreg';
-  return'tag source-empty';
+function setVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="result-value"+(val?"":" empty");}
+function tagClass(k){const l=(k||"").toLowerCase();if(l.includes("nettside"))return"tag source-nettside";if(l.includes("1881"))return"tag source-1881";if(l.includes("br"))return"tag source-brreg";return"tag source-empty";}
+function showErr(errId,txtId,msg){document.getElementById(txtId).textContent=msg;document.getElementById(errId).style.display="flex";}
+function hideEl(id){document.getElementById(id).style.display="none";}
+
+// BULK
+const dz=document.getElementById("dropZone");
+const fi=document.getElementById("fileInput");
+if(dz){
+  dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});
+  dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
+  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");handleFile(e.dataTransfer.files[0])});
 }
-
-function showSErr(m){document.getElementById('sErrTxt').textContent=m;document.getElementById('sErr').style.display='flex'}
-function hideSErr(){document.getElementById('sErr').style.display='none'}
-
-const dz=document.getElementById('dropZone');
-const fi=document.getElementById('fileInput');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
-dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');handleFile(e.dataTransfer.files[0])});
-fi.addEventListener('change',e=>handleFile(e.target.files[0]));
+if(fi) fi.addEventListener("change",e=>handleFile(e.target.files[0]));
 
 function handleFile(file){
   if(!file)return;
   const rd=new FileReader();
   rd.onload=e=>{
     try{
-      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const wb=XLSX.read(e.target.result,{type:"binary"});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const data=XLSX.utils.sheet_to_json(ws,{header:1});
       let col=0;
-      if(data.length>0){const h=data[0].map(x=>String(x||'').toLowerCase());const f=h.findIndex(x=>x.includes('org'));if(f>=0)col=f;}
-      orgnrs=data.slice(1).map(r=>String(r[col]||'').replace(/[\s\.]/g,'')).filter(n=>n.length>=8);
-      if(!orgnrs.length){showBErr('Fant ingen org.nr. Sjekk kolonnenavn.');return}
-      hideBErr();
-      document.getElementById('fName').textContent=file.name;
-      document.getElementById('fCount').textContent=`${orgnrs.length} selskaper`;
-      document.getElementById('filePill').style.display='flex';
-      document.getElementById('runBtn').disabled=false;
-    }catch{showBErr('Kunne ikke lese filen.')}
+      if(data.length>0){const h=data[0].map(x=>String(x||"").toLowerCase());const f=h.findIndex(x=>x.includes("org"));if(f>=0)col=f;}
+      orgnrs=data.slice(1).map(r=>String(r[col]||"").replace(/[\s\.]/g,"")).filter(n=>n.length>=8);
+      if(!orgnrs.length){showErr("bErr","bErrTxt","Fant ingen org.nr.");return}
+      hideEl("bErr");
+      document.getElementById("fName").textContent=file.name;
+      document.getElementById("fCount").textContent=`${orgnrs.length} selskaper`;
+      document.getElementById("filePill").style.display="flex";
+      document.getElementById("runBtn").disabled=false;
+    }catch{showErr("bErr","bErrTxt","Kunne ikke lese filen.")}
   };
   rd.readAsBinaryString(file);
 }
 
-document.getElementById('runBtn').addEventListener('click',async()=>{
+const runBtn=document.getElementById("runBtn");
+if(runBtn) runBtn.addEventListener("click",async()=>{
   if(!orgnrs.length)return;
   results=[];
-  document.getElementById('tBody').innerHTML='';
-  document.getElementById('resultsWrap').style.display='none';
-  document.getElementById('runBtn').disabled=true;
-  document.getElementById('rSpin').style.display='inline-block';
-  document.getElementById('rTxt').textContent='Jobber...';
-  document.getElementById('progWrap').style.display='block';
+  document.getElementById("tBody").innerHTML="";
+  document.getElementById("resultsWrap").style.display="none";
+  runBtn.disabled=true;
+  document.getElementById("rSpin").style.display="inline-block";
+  document.getElementById("rTxt").textContent="Jobber...";
+  document.getElementById("progWrap").style.display="block";
   for(let i=0;i<orgnrs.length;i++){
     const o=orgnrs[i];
-    document.getElementById('progCount').textContent=`${i+1} / ${orgnrs.length}`;
-    document.getElementById('barFill').style.width=`${((i+1)/orgnrs.length)*100}%`;
-    document.getElementById('progCur').textContent=`↳ Slår opp ${o}`;
+    document.getElementById("progCount").textContent=`${i+1} / ${orgnrs.length}`;
+    document.getElementById("barFill").style.width=`${((i+1)/orgnrs.length)*100}%`;
+    document.getElementById("progCur").textContent=`Slår opp ${o}`;
     try{
       const r=await fetch(`${API}/lookup?orgnr=${o}`);
       const d=await r.json();
       results.push(d);addRow(d);
     }catch{
-      const row={'Org.nr':o,Firmanavn:'',Kontaktperson:'',Tittel:'',Telefon:'',Kilde:'feil'};
+      const row={"Org.nr":o,Firmanavn:"",Kontaktperson:"",Tittel:"",Telefon:"",Kilde:"feil"};
       results.push(row);addRow(row);
     }
-    if(i===0)document.getElementById('resultsWrap').style.display='block';
+    if(i===0)document.getElementById("resultsWrap").style.display="block";
   }
-  document.getElementById('progCur').textContent='✓ Ferdig!';
-  document.getElementById('rSpin').style.display='none';
-  document.getElementById('rTxt').textContent='Start oppslag';
-  document.getElementById('runBtn').disabled=false;
+  document.getElementById("progCur").textContent="Ferdig!";
+  document.getElementById("rSpin").style.display="none";
+  document.getElementById("rTxt").textContent="Start oppslag";
+  runBtn.disabled=false;
   updateStats();
 });
 
 function addRow(d){
-  const tr=document.createElement('tr');
-  const ph=d['Telefon']?`<a href="tel:${d['Telefon']}" style="color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace">${d['Telefon']}</a>`:`<span class="td-empty"> </span>`;
-  tr.innerHTML=`
-    <td class="td-orgnr">${d['Org.nr']||''}</td>
-    <td class="td-firm">${d['Firmanavn']||''}</td>
-    <td>${d['Kontaktperson']||'<span class="td-empty"> </span>'}</td>
-    <td style="color:var(--muted);font-size:12px">${d['Tittel']||''}</td>
-    <td>${ph}</td>
-    <td><span class="${tagClass(d['Kilde']||'')}">${d['Kilde']||' '}</span></td>
-  `;
-  document.getElementById('tBody').appendChild(tr);
+  const tr=document.createElement("tr");
+  const ph=d["Telefon"]?`<a href="tel:${d["Telefon"]}" style="color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace">${d["Telefon"]}</a>`:`<span class="td-empty">Ikke funnet</span>`;
+  tr.innerHTML=`<td class="td-orgnr">${d["Org.nr"]||""}</td><td class="td-firm">${d["Firmanavn"]||""}</td><td>${d["Kontaktperson"]||'<span class="td-empty">Ikke funnet</span>'}</td><td style="color:var(--muted);font-size:12px">${d["Tittel"]||""}</td><td>${ph}</td><td><span class="${tagClass(d["Kilde"]||"")}">${d["Kilde"]||"Ukjent"}</span></td>`;
+  document.getElementById("tBody").appendChild(tr);
 }
 
 function updateStats(){
-  const t=results.length;
-  const p=results.filter(r=>r['Telefon']).length;
-  const k=results.filter(r=>r['Kontaktperson']).length;
-  document.getElementById('statsRow').innerHTML=`
+  const t=results.length,p=results.filter(r=>r["Telefon"]).length,k=results.filter(r=>r["Kontaktperson"]).length;
+  document.getElementById("statsRow").innerHTML=`
     <div class="stat-box"><div class="stat-n">${t}</div><div class="stat-l">Totalt</div></div>
     <div class="stat-box"><div class="stat-n">${k}</div><div class="stat-l">Kontakt funnet</div></div>
     <div class="stat-box"><div class="stat-n">${p}</div><div class="stat-l">Telefon funnet</div></div>
-    <div class="stat-box"><div class="stat-n">${t?Math.round(p/t*100):0}%</div><div class="stat-l">Treffrate</div></div>
-  `;
+    <div class="stat-box"><div class="stat-n">${t?Math.round(p/t*100):0}%</div><div class="stat-l">Treffrate</div></div>`;
 }
 
-document.getElementById('dlBtn').addEventListener('click',()=>{
-  const ws=XLSX.utils.json_to_sheet(results.map(r=>({'Org.nr':r['Org.nr'],'Firmanavn':r['Firmanavn'],'Kontaktperson':r['Kontaktperson'],'Tittel':r['Tittel'],'Telefon':r['Telefon'],'Kilde':r['Kilde']})));
+const dlBtn=document.getElementById("dlBtn");
+if(dlBtn) dlBtn.addEventListener("click",()=>{
+  const ws=XLSX.utils.json_to_sheet(results.map(r=>({"Org.nr":r["Org.nr"],"Firmanavn":r["Firmanavn"],"Kontaktperson":r["Kontaktperson"],"Tittel":r["Tittel"],"Telefon":r["Telefon"],"Kilde":r["Kilde"]})));
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Kontakter');
-  XLSX.writeFile(wb,'dialr-kontakter.xlsx');
+  XLSX.utils.book_append_sheet(wb,ws,"Kontakter");
+  XLSX.writeFile(wb,"dialr-kontakter.xlsx");
 });
 
-function showBErr(m){document.getElementById('bErrTxt').textContent=m;document.getElementById('bErr').style.display='flex';document.getElementById('runBtn').disabled=true}
-function hideBErr(){document.getElementById('bErr').style.display='none'}
-</script>
-
-<script>
-const PW_SINGLE = "Bjørnis";
-const PW_FULL = "Bjørnis1";
-
-function unlockApp() {
-  const v = document.getElementById("gateInput").value;
-  if (v === PW_FULL) {
-    document.getElementById("lock-gate").style.display = "none";
-    document.getElementById("app-full").style.display = "block";
-    sessionStorage.setItem("dialr-auth", "full");
-  } else if (v === PW_SINGLE) {
-    document.getElementById("lock-gate").style.display = "none";
-    document.getElementById("app-single").style.display = "block";
-    sessionStorage.setItem("dialr-auth", "single");
-  } else {
-    document.getElementById("gateErr").textContent = "Feil kode. Prøv igjen.";
-    document.getElementById("gateInput").value = "";
-  }
-}
-
-const stored = sessionStorage.getItem("dialr-auth");
-if (stored === "full") {
-  document.getElementById("lock-gate").style.display = "none";
-  document.getElementById("app-full").style.display = "block";
-} else if (stored === "single") {
-  document.getElementById("lock-gate").style.display = "none";
-  document.getElementById("app-single").style.display = "block";
-}
-</script>
-
-<script>
-document.querySelectorAll('.dropdown-btn').forEach(btn=>{
-  btn.addEventListener('click',e=>{
+// DROPDOWN NAV
+document.querySelectorAll(".dropdown-btn").forEach(btn=>{
+  btn.addEventListener("click",e=>{
     e.stopPropagation();
-    const dd=btn.closest('.dropdown');
-    const wasOpen=dd.classList.contains('open');
-    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
-    if(!wasOpen)dd.classList.add('open');
+    const dd=btn.closest(".dropdown");
+    const wasOpen=dd.classList.contains("open");
+    document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open"));
+    if(!wasOpen)dd.classList.add("open");
   });
 });
-document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
+document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
 </script>
 </body>
 </html>
