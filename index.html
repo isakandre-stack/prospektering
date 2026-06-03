@@ -8,6 +8,7 @@
 <meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk.">
 <meta name="robots" content="index, follow">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -159,7 +160,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
         <a href="vilkar.html">Vilkår for bruk</a>
       </div>
     </div>
-    <a class="nav-cta" href="pris.html">Kom i gang</a>
+    <button onclick="logout()" style="padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">Logg ut</button>
   </div>
 </nav>
 
@@ -186,34 +187,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
     <button class="lock-btn" onclick="unlockApp()">Lås opp</button>
   </div>
   <div class="lock-err" id="gateErr"></div>
-</div>
-
-<!-- SINGLE ONLY -->
-<div id="app-single" style="display:none;">
-  <div class="app-shell">
-    <div class="app-header">
-      <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
-    </div>
-    <div class="app-body">
-      <div class="search-row">
-        <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
-        <button class="search-btn" id="singleBtn" onclick="doSingle('singleInput','sSpin','sBtnTxt','singleBtn','sErr','sErrTxt','resultCard','resFirm','resOrgnr','resKontakt','resTittel','resTlf','resKilde')">
-          <span class="spin" id="sSpin" style="display:none"></span>
-          <span id="sBtnTxt">Søk opp</span>
-        </button>
-      </div>
-      <div class="err-pill" id="sErr" style="display:none"><span>⚠</span><span id="sErrTxt"></span></div>
-      <div class="result-card" id="resultCard">
-        <div class="result-header"><div class="result-company" id="resFirm"></div><div class="result-orgnr" id="resOrgnr"></div></div>
-        <div class="result-grid">
-          <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt"></div></div>
-          <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel"></div></div>
-          <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value" id="resTlf"></div></div>
-          <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde"></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- FULL ACCESS -->
@@ -298,26 +271,34 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 const API = "https://kontakt-api-production.up.railway.app";
 let orgnrs = [], results = [], currentMsgData = null;
 
-// PASSWORD
-function unlockApp(){
-  const v = document.getElementById("gateInput").value;
-  if(v === "Bjørn1"){
-    document.getElementById("lock-gate").style.display="none";
-    document.getElementById("app-full").style.display="block";
-    localStorage.setItem("dialr-auth","full");
-  } else if(v === "Bjørn"){
-    document.getElementById("lock-gate").style.display="none";
-    document.getElementById("app-single").style.display="block";
-    localStorage.setItem("dialr-auth","single");
-  } else {
-    document.getElementById("gateErr").textContent="Feil kode. Prøv igjen.";
-    document.getElementById("gateInput").value="";
+// SUPABASE AUTH
+const SUPABASE_URL = "DIN_SUPABASE_URL";
+const SUPABASE_KEY = "DIN_SUPABASE_ANON_KEY";
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function checkAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) {
+    window.location.href = 'login.html';
+    return;
   }
+  const { data: profile } = await sb.from('profiles').select('approved').eq('email', session.user.email).single();
+  if(!profile || !profile.approved) {
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
+  document.getElementById("auth-loading").style.display = "none";
+  document.getElementById("app-full").style.display = "block";
 }
-document.getElementById("gateInput").addEventListener("keydown",e=>{if(e.key==="Enter")unlockApp()});
-const stored = localStorage.getItem("dialr-auth");
-if(stored==="full"){document.getElementById("lock-gate").style.display="none";document.getElementById("app-full").style.display="block";}
-else if(stored==="single"){document.getElementById("lock-gate").style.display="none";document.getElementById("app-single").style.display="block";}
+
+checkAuth();
+
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
 
 // TABS
 function switchFTab(t){
