@@ -272,8 +272,8 @@ const API = "https://kontakt-api-production.up.railway.app";
 let orgnrs = [], results = [], currentMsgData = null;
 
 // SUPABASE AUTH
-const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+const SUPABASE_URL = "DIN_SUPABASE_URL";
+const SUPABASE_KEY = "DIN_SUPABASE_ANON_KEY";
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -404,16 +404,19 @@ document.getElementById("dlBtn").addEventListener("click",()=>{
 
 
 // DROPDOWN
-document.querySelectorAll(".dropdown-btn").forEach(btn=>{
-  btn.addEventListener("click",e=>{
-    e.stopPropagation();
-    const dd=btn.closest(".dropdown");
-    const wasOpen=dd.classList.contains("open");
-    document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open"));
-    if(!wasOpen)dd.classList.add("open");
+function initDropdowns(){
+  document.querySelectorAll(".dropdown-btn").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.stopPropagation();
+      const dd=btn.closest(".dropdown");
+      const wasOpen=dd.classList.contains("open");
+      document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open"));
+      if(!wasOpen)dd.classList.add("open");
+    });
   });
-});
-document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
+  document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
+}
+document.addEventListener("DOMContentLoaded", initDropdowns);
 </script>
 </body>
 </html>
