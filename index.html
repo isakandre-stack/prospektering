@@ -179,17 +179,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 </div>
 
 <!-- LOCK -->
-<div class="lock-box" id="lock-gate">
-  <div class="lock-icon">🔒</div>
-  <div class="lock-title">Skriv inn passord for å begynne å bruke</div>
-  <div class="lock-sub">Har du ikke tilgang? Ta kontakt med Isak.</div>
-  <div class="lock-row">
-    <input class="lock-input" id="gateInput" type="password" placeholder="Tilgangskode" autocomplete="off" onkeydown="if(event.key==='Enter')unlockApp()">
-    <button class="lock-btn" onclick="unlockApp()">Lås opp</button>
-  </div>
-  <div class="lock-err" id="gateErr"></div>
-</div>
-
 <!-- FULL ACCESS -->
 <div id="loginRequired" style="display:none;align-items:center;gap:12px;padding:14px 20px;background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.3);border-radius:10px;margin-bottom:16px;font-size:14px;color:var(--accent2);">
   🔒 Du må <a href="login.html" style="color:var(--accent2);font-weight:600;text-decoration:underline;">opprette en bruker</a> for å kunne bruke dette.
@@ -276,8 +265,8 @@ const API = "https://kontakt-api-production.up.railway.app";
 let orgnrs = [], results = [], currentMsgData = null;
 
 // SUPABASE AUTH
-const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+const SUPABASE_URL = "DIN_SUPABASE_URL";
+const SUPABASE_KEY = "DIN_SUPABASE_ANON_KEY";
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
