@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>dialr — Finn direktenummeret til daglig leder</title>
 <meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
 <meta name="keywords" content="prospektering Norge, finn direktenummer, kontaktinfo daglig leder, cold calling verktøy, møtebooking">
@@ -195,6 +194,53 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   </div>
 </div>
 
+<div id="lock-gate" style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:48px 32px;text-align:center;margin-bottom:20px;">
+  <div style="width:56px;height:56px;margin:0 auto 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>
+  <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;">Skriv inn passord for å begynne å bruke</div>
+  <div style="font-size:14px;color:var(--muted);margin-bottom:28px;">Har du ikke tilgang? Ta kontakt med Isak.</div>
+  <div style="display:flex;gap:10px;max-width:360px;margin:0 auto;">
+    <input id="gateInput" type="password" placeholder="Tilgangskode" autocomplete="off"
+      style="flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:0 18px;height:48px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);outline:none;letter-spacing:0.08em;transition:border-color 0.15s;"
+      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'"
+      onkeydown="if(event.key==='Enter')unlockApp()">
+    <button onclick="unlockApp()"
+      style="height:48px;padding:0 24px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;"
+      onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">Lås opp</button>
+  </div>
+  <div id="gateErr" style="margin-top:10px;font-size:13px;color:var(--red);min-height:18px;"></div>
+</div>
+
+<div id="app-single" style="display:none;">
+<div class="app-shell">
+  <div class="app-header">
+    <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
+  </div>
+  <div style="padding:32px;">
+    <div class="search-row">
+      <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+      <button class="search-btn" id="singleBtn" onclick="doSingle()">
+        <span class="spin" id="sSpin" style="display:none"></span>
+        <span id="sBtnTxt">Søk opp</span>
+      </button>
+    </div>
+    <div class="err-pill" id="sErr"><span>⚠</span><span id="sErrTxt"></span></div>
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div class="result-company" id="resFirm"></div>
+        <div class="result-orgnr" id="resOrgnr"></div>
+      </div>
+      <div class="result-grid">
+        <div class="result-cell"><div class="result-label">Kontaktperson</div><div class="result-value" id="resKontakt"></div></div>
+        <div class="result-cell"><div class="result-label">Tittel</div><div class="result-value" id="resTittel"></div></div>
+        <div class="result-cell"><div class="result-label">Telefon</div><div class="result-value phone" id="resTlf"></div></div>
+        <div class="result-cell"><div class="result-label">Kilde</div><div class="result-value" id="resKilde"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="app-full" style="display:none;">
 <div class="app-shell">
   <div class="app-header">
     <div class="app-dot"></div>
@@ -314,7 +360,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   </div>
 </div>
 
-</div><!-- end app-content -->
+</div></div><!-- end app-full -->
 
 <footer>
   <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
@@ -480,21 +526,32 @@ function hideBErr(){document.getElementById('bErr').style.display='none'}
 </script>
 
 <script>
-const GATE_PW = "Bjørnis";
+const PW_SINGLE = "Bjørnis";
+const PW_FULL = "Bjørnis1";
+
 function unlockApp() {
   const v = document.getElementById("gateInput").value;
-  if (v === GATE_PW) {
+  if (v === PW_FULL) {
     document.getElementById("lock-gate").style.display = "none";
-    document.getElementById("app-content").style.display = "block";
-    sessionStorage.setItem("dialr-auth", "1");
+    document.getElementById("app-full").style.display = "block";
+    sessionStorage.setItem("dialr-auth", "full");
+  } else if (v === PW_SINGLE) {
+    document.getElementById("lock-gate").style.display = "none";
+    document.getElementById("app-single").style.display = "block";
+    sessionStorage.setItem("dialr-auth", "single");
   } else {
-    document.getElementById("gateErr").textContent = "Feil kode prøv igjen.";
+    document.getElementById("gateErr").textContent = "Feil kode. Prøv igjen.";
     document.getElementById("gateInput").value = "";
   }
 }
-if (sessionStorage.getItem("dialr-auth") === "1") {
+
+const stored = sessionStorage.getItem("dialr-auth");
+if (stored === "full") {
   document.getElementById("lock-gate").style.display = "none";
-  document.getElementById("app-content").style.display = "block";
+  document.getElementById("app-full").style.display = "block";
+} else if (stored === "single") {
+  document.getElementById("lock-gate").style.display = "none";
+  document.getElementById("app-single").style.display = "block";
 }
 </script>
 
