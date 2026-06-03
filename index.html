@@ -301,11 +301,11 @@ let orgnrs = [], results = [], currentMsgData = null;
 // PASSWORD
 function unlockApp(){
   const v = document.getElementById("gateInput").value;
-  if(v === "Isak1"){
+  if(v === "Bjørn1"){
     document.getElementById("lock-gate").style.display="none";
     document.getElementById("app-full").style.display="block";
     localStorage.setItem("dialr-auth","full");
-  } else if(v === "Bjørnis1"){
+  } else if(v === "Bjørn"){
     document.getElementById("lock-gate").style.display="none";
     document.getElementById("app-single").style.display="block";
     localStorage.setItem("dialr-auth","single");
