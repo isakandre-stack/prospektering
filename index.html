@@ -154,6 +154,9 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 .footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
 .footer-links a:hover{color:var(--muted)}
 .footer-note{font-size:12px;color:var(--muted2);}
+
+#msgText:focus{outline:none;}
+#msgText::placeholder{color:var(--muted2);}
 </style>
 </head>
 <body>
@@ -247,6 +250,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
     <div class="app-tabs">
       <button class="app-tab active" id="tab-single-btn" onclick="switchTab('single')">Enkeltoppslag</button>
       <button class="app-tab" id="tab-bulk-btn" onclick="switchTab('bulk')">Masseoppslag</button>
+      <button class="app-tab" id="tab-msg-btn" onclick="switchTab('msg')">Meldingsgenerator</button>
     </div>
     <div class="app-body">
 
@@ -317,7 +321,47 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
             </div>
           </div>
         </div>
+  
+      <div class="tab-panel" id="panel-msg">
+        <div style="margin-bottom:20px;">
+          <div class="result-label" style="margin-bottom:8px;">Organisasjonsnummer</div>
+          <div class="search-row">
+            <input class="search-input" id="msgInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+            <button class="search-btn" id="msgBtn" onclick="generateMsg()">
+              <span class="spin" id="msgSpin" style="display:none"></span>
+              <span id="msgBtnTxt">Generer melding</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="msgResult" style="display:none;">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <div class="result-label" style="margin-bottom:12px;">Kontaktinfo</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">FIRMA</div><div id="msgFirm" style="font-size:14px;font-weight:500;"></div></div>
+              <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">KONTAKT</div><div id="msgKontakt" style="font-size:14px;font-weight:500;"></div></div>
+              <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">BRANSJE</div><div id="msgBransje" style="font-size:14px;"></div></div>
+              <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">TELEFON</div><div id="msgTlf" style="font-size:14px;font-family:'DM Mono',monospace;color:var(--accent2);"></div></div>
+            </div>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <div class="result-label">Generert melding</div>
+              <button onclick="regenerateMsg()" style="background:transparent;border:1px solid var(--border2);border-radius:6px;padding:5px 12px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">Generer på nytt</button>
+            </div>
+            <textarea id="msgText" style="width:100%;background:transparent;border:none;padding:20px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);line-height:1.7;resize:vertical;min-height:200px;outline:none;" placeholder="Meldingen genereres her..."></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a id="smsLink" href="#" style="display:inline-flex;align-items:center;gap:8px;padding:14px 24px;background:var(--accent);border-radius:10px;color:#fff;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">📱 Åpne i SMS</a>
+            <button onclick="copyMsg()" style="display:inline-flex;align-items:center;gap:8px;padding:14px 24px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📋 Kopier melding</button>
+          </div>
+        </div>
+
+        <div class="err-pill" id="msgErr" style="display:none;"><span>⚠</span><span id="msgErrTxt"></span></div>
       </div>
+    </div>
 
     </div>
   </div>
@@ -347,25 +391,26 @@ function unlockApp(){
   if(v === PW_FULL){
     document.getElementById("lock-gate").style.display="none";
     document.getElementById("app-full").style.display="block";
-    sessionStorage.setItem("dialr-auth","full");
+    localStorage.setItem("dialr-auth","full");
   } else if(v === PW_SINGLE){
     document.getElementById("lock-gate").style.display="none";
     document.getElementById("app-single").style.display="block";
-    sessionStorage.setItem("dialr-auth","single");
+    localStorage.setItem("dialr-auth","single");
   } else {
     document.getElementById("gateErr").textContent="Feil kode. Prøv igjen.";
     document.getElementById("gateInput").value="";
   }
 }
 
-const stored = sessionStorage.getItem("dialr-auth");
+const stored = localStorage.getItem("dialr-auth");
 if(stored==="full"){document.getElementById("lock-gate").style.display="none";document.getElementById("app-full").style.display="block";}
 else if(stored==="single"){document.getElementById("lock-gate").style.display="none";document.getElementById("app-single").style.display="block";}
 
 // TABS
 function switchTab(t){
-  document.querySelectorAll('.app-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const appFull = document.getElementById('app-full');
+  appFull.querySelectorAll('.app-tab').forEach(b=>b.classList.remove('active'));
+  appFull.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+t+'-btn').classList.add('active');
   document.getElementById('panel-'+t).classList.add('active');
 }
@@ -531,6 +576,128 @@ document.querySelectorAll(".dropdown-btn").forEach(btn=>{
   });
 });
 document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
+
+// MESSAGE GENERATOR
+const CLAUDE_API_KEY = "DIN_API_NØKKEL_HER";
+
+let currentMsgData = null;
+
+document.getElementById("msgInput") && document.getElementById("msgInput").addEventListener("keydown", e => {
+  if(e.key === "Enter") generateMsg();
+});
+
+async function generateMsg() {
+  const org = (document.getElementById("msgInput").value || "").replace(/[\s\.]/g, "");
+  if(org.length < 8) { showMsgErr("Skriv inn et gyldig org.nr"); return; }
+  
+  hideMsgErr();
+  document.getElementById("msgResult").style.display = "none";
+  document.getElementById("msgSpin").style.display = "inline-block";
+  document.getElementById("msgBtnTxt").textContent = "Henter info...";
+  document.getElementById("msgBtn").disabled = true;
+
+  try {
+    // Step 1: Get contact info
+    const r = await fetch(`${API}/lookup?orgnr=${org}`);
+    const d = await r.json();
+    
+    currentMsgData = d;
+    
+    document.getElementById("msgFirm").textContent = d["Firmanavn"] || "Ukjent";
+    document.getElementById("msgKontakt").textContent = d["Kontaktperson"] || "Ikke funnet";
+    document.getElementById("msgBransje").textContent = d["Kilde"] ? (d["Bransjebeskrivelse"] || "Ikke funnet") : "Ikke funnet";
+    
+    const tlf = d["Telefon"];
+    document.getElementById("msgTlf").textContent = tlf || "Ikke funnet";
+
+    document.getElementById("msgBtnTxt").textContent = "Genererer melding...";
+    
+    // Step 2: Generate message with Claude
+    await callClaude(d);
+    
+    document.getElementById("msgResult").style.display = "block";
+  } catch(e) {
+    showMsgErr("Noe gikk galt. Prøv igjen.");
+  }
+
+  document.getElementById("msgSpin").style.display = "none";
+  document.getElementById("msgBtnTxt").textContent = "Generer melding";
+  document.getElementById("msgBtn").disabled = false;
+}
+
+async function callClaude(d) {
+  const navn = d["Kontaktperson"] || "der";
+  const firma = d["Firmanavn"] || "selskapet";
+  const bransje = d["Bransjebeskrivelse"] || d["Kilde"] || "bransjen";
+
+  const prompt = `Du er en erfaren B2B-selger i Aspia, Norges ledende regnskaps- og rådgivningsselskap. 
+Generer en kort og personlig SMS-melding til ${navn} som er daglig leder i ${firma} innen ${bransje}.
+
+Meldingen skal følge denne malen nøyaktig:
+"Hei ${navn},
+Jeg har forsøkt å få tak i deg på telefon.
+Jeg jobber i Aspia, et regnskaps- og rådgivningsselskap, og tar kontakt fordi vi ser at mange selskaper innen ${bransje} opplever utfordringer knyttet til [utfordring 1], [utfordring 2] og [utfordring 3].
+Vi har både systemene og kompetansen til å løse dette, og etter å ha sett litt på ${firma} tror jeg det kan være interessant å ta en prat.
+Har du tid til en kjapp telefon i morgen?
+Mvh
+Isak Bjørnstad
+Inside Sales | Aspia"
+
+Fyll inn tre relevante og konkrete utfordringer som er typiske for selskaper i ${bransje}-bransjen, relatert til regnskap, lønn, prosjektstyring eller økonomirapportering. Ikke bruk tankestreker. Skriv bare meldingen, ingen forklaring.`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": CLAUDE_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 500,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  const data = await response.json();
+  const msg = data.content[0].text;
+  
+  document.getElementById("msgText").value = msg;
+  
+  // Update SMS link
+  const tlf = d["Telefon"] || "";
+  updateSmsLink();
+}
+
+async function regenerateMsg() {
+  if(!currentMsgData) return;
+  document.getElementById("msgText").value = "";
+  document.getElementById("msgText").placeholder = "Genererer ny melding...";
+  await callClaude(currentMsgData);
+}
+
+function updateSmsLink() {
+  const msg = document.getElementById("msgText").value;
+  const tlf = currentMsgData && currentMsgData["Telefon"] ? currentMsgData["Telefon"].replace(/\s/g, "") : "";
+  const encoded = encodeURIComponent(msg);
+  document.getElementById("smsLink").href = `sms:${tlf}?body=${encoded}`;
+}
+
+document.getElementById("msgText") && document.getElementById("msgText").addEventListener("input", updateSmsLink);
+
+function copyMsg() {
+  const msg = document.getElementById("msgText").value;
+  navigator.clipboard.writeText(msg).then(() => {
+    const btn = event.target.closest("button");
+    const orig = btn.innerHTML;
+    btn.innerHTML = "✓ Kopiert!";
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  });
+}
+
+function showMsgErr(msg) { document.getElementById("msgErrTxt").textContent = msg; document.getElementById("msgErr").style.display = "flex"; }
+function hideMsgErr() { document.getElementById("msgErr").style.display = "none"; }
 </script>
 </body>
 </html>
