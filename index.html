@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>dialr — Finn direktenummeret</title>
+<title>dialr — Finn direktenummeret til daglig leder</title>
+<meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
+<meta name="keywords" content="prospektering Norge, finn direktenummer, kontaktinfo daglig leder, cold calling verktøy, møtebooking">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="dialr — Finn direktenummeret til daglig leder">
+<meta property="og:description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
+<meta property="og:url" content="https://dialr.no/">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://dialr.no/">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -696,21 +704,45 @@ footer{
   font-size:12px;
   color:var(--muted2);
 }
+
+.nav-links{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.arrow{font-size:10px;}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="page">
 
 <nav>
-  <div class="logo">dial<span>r</span></div>
-  <div class="nav-links" style="display:flex;align-items:center;gap:24px;">
-  <a href="hvordan.html" style="font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Slik fungerer det</a>
-  <a href="pris.html" style="font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Pris</a>
-  <a href="om.html" style="font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Om oss</a>
-  <a href="kontakt.html" style="font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Kontakt</a>
-</div><div class="nav-badge">
-    <div class="status-dot"></div>
-    Live
+  <a class="logo" href="index.html">dial<span>r</span></a>
+  <div class="nav-links">
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Produkt <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Om dialr <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="index.html">Kom i gang</a>
   </div>
 </nav>
 
@@ -875,8 +907,13 @@ footer{
 
 </div><!-- end app-content -->
 <footer>
-  <div class="footer-logo">dial<span>r</span>.no</div>
-  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
+  <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
 </footer>
 
 </div>
@@ -908,16 +945,16 @@ async function doSingle(){
     const d=await r.json();
     document.getElementById('resFirm').textContent=d['Firmanavn']||'Ukjent firma';
     document.getElementById('resOrgnr').textContent=d['Org.nr']||org;
-    const setVal=(id,val)=>{const el=document.getElementById(id);el.textContent=val||'—';el.className='result-value'+(val?'':' empty')};
+    const setVal=(id,val)=>{const el=document.getElementById(id);el.textContent=val||' ';el.className='result-value'+(val?'':' empty')};
     setVal('resKontakt',d['Kontaktperson']);
     setVal('resTittel',d['Tittel']);
     const tlf=d['Telefon'];
     const tEl=document.getElementById('resTlf');
     if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className='result-value phone';}
-    else{tEl.textContent='—';tEl.className='result-value empty';}
+    else{tEl.textContent=' ';tEl.className='result-value empty';}
     const kilde=d['Kilde']||'';
     const kEl=document.getElementById('resKilde');
-    kEl.innerHTML=`<span class="tag ${tagClass(kilde)}">${kilde||'—'}</span>`;
+    kEl.innerHTML=`<span class="tag ${tagClass(kilde)}">${kilde||' '}</span>`;
     document.getElementById('resultCard').style.display='block';
   }catch{showSErr('Noe gikk galt. Prøv igjen.')}
   document.getElementById('sSpin').style.display='none';
@@ -998,14 +1035,14 @@ document.getElementById('runBtn').addEventListener('click',async()=>{
 
 function addRow(d){
   const tr=document.createElement('tr');
-  const ph=d['Telefon']?`<a href="tel:${d['Telefon']}" style="color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace">${d['Telefon']}</a>`:`<span class="td-empty">—</span>`;
+  const ph=d['Telefon']?`<a href="tel:${d['Telefon']}" style="color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace">${d['Telefon']}</a>`:`<span class="td-empty"> </span>`;
   tr.innerHTML=`
     <td class="td-orgnr">${d['Org.nr']||''}</td>
     <td class="td-firm">${d['Firmanavn']||''}</td>
-    <td>${d['Kontaktperson']||'<span class="td-empty">—</span>'}</td>
+    <td>${d['Kontaktperson']||'<span class="td-empty"> </span>'}</td>
     <td style="color:var(--muted);font-size:12px">${d['Tittel']||''}</td>
     <td>${ph}</td>
-    <td><span class="${tagClass(d['Kilde']||'')}">${d['Kilde']||'—'}</span></td>
+    <td><span class="${tagClass(d['Kilde']||'')}">${d['Kilde']||' '}</span></td>
   `;
   document.getElementById('tBody').appendChild(tr);
 }
@@ -1041,7 +1078,7 @@ function unlockApp() {
     document.getElementById("app-content").style.display = "block";
     sessionStorage.setItem("dialr-auth", "1");
   } else {
-    document.getElementById("gateErr").textContent = "Feil kode — prøv igjen.";
+    document.getElementById("gateErr").textContent = "Feil kode prøv igjen.";
     document.getElementById("gateInput").value = "";
   }
 }
@@ -1049,6 +1086,18 @@ if (sessionStorage.getItem("dialr-auth") === "1") {
   document.getElementById("lock-gate").style.display = "none";
   document.getElementById("app-content").style.display = "block";
 }
+</script>
+<script>
+document.querySelectorAll('.dropdown-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const dd=btn.closest('.dropdown');
+    const wasOpen=dd.classList.contains('open');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+    if(!wasOpen)dd.classList.add('open');
+  });
+});
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
 </script>
 </body>
 </html>

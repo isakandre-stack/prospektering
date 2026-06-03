@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pris — dialr</title>
+<title>Pris — dialr 249 kr per måned</title>
+<meta name="description" content="dialr koster 249 kr per måned med ubegrenset bruk. Ingen bindingstid. Lanseringspris.">
+<meta name="keywords" content="dialr pris, prospekteringsverktøy pris, kontaktoppslag abonnement">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Pris — dialr 249 kr per måned">
+<meta property="og:description" content="dialr koster 249 kr per måned med ubegrenset bruk. Ingen bindingstid. Lanseringspris.">
+<meta property="og:url" content="https://dialr.no/pris.html">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://dialr.no/pris.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -69,6 +77,20 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 .footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
 .footer-logo span{color:var(--accent)}
 .footer-note{font-size:12px;color:var(--muted2);}
+
+.nav-links{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.arrow{font-size:10px;}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -77,11 +99,23 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 <nav>
   <a class="logo" href="index.html">dial<span>r</span></a>
   <div class="nav-links">
-    <a class="nav-link" href="hvordan.html">Slik fungerer det</a>
-    <a class="nav-link active" href="pris.html">Pris</a>
-    <a class="nav-link" href="om.html">Om oss</a>
-    <a class="nav-link" href="kontakt.html">Kontakt</a>
-    <a class="nav-cta" href="index.html">Prøv dialr</a>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Produkt <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Om dialr <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="index.html">Kom i gang</a>
   </div>
 </nav>
 
@@ -103,8 +137,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
       <span class="price-currency">kr</span>
       <span class="price-period">/ mnd</span>
     </div>
-    <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:100px;font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:16px">🎉 &nbsp;Lanseringspris — spar 50%</div>
-    <p class="price-desc">Alt du trenger for å finne direktenummeret til beslutningstakere — ubegrenset.</p>
+    <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:100px;font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:16px">🎉 &nbsp;Lanseringspris spar 50%</div>
+    <p class="price-desc">Alt du trenger for å finne direktenummeret til beslutningstakere ubegrenset.</p>
     <ul class="features">
       <li class="feature"><span class="feature-check">✓</span>Ubegrenset enkeltoppslag</li>
       <li class="feature"><span class="feature-check">✓</span>Masseoppslag via Excel</li>
@@ -113,7 +147,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
       <li class="feature"><span class="feature-check">✓</span>Personlig lisensnøkkel</li>
       <li class="feature"><span class="feature-check">✓</span>Ingen bindingstid</li>
     </ul>
-    <a class="cta-btn" href="https://buy.stripe.com/28E4gz6OueenbNv7RDe3e00" target="_blank">Start nå →</a>
+    <a class="cta-btn" href="https://www.linkedin.com/in/isak-andre-bjornstad" target="_blank">Kom i gang →</a>
     <p class="note">Ta kontakt på LinkedIn for å få tilgang</p>
   </div>
 </div>
@@ -142,9 +176,26 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 
 <footer>
   <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
-  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
 </footer>
 </div>
 <script>function toggleFaq(btn){btn.closest('.faq-item').classList.toggle('open')}</script>
+<script>
+document.querySelectorAll('.dropdown-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const dd=btn.closest('.dropdown');
+    const wasOpen=dd.classList.contains('open');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+    if(!wasOpen)dd.classList.add('open');
+  });
+});
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
+</script>
 </body>
 </html>

@@ -3,431 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Om dialr — Slik fungerer det</title>
+<title>Slik fungerer dialr — Automatisk kontaktoppslag</title>
+<meta name="description" content="Lær hvordan dialr henter kontaktinfo fra Brønnøysundregistrene, nettsider og 1881 for å finne direktenummeret til beslutningstakere.">
+<meta name="keywords" content="slik fungerer dialr, kontaktoppslag Norge, automatisk prospektering">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Slik fungerer dialr — Automatisk kontaktoppslag">
+<meta property="og:description" content="Lær hvordan dialr henter kontaktinfo fra Brønnøysundregistrene, nettsider og 1881 for å finne direktenummeret til beslutningstakere.">
+<meta property="og:url" content="https://dialr.no/hvordan.html">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://dialr.no/hvordan.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --bg:#0a0a0f;
-  --bg2:#111118;
-  --bg3:#18181f;
-  --border:#22222e;
-  --border2:#2e2e3e;
-  --text:#f0f0f5;
-  --muted:#6b6b80;
-  --muted2:#4a4a5a;
-  --accent:#7c6af7;
-  --accent2:#9b8cff;
-  --accent-bg:rgba(124,106,247,0.08);
-  --accent-border:rgba(124,106,247,0.25);
-  --green:#34d399;
-  --red:#f87171;
-  --yellow:#fbbf24;
-  --blue:#60a5fa;
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--border:#22222e;--border2:#2e2e3e;
+  --text:#f0f0f5;--muted:#6b6b80;--muted2:#4a4a5a;--accent:#7c6af7;--accent2:#9b8cff;
+  --accent-bg:rgba(124,106,247,0.08);--accent-border:rgba(124,106,247,0.25);
+  --green:#34d399;--green-bg:rgba(52,211,153,0.08);--green-border:rgba(52,211,153,0.2);
+  --blue:#60a5fa;--yellow:#fbbf24;
 }
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+.page{max-width:1100px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
-
-body::after{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:0;
-  opacity:0.4;
-}
-
-.page{
-  max-width:1100px;
-  margin:0 auto;
-  padding:0 24px 80px;
-  position:relative;
-  z-index:1;
-}
-
-nav{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:24px 0;
-  border-bottom:1px solid var(--border);
-  margin-bottom:80px;
-}
-
-.logo{
-  font-family:'DM Mono',monospace;
-  font-size:20px;
-  font-weight:500;
-  color:var(--text);
-  letter-spacing:-0.02em;
-  text-decoration:none;
-}
-
+nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:80px;}
+.logo{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);text-decoration:none;}
 .logo span{color:var(--accent)}
-
-.nav-links{
-  display:flex;
-  align-items:center;
-  gap:24px;
-}
-
-.nav-link{
-  font-size:14px;
-  color:var(--muted);
-  text-decoration:none;
-  transition:color 0.15s;
-}
-
-.nav-link:hover{color:var(--text)}
-.nav-link.active{color:var(--text)}
-
-.nav-cta{
-  padding:8px 18px;
-  background:var(--accent);
-  border-radius:8px;
-  font-size:13px;
-  font-weight:600;
-  color:#fff;
-  text-decoration:none;
-  transition:background 0.15s;
-}
-
+.nav-links{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.arrow{font-size:10px;}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+.nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;}
 .nav-cta:hover{background:var(--accent2)}
 
-/* Hero */
-.hero{
-  text-align:center;
-  margin-bottom:96px;
-}
+.hero{text-align:center;margin-bottom:96px;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:12px;color:var(--accent2);font-family:'DM Mono',monospace;letter-spacing:0.05em;margin-bottom:28px;}
+h1{font-size:clamp(36px,5vw,58px);font-weight:600;letter-spacing:-0.03em;line-height:1.08;margin-bottom:20px;}
+h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;}
+.hero-sub{font-size:18px;color:var(--muted);font-weight:300;max-width:500px;margin:0 auto;line-height:1.6;}
 
-.eyebrow{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:6px 16px;
-  background:var(--accent-bg);
-  border:1px solid var(--accent-border);
-  border-radius:100px;
-  font-size:12px;
-  color:var(--accent2);
-  font-family:'DM Mono',monospace;
-  letter-spacing:0.05em;
-  margin-bottom:28px;
-}
-
-h1{
-  font-size:clamp(36px,5vw,58px);
-  font-weight:600;
-  letter-spacing:-0.03em;
-  line-height:1.08;
-  margin-bottom:20px;
-}
-
-h1 em{
-  font-style:normal;
-  color:transparent;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;
-  background-clip:text;
-}
-
-.hero-sub{
-  font-size:18px;
-  color:var(--muted);
-  font-weight:300;
-  max-width:500px;
-  margin:0 auto;
-  line-height:1.6;
-}
-
-/* Steps */
 .steps-section{margin-bottom:96px}
-
-.section-label{
-  font-family:'DM Mono',monospace;
-  font-size:11px;
-  letter-spacing:0.15em;
-  color:var(--accent);
-  text-transform:uppercase;
-  margin-bottom:40px;
-  text-align:center;
-}
-
-.steps{
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  position:relative;
-}
-
-.steps::before{
-  content:'';
-  position:absolute;
-  left:27px;
-  top:56px;
-  bottom:56px;
-  width:1px;
-  background:linear-gradient(to bottom,var(--accent),var(--accent-border),transparent);
-}
-
-.step{
-  display:flex;
-  gap:28px;
-  align-items:flex-start;
-  padding:32px 0;
-  border-bottom:1px solid var(--border);
-}
-
+.section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--accent);text-transform:uppercase;margin-bottom:40px;text-align:center;}
+.steps{display:flex;flex-direction:column;gap:0;position:relative;}
+.steps::before{content:'';position:absolute;left:27px;top:56px;bottom:56px;width:1px;background:linear-gradient(to bottom,var(--accent),var(--accent-border),transparent);}
+.step{display:flex;gap:28px;align-items:flex-start;padding:32px 0;border-bottom:1px solid var(--border);}
 .step:last-child{border-bottom:none}
-
-.step-num{
-  width:56px;
-  height:56px;
-  flex-shrink:0;
-  background:var(--bg3);
-  border:1px solid var(--border2);
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family:'DM Mono',monospace;
-  font-size:18px;
-  font-weight:500;
-  color:var(--accent2);
-  position:relative;
-  z-index:1;
-}
-
+.step-num{width:56px;height:56px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--accent2);position:relative;z-index:1;}
 .step-body{padding-top:8px}
+.step-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;letter-spacing:-0.01em;}
+.step-desc{font-size:15px;color:var(--muted);line-height:1.65;max-width:560px;}
+.step-tag{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:4px 12px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:11px;color:var(--accent2);font-family:'DM Mono',monospace;}
 
-.step-title{
-  font-size:18px;
-  font-weight:600;
-  color:var(--text);
-  margin-bottom:8px;
-  letter-spacing:-0.01em;
-}
-
-.step-desc{
-  font-size:15px;
-  color:var(--muted);
-  line-height:1.65;
-  max-width:560px;
-}
-
-.step-tag{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  margin-top:12px;
-  padding:4px 12px;
-  background:var(--accent-bg);
-  border:1px solid var(--accent-border);
-  border-radius:100px;
-  font-size:11px;
-  color:var(--accent2);
-  font-family:'DM Mono',monospace;
-}
-
-/* Sources */
 .sources-section{margin-bottom:96px}
-
-.sources-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-  margin-top:40px;
-}
-
+.sources-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;}
 @media(max-width:640px){.sources-grid{grid-template-columns:1fr}}
-
-.source-card{
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:28px;
-  transition:border-color 0.2s;
-}
-
+.source-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;transition:border-color 0.2s;}
 .source-card:hover{border-color:var(--border2)}
-
-.source-icon{
-  width:44px;height:44px;
-  border-radius:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  margin-bottom:16px;
-}
-
+.source-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;}
 .source-icon.green{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2)}
 .source-icon.blue{background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2)}
 .source-icon.yellow{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
-
-.source-name{
-  font-size:16px;
-  font-weight:600;
-  margin-bottom:8px;
-  color:var(--text);
-}
-
-.source-desc{
-  font-size:14px;
-  color:var(--muted);
-  line-height:1.6;
-}
-
-.source-badge{
-  display:inline-block;
-  margin-top:12px;
-  padding:3px 10px;
-  border-radius:100px;
-  font-size:11px;
-  font-family:'DM Mono',monospace;
-}
-
+.source-name{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text);}
+.source-desc{font-size:14px;color:var(--muted);line-height:1.6;}
+.source-badge{display:inline-block;margin-top:12px;padding:3px 10px;border-radius:100px;font-size:11px;font-family:'DM Mono',monospace;}
 .badge-green{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
 .badge-blue{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
 .badge-yellow{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
 
-/* FAQ */
 .faq-section{margin-bottom:96px}
-
-.faq-list{
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  margin-top:40px;
-  border:1px solid var(--border);
-  border-radius:16px;
-  overflow:hidden;
-  background:var(--bg2);
-}
-
-.faq-item{
-  border-bottom:1px solid var(--border);
-}
-
+.faq-list{display:flex;flex-direction:column;gap:0;margin-top:40px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--bg2);}
+.faq-item{border-bottom:1px solid var(--border);}
 .faq-item:last-child{border-bottom:none}
-
-.faq-q{
-  width:100%;
-  padding:20px 24px;
-  background:transparent;
-  border:none;
-  text-align:left;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  cursor:pointer;
-  font-size:15px;
-  font-weight:500;
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  transition:background 0.15s;
-  gap:16px;
-}
-
+.faq-q{width:100%;padding:20px 24px;background:transparent;border:none;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:15px;font-weight:500;color:var(--text);font-family:'Inter',sans-serif;transition:background 0.15s;gap:16px;}
 .faq-q:hover{background:var(--bg3)}
-
-.faq-arrow{
-  color:var(--muted);
-  font-size:18px;
-  flex-shrink:0;
-  transition:transform 0.2s;
-}
-
+.faq-arrow{color:var(--muted);font-size:18px;flex-shrink:0;transition:transform 0.2s;}
 .faq-item.open .faq-arrow{transform:rotate(45deg)}
-
-.faq-a{
-  display:none;
-  padding:0 24px 20px;
-  font-size:14px;
-  color:var(--muted);
-  line-height:1.7;
-}
-
+.faq-a{display:none;padding:0 24px 20px;font-size:14px;color:var(--muted);line-height:1.7;}
 .faq-item.open .faq-a{display:block}
 
-/* CTA */
-.cta-section{
-  text-align:center;
-  padding:64px 32px;
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:20px;
-  position:relative;
-  overflow:hidden;
-}
-
-.cta-section::before{
-  content:'';
-  position:absolute;
-  top:-1px;left:0;right:0;
-  height:1px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-}
-
-.cta-title{
-  font-size:32px;
-  font-weight:600;
-  letter-spacing:-0.02em;
-  margin-bottom:12px;
-}
-
-.cta-sub{
-  font-size:16px;
-  color:var(--muted);
-  margin-bottom:28px;
-}
-
-.cta-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:14px 32px;
-  background:var(--accent);
-  border-radius:12px;
-  font-size:15px;
-  font-weight:600;
-  color:#fff;
-  text-decoration:none;
-  transition:all 0.15s;
-}
-
+.cta-section{text-align:center;padding:64px 32px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;position:relative;overflow:hidden;}
+.cta-section::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.cta-title{font-size:32px;font-weight:600;letter-spacing:-0.02em;margin-bottom:12px;}
+.cta-sub{font-size:16px;color:var(--muted);margin-bottom:28px;}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--accent);border-radius:12px;font-size:15px;font-weight:600;color:#fff;text-decoration:none;transition:all 0.15s;}
 .cta-btn:hover{background:var(--accent2);transform:translateY(-1px)}
 
-footer{
-  margin-top:64px;
-  padding-top:24px;
-  border-top:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:12px;
-}
-
-.footer-logo{
-  font-family:'DM Mono',monospace;
-  font-size:14px;
-  color:var(--muted);
-  text-decoration:none;
-}
-
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
 .footer-logo span{color:var(--accent)}
-.footer-note{font-size:12px;color:var(--muted2)}
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
+.footer-note{font-size:12px;color:var(--muted2);}
 </style>
 </head>
 <body>
@@ -436,8 +110,23 @@ footer{
 <nav>
   <a class="logo" href="index.html">dial<span>r</span></a>
   <div class="nav-links">
-    <a class="nav-link active" href="om.html">Slik fungerer det</a>
-    <a class="nav-cta" href="index.html">Prøv nå</a>
+    <div class="dropdown">
+      <button class="dropdown-btn">Produkt <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropdown-btn">Om dialr <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="index.html">Kom i gang</a>
   </div>
 </nav>
 
@@ -447,155 +136,131 @@ footer{
   <p class="hero-sub">dialr gjør på sekunder det som ellers tar deg 10 minutter per selskap.</p>
 </div>
 
-<!-- Steps -->
 <div class="steps-section">
   <div class="section-label">Prosessen</div>
   <div class="steps">
-
     <div class="step">
       <div class="step-num">01</div>
       <div class="step-body">
         <div class="step-title">Du legger inn org.nr</div>
         <div class="step-desc">Skriv inn ett organisasjonsnummer direkte, eller last opp en Excel-fil med hundrevis av selskaper på én gang. dialr finner kolonnen automatisk.</div>
-        <div class="step-tag">⌛ &lt; 2 sekunder</div>
+        <div class="step-tag">Under 2 sekunder</div>
       </div>
     </div>
-
     <div class="step">
       <div class="step-num">02</div>
       <div class="step-body">
         <div class="step-title">Vi slår opp Brønnøysundregistrene</div>
         <div class="step-desc">Først henter vi firmanavn, nettside og hvem som er registrert som daglig leder via Brreg sitt åpne API. Dette er grunnlaget for alle videre oppslag.</div>
-        <div class="step-tag">🏛 Offentlig register</div>
+        <div class="step-tag">Offentlig register</div>
       </div>
     </div>
-
     <div class="step">
       <div class="step-num">03</div>
       <div class="step-body">
-        <div class="step-title">Vi skraper selskapets nettside</div>
-        <div class="step-desc">Hvis selskapet har en nettside sjekker vi kontakt-, team-, ledelses- og om-oss-sidene. Vi leter spesifikt etter økonomisjef, CFO eller daglig leder — og henter direktenummeret som ligger ved siden av tittelen.</div>
-        <div class="step-tag">🌐 Nettside-analyse</div>
+        <div class="step-title">Vi analyserer selskapets nettside</div>
+        <div class="step-desc">Hvis selskapet har en nettside sjekker vi kontakt-, team- og om-oss-sidene. Vi leter spesifikt etter økonomisjef, CFO eller daglig leder og henter direktenummeret som ligger ved siden av tittelen.</div>
+        <div class="step-tag">Nettside-analyse</div>
       </div>
     </div>
-
     <div class="step">
       <div class="step-num">04</div>
       <div class="step-body">
-        <div class="step-title">Fallback: 1881.no</div>
+        <div class="step-title">Fallback via 1881.no</div>
         <div class="step-desc">Fant vi ikke noe på nettsiden, søker vi opp daglig leders navn på 1881.no for å finne et personlig mobilnummer. Dette er særlig nyttig for selskaper uten god nettside.</div>
-        <div class="step-tag">📞 Personoppslag</div>
+        <div class="step-tag">Personoppslag</div>
       </div>
     </div>
-
     <div class="step">
       <div class="step-num">05</div>
       <div class="step-body">
         <div class="step-title">Du får resultatet tilbake</div>
         <div class="step-desc">Navn, tittel, telefonnummer og hvilken kilde vi fant det fra vises direkte i nettleseren. Ved masseoppslag kan du laste ned alt som en Excel-fil klar til bruk.</div>
-        <div class="step-tag">✅ Klar til bruk</div>
+        <div class="step-tag">Klar til bruk</div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Sources -->
 <div class="sources-section">
   <div class="section-label">Datakildene</div>
   <div class="sources-grid">
-
     <div class="source-card">
       <div class="source-icon green">🏛</div>
       <div class="source-name">Brønnøysundregistrene</div>
-      <div class="source-desc">Norges offisielle foretaksregister. Brukes til firmanavn, nettside og daglig leder. Gratis og åpent API.</div>
+      <div class="source-desc">Norges offisielle foretaksregister. Brukes til firmanavn, nettside og daglig leder. Grunnlaget for alle oppslag.</div>
       <div class="source-badge badge-green">Prioritet 1</div>
     </div>
-
     <div class="source-card">
       <div class="source-icon blue">🌐</div>
       <div class="source-name">Selskapets nettside</div>
       <div class="source-desc">Vi analyserer kontakt- og teamsider for å finne direktenummer til økonomiansvarlige og ledere.</div>
       <div class="source-badge badge-blue">Prioritet 2</div>
     </div>
-
     <div class="source-card">
       <div class="source-icon yellow">📞</div>
       <div class="source-name">1881.no</div>
       <div class="source-desc">Søker opp daglig leders navn og kommune for å finne personlig mobilnummer når nettsiden ikke har nok info.</div>
       <div class="source-badge badge-yellow">Prioritet 3</div>
     </div>
-
   </div>
 </div>
 
-<!-- FAQ -->
 <div class="faq-section">
   <div class="section-label">Ofte stilte spørsmål</div>
   <div class="faq-list">
-
     <div class="faq-item">
-      <button class="faq-q" onclick="toggleFaq(this)">
-        Hvor lang tid tar et oppslag?
-        <span class="faq-arrow">+</span>
-      </button>
-      <div class="faq-a">Et enkelt oppslag tar typisk 10-30 sekunder. Tiden går med til å sjekke nettside og 1881. Masseoppslag kjører sekvensielt, så 100 selskaper tar ca 20-50 minutter.</div>
+      <button class="faq-q" onclick="toggleFaq(this)">Hvor lang tid tar et oppslag?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Et enkelt oppslag tar typisk 10 til 30 sekunder. Masseoppslag kjører sekvensielt, så 100 selskaper tar ca 20 til 50 minutter.</div>
     </div>
-
     <div class="faq-item">
-      <button class="faq-q" onclick="toggleFaq(this)">
-        Finner dere alltid et nummer?
-        <span class="faq-arrow">+</span>
-      </button>
-      <div class="faq-a">Nei, ikke alltid. Selskaper uten nettside eller svak nettside gir lavere treffrate. Typisk finner vi direktenummer på 40-70% av selskaper, og kontaktperson (uten nummer) på ytterligere 20-30%.</div>
+      <button class="faq-q" onclick="toggleFaq(this)">Finner dere alltid et nummer?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Ikke alltid. Selskaper uten nettside eller svak nettside gir lavere treffrate. Typisk finner vi direktenummer på 40 til 70% av selskaper, og kontaktperson uten nummer på ytterligere 20 til 30%.</div>
     </div>
-
     <div class="faq-item">
-      <button class="faq-q" onclick="toggleFaq(this)">
-        Hvilke selskaper fungerer best?
-        <span class="faq-arrow">+</span>
-      </button>
-      <div class="faq-a">Selskaper med aktiv nettside og synlig lederteam gir best treff. Særlig profesjonelle tjenestebedrifter, industri og oppdrett. Enkeltpersonforetak og svært små selskaper er vanskeligere.</div>
+      <button class="faq-q" onclick="toggleFaq(this)">Hvilke selskaper fungerer best?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Selskaper med aktiv nettside og synlig lederteam gir best treff. Særlig profesjonelle tjenestebedrifter, industri og oppdrett.</div>
     </div>
-
     <div class="faq-item">
-      <button class="faq-q" onclick="toggleFaq(this)">
-        Er dataene oppdaterte?
-        <span class="faq-arrow">+</span>
-      </button>
-      <div class="faq-a">Ja, hvert oppslag henter ferske data i sanntid. Vi lagrer ingenting — alt hentes direkte fra kildene i det du søker.</div>
+      <button class="faq-q" onclick="toggleFaq(this)">Er dataene oppdaterte?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Ja, hvert oppslag henter ferske data i sanntid. Vi lagrer ingenting, alt hentes direkte fra kildene i det du søker.</div>
     </div>
-
     <div class="faq-item">
-      <button class="faq-q" onclick="toggleFaq(this)">
-        Hva er formatet på Excel-filen jeg laster opp?
-        <span class="faq-arrow">+</span>
-      </button>
-      <div class="faq-a">Filen trenger bare én kolonne med org.nr. Kolonnen bør hete "Org.nr", "Organisasjonsnr" eller noe lignende. Resten av kolonnene ignoreres. Eksportfilen fra Bizweb og Proff Forvalt fungerer direkte.</div>
+      <button class="faq-q" onclick="toggleFaq(this)">Hva er formatet på Excel-filen jeg laster opp?<span class="faq-arrow">+</span></button>
+      <div class="faq-a">Filen trenger bare én kolonne med org.nr. Kolonnen bør hete "Org.nr" eller "Organisasjonsnr". Eksportfilen fra Bizweb og Proff Forvalt fungerer direkte.</div>
     </div>
-
   </div>
 </div>
 
-<!-- CTA -->
 <div class="cta-section">
-  <div class="cta-title">Klar til å prøve?</div>
-  <div class="cta-sub">Gratis å bruke. Ingen innlogging.</div>
-  <a class="cta-btn" href="index.html">→ &nbsp;Gå til dialr</a>
+  <div class="cta-title">Klar til å komme i gang?</div>
+  <div class="cta-sub">249 kr per måned. Ubegrenset bruk.</div>
+  <a class="cta-btn" href="pris.html">Se pris og kom i gang</a>
 </div>
 
 <footer>
   <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
   <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
 </footer>
-
 </div>
 
 <script>
-function toggleFaq(btn){
-  const item=btn.closest('.faq-item');
-  item.classList.toggle('open');
-}
+function toggleFaq(btn){btn.closest('.faq-item').classList.toggle('open')}
+document.querySelectorAll('.dropdown-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const dd=btn.closest('.dropdown');
+    const wasOpen=dd.classList.contains('open');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+    if(!wasOpen)dd.classList.add('open');
+  });
+});
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
 </script>
 </body>
 </html>

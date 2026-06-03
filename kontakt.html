@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kontakt — dialr</title>
+<title>Kontakt dialr</title>
+<meta name="description" content="Ta kontakt med dialr for spørsmål om tilgang, pris eller annet. Vi svarer raskt.">
+<meta name="keywords" content="kontakt dialr, dialr support">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Kontakt dialr">
+<meta property="og:description" content="Ta kontakt med dialr for spørsmål om tilgang, pris eller annet. Vi svarer raskt.">
+<meta property="og:url" content="https://dialr.no/kontakt.html">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://dialr.no/kontakt.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -61,6 +69,20 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 .footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
 .footer-logo span{color:var(--accent)}
 .footer-note{font-size:12px;color:var(--muted2);}
+
+.nav-links{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.arrow{font-size:10px;}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -69,11 +91,23 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 <nav>
   <a class="logo" href="index.html">dial<span>r</span></a>
   <div class="nav-links">
-    <a class="nav-link" href="hvordan.html">Slik fungerer det</a>
-    <a class="nav-link" href="pris.html">Pris</a>
-    <a class="nav-link" href="om.html">Om oss</a>
-    <a class="nav-link active" href="kontakt.html">Kontakt</a>
-    <a class="nav-cta" href="index.html">Prøv dialr</a>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Produkt <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Om dialr <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="index.html">Kom i gang</a>
   </div>
 </nav>
 
@@ -122,9 +156,26 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 
 <footer>
   <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
-  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
 </footer>
 </div>
 <script>function toggleFaq(btn){btn.closest('.faq-item').classList.toggle('open')}</script>
+<script>
+document.querySelectorAll('.dropdown-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const dd=btn.closest('.dropdown');
+    const wasOpen=dd.classList.contains('open');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+    if(!wasOpen)dd.classList.add('open');
+  });
+});
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
+</script>
 </body>
 </html>

@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Om oss — dialr</title>
+<title>Om oss — dialr, bygget av en selger for selgere</title>
+<meta name="description" content="dialr ble bygget av Isak André Bjørnstad, en møtebooker som så hvor mye tid prospektering stjal fra det som faktisk gir resultater.">
+<meta name="keywords" content="om dialr, Isak Bjørnstad, norsk salgsverktøy">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Om oss — dialr, bygget av en selger for selgere">
+<meta property="og:description" content="dialr ble bygget av Isak André Bjørnstad, en møtebooker som så hvor mye tid prospektering stjal fra det som faktisk gir resultater.">
+<meta property="og:url" content="https://dialr.no/om.html">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://dialr.no/om.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -68,6 +76,20 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 .footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
 .footer-logo span{color:var(--accent)}
 .footer-note{font-size:12px;color:var(--muted2);}
+
+.nav-links{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.arrow{font-size:10px;}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -76,18 +98,30 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 <nav>
   <a class="logo" href="index.html">dial<span>r</span></a>
   <div class="nav-links">
-    <a class="nav-link" href="hvordan.html">Slik fungerer det</a>
-    <a class="nav-link" href="pris.html">Pris</a>
-    <a class="nav-link active" href="om.html">Om oss</a>
-    <a class="nav-link" href="kontakt.html">Kontakt</a>
-    <a class="nav-cta" href="index.html">Prøv dialr</a>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Produkt <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Om dialr <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="index.html">Kom i gang</a>
   </div>
 </nav>
 
 <div class="hero">
   <div class="eyebrow">🎯 &nbsp;Om oss</div>
   <h1>Bygget av en selger,<br><em>for selgere</em></h1>
-  <p class="hero-sub">"Jeg så hvor lang tid prospektering tok — og det stjal tid fra det en selger faktisk skal gjøre."</p>
+  <p class="hero-sub">"Jeg så hvor lang tid prospektering tok og det stjal tid fra det en selger faktisk skal gjøre."</p>
 </div>
 
 <div class="story-section">
@@ -102,20 +136,20 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
       </div>
     </div>
     <div class="profile-body">
-      <p>Jeg jobber som møtebooker i hverdagen og ringer kaldt hver eneste dag. Det jeg raskt oppdaget var at <strong>det meste av tiden ikke gikk med til selve samtalene</strong>, den gikk med til å finne ut hvem man skulle ringe og hvordan man kom forbi sentralbordet.</p>
-      <p>Proff gir deg sentralbordnummeret. 1881 gir deg kanskje noe mer. Men <strong>direktenummeret til daglig leder eller økonomisjef?</strong> Det måtte du grave etter selv, side etter side, minutt etter minutt.</p>
+      <p>Jeg jobber som møtebooker i hverdagen og ringer kaldt hver eneste dag. Det jeg raskt oppdaget var at <strong>det meste av tiden ikke gikk med til selve samtalene</strong> den gikk med til å finne ut hvem man skulle ringe og hvordan man kom forbi sentralbordet.</p>
+      <p>Proff Forvalt gir deg sentralbordnummeret. 1881 gir deg kanskje noe. Men <strong>direktenummeret til daglig leder eller økonomisjef?</strong> Det måtte du grave etter selv, side etter side, minutt etter minutt.</p>
       <p>Jeg bestemte meg for å bygge løsningen jeg selv ønsket hadde fantes. Det ble dialr.</p>
     </div>
   </div>
 
   <div class="quote-block">
-    <div class="quote-text">"Jeg så hvor lang tid prospektering tok — og innså at det stjal tid fra det en selger faktisk skal gjøre: ringe, booke møter og selge."</div>
-    <div class="quote-attr">— Isak André Bjørnstad, grunnlegger</div>
+    <div class="quote-text">"Jeg så hvor lang tid prospektering tok og innså at det stjal tid fra det en selger faktisk skal gjøre: ringe, booke møter og selge."</div>
+    <div class="quote-attr">  Isak André Bjørnstad, grunnlegger</div>
   </div>
 
   <div class="vision-card">
     <div class="vision-title">Visjonen</div>
-    <div class="vision-body">Vi tror norsk prospektering er klar for en oppgradering. Selgere er dyre ressurser — de skal ikke bruke halvparten av dagen på å lete etter kontaktinfo. dialr er starten på noe større: et verktøy som gir selgere tiden tilbake, slik at de kan gjøre det de er best på.</div>
+    <div class="vision-body">Vi tror norsk prospektering er klar for en oppgradering. Selgere er dyre ressurser de skal ikke bruke halvparten av dagen på å lete etter kontaktinfo. dialr er starten på noe større: et verktøy som gir selgere tiden tilbake, slik at de kan gjøre det de er best på.</div>
   </div>
 
   <div class="cta-section">
@@ -131,8 +165,25 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 
 <footer>
   <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
-  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 · Bygget av Isak Bjørnstad</div>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
 </footer>
 </div>
+<script>
+document.querySelectorAll('.dropdown-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const dd=btn.closest('.dropdown');
+    const wasOpen=dd.classList.contains('open');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+    if(!wasOpen)dd.classList.add('open');
+  });
+});
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
+</script>
 </body>
 </html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vilkår for bruk — dialr</title>
+<meta name="description" content="Les vilkårene for bruk av dialr, inkludert betalingsbetingelser og ansvarsfraskrivelse.">
+<meta name="keywords" content="dialr vilkår, brukervilkår">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Vilkår for bruk — dialr">
+<meta property="og:description" content="Les vilkårene for bruk av dialr, inkludert betalingsbetingelser og ansvarsfraskrivelse.">
+<meta property="og:url" content="https://dialr.no/vilkar.html">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://dialr.no/vilkar.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--border:#22222e;--border2:#2e2e3e;
+  --text:#f0f0f5;--muted:#6b6b80;--muted2:#4a4a5a;--accent:#7c6af7;--accent2:#9b8cff;
+  --accent-bg:rgba(124,106,247,0.08);--accent-border:rgba(124,106,247,0.25);
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+.page{max-width:1100px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:80px;}
+.logo{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);text-decoration:none;}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:24px;}
+.nav-link{font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.15s;}
+.nav-link:hover{color:var(--text)}
+.nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;}
+.nav-cta:hover{background:var(--accent2)}
+
+.doc-wrap{max-width:720px;margin:0 auto;}
+.doc-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:12px;color:var(--accent2);font-family:'DM Mono',monospace;letter-spacing:0.05em;margin-bottom:28px;}
+.doc-title{font-size:clamp(32px,4vw,48px);font-weight:600;letter-spacing:-0.03em;margin-bottom:12px;}
+.doc-date{font-size:13px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:56px;}
+
+.doc-section{margin-bottom:48px;}
+.doc-section h2{font-size:18px;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.doc-section p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:12px;}
+.doc-section p:last-child{margin-bottom:0}
+.doc-section ul{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.doc-section ul li{font-size:15px;color:var(--muted);line-height:1.7;padding-left:20px;position:relative;}
+.doc-section ul li::before{content:'○';position:absolute;left:0;color:var(--accent);font-size:10px;top:4px;}
+.doc-section strong{color:var(--text);font-weight:500;}
+.doc-section a{color:var(--accent2);text-decoration:none;}
+.doc-section a:hover{text-decoration:underline;}
+
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
+.footer-logo span{color:var(--accent)}
+.footer-note{font-size:12px;color:var(--muted2);}
+
+.nav-links{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.arrow{font-size:10px;}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav>
+  <a class="logo" href="index.html">dial<span>r</span></a>
+  <div class="nav-links">
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Produkt <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="nav-link dropdown-btn">Om dialr <span class="arrow">&#9662;</span></button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="index.html">Kom i gang</a>
+  </div>
+</nav>
+
+<div class="doc-wrap">
+  <div class="doc-eyebrow">📋 &nbsp;Juridisk</div>
+  <div class="doc-title">Vilkår for bruk</div>
+  <div class="doc-date">Sist oppdatert: 3. juni 2026</div>
+
+  <div class="doc-section">
+    <h2>1. Om tjenesten</h2>
+    <p>dialr er en digital tjeneste som hjelper brukere med å finne kontaktinformasjon til beslutningstakere i norske selskaper. Data hentes fra Brønnøysundregistrene, selskapers nettsider og 1881.no. Tjenesten leveres av Bjørnstad dialr ved Isak André Bjørnstad.</p>
+    <p>Ved å bruke dialr aksepterer du disse vilkårene i sin helhet.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>2. Abonnement og betaling</h2>
+    <p>Tilgang til dialr krever et aktivt abonnement. Følgende gjelder for betaling:</p>
+    <ul>
+      <li>Prisen er 249 kr per måned i lanseringsperioden</li>
+      <li>Betaling håndteres av Stripe og trekkes månedlig</li>
+      <li>Det er ingen bindingstid og du kan avslutte når som helst</li>
+      <li>Ved avslutning beholder du tilgang ut inneværende betalingsperiode</li>
+      <li>Vi forbeholder oss retten til å endre prisen med 30 dagers varsel</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2>3. Lisens og tilgang</h2>
+    <p>Abonnementet gir én personlig lisens til bruk av dialr. Lisensen er ikke overførbar og skal ikke deles med andre. Misbruk av lisensen kan føre til umiddelbar oppsigelse av abonnementet uten refusjon.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>4. Ansvarsbegrensning</h2>
+    <p>dialr henter data fra offentlig tilgjengelige kilder, men vi kan ikke garantere at informasjonen alltid er korrekt, komplett eller oppdatert. Følgende gjelder:</p>
+    <ul>
+      <li>Vi garanterer ikke en bestemt treffrate for kontaktinformasjon</li>
+      <li>Vi er ikke ansvarlige for beslutninger tatt på bakgrunn av data hentet fra tjenesten</li>
+      <li>Vi er ikke ansvarlige for driftsavbrudd eller tekniske feil</li>
+      <li>Maksimalt erstatningsansvar er begrenset til beløpet betalt siste måned</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2>5. Akseptabel bruk</h2>
+    <p>Du forplikter deg til å bruke dialr på en lovlig og ansvarlig måte. Følgende er ikke tillatt:</p>
+    <ul>
+      <li>Automatisert massehøsting av data fra tjenesten</li>
+      <li>Videreselge eller distribuere data hentet fra tjenesten</li>
+      <li>Bruke tjenesten til ulovlig markedsføring eller spam</li>
+      <li>Forsøk på å omgå sikkerhetstiltak eller tilgangskontroll</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2>6. Endringer i vilkårene</h2>
+    <p>Vi forbeholder oss retten til å oppdatere disse vilkårene. Ved vesentlige endringer vil aktive abonnenter varsles på e-post. Fortsatt bruk av tjenesten etter varsling anses som aksept av nye vilkår.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>7. Gjeldende lov</h2>
+    <p>Disse vilkårene er underlagt norsk rett. Eventuelle tvister skal forsøkes løst i minnelighet. Dersom dette ikke lykkes, er Oslo tingrett verneting.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>8. Kontakt</h2>
+    <p>Spørsmål om disse vilkårene kan rettes til <a href="mailto:isakandre@gmail.com">isakandre@gmail.com</a>.</p>
+  </div>
+
+</div>
+
+<footer>
+  <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
+</footer>
+</div>
+<script>
+document.querySelectorAll('.dropdown-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const dd=btn.closest('.dropdown');
+    const wasOpen=dd.classList.contains('open');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+    if(!wasOpen)dd.classList.add('open');
+  });
+});
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
+</script>
+</body>
+</html>
