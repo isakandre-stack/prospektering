@@ -292,8 +292,8 @@ function requireLogin(){
   const script=document.createElement("script");
   script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   script.onload=async function(){
-    const SUPABASE_URL="DIN_SUPABASE_URL";
-    const SUPABASE_KEY="DIN_SUPABASE_ANON_KEY";
+    const SUPABASE_URL="https://lvhlslkiaazuytezajsw.supabase.co";
+    const SUPABASE_KEY="sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
     const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     window._sb=sb;
     const {data:{session}}=await sb.auth.getSession();
