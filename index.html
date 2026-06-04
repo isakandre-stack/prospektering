@@ -205,6 +205,13 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
           <div class="result-cell"><div class="result-label">Kilde daglig leder</div><div class="result-value" id="resKilde"></div></div>
           <div class="result-cell"><div class="result-label">Kilde økonomisjef</div><div class="result-value" id="resKildeOko"></div></div>
         </div>
+        <div id="resRollerWrap" style="display:none;border-top:1px solid var(--border);">
+          <div style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="toggleRoller()">
+            <div class="result-label" style="margin:0;">Andre roller daglig leder</div>
+            <span id="rollerArrow" style="color:var(--muted);font-size:12px;">&#9660;</span>
+          </div>
+          <div id="rollerList" style="display:none;padding:0 20px 16px;"></div>
+        </div>
       </div>
     </div>
 
@@ -285,8 +292,8 @@ function requireLogin(){
   const script=document.createElement("script");
   script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   script.onload=async function(){
-    const SUPABASE_URL="https://lvhlslkiaazuytezajsw.supabase.co";
-    const SUPABASE_KEY="sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+    const SUPABASE_URL="DIN_SUPABASE_URL";
+    const SUPABASE_KEY="DIN_SUPABASE_ANON_KEY";
     const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     window._sb=sb;
     const {data:{session}}=await sb.auth.getSession();
@@ -339,11 +346,38 @@ async function doSingle(){
     else{oEl.textContent="Ikke funnet";oEl.className="result-value empty";}
     document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde daglig leder"]||"")}">${d["Kilde daglig leder"]||"Ukjent"}</span>`;
     document.getElementById("resKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="tag ${tagClass(d["Kilde økonomisjef"])}">${d["Kilde økonomisjef"]}</span>`:`<span class="result-value empty">Ikke funnet</span>`;
+    // Andre roller
+    const roller = d["Andre roller"] || [];
+    const rollerWrap = document.getElementById("resRollerWrap");
+    const rollerList = document.getElementById("rollerList");
+    if(roller.length > 0){
+      rollerList.innerHTML = roller.map(r=>`
+        <div style="display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--muted);min-width:120px;font-family:'DM Mono',monospace;font-size:11px;">${r.rolle}</span>
+          <span style="font-weight:500;flex:1;">${r.firma}</span>
+          <span style="color:var(--muted);font-size:12px;">${r.bransje}</span>
+        </div>`).join('');
+      rollerWrap.style.display = "block";
+    } else {
+      rollerWrap.style.display = "none";
+    }
     document.getElementById("resultCard").style.display="block";
   }catch{document.getElementById("sErrTxt").textContent="Noe gikk galt.";document.getElementById("sErr").style.display="flex";}
   document.getElementById("sSpin").style.display="none";
   document.getElementById("sBtnTxt").textContent="Søk opp";
   document.getElementById("singleBtn").disabled=false;
+}
+
+function toggleRoller(){
+  const list = document.getElementById("rollerList");
+  const arrow = document.getElementById("rollerArrow");
+  if(list.style.display === "none"){
+    list.style.display = "block";
+    arrow.innerHTML = "&#9650;";
+  } else {
+    list.style.display = "none";
+    arrow.innerHTML = "&#9660;";
+  }
 }
 
 function setVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="result-value"+(val?"":" empty");}
