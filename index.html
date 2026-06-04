@@ -194,12 +194,12 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
       </div>
       <div class="err-pill" id="sErr" style="display:none"><span>⚠</span><span id="sErrTxt"></span></div>
       <div class="result-card" id="resultCard">
-        <div class="result-header"><div class="result-company" id="resFirm"></div><div class="result-orgnr" id="resBransjeHeader"></div></div>
+        <div class="result-header"><div class="result-company" id="resFirm"></div><div class="result-orgnr" id="resOrgnr"></div></div>
         <div class="result-grid">
-          <div class="result-cell"><div class="result-label">Daglig leder</div><div class="result-value" id="resKontakt"></div></div>
+          <div class="result-cell"><div class="result-label">Bransje</div><div class="result-value" id="resBransje"></div></div>
           <div class="result-cell"><div class="result-label">Daglig leder tittel</div><div class="result-value" id="resTittel"></div></div>
+          <div class="result-cell"><div class="result-label">Daglig leder</div><div class="result-value" id="resKontakt"></div></div>
           <div class="result-cell"><div class="result-label">Daglig leder tlf</div><div class="result-value" id="resTlf"></div></div>
-          <div class="result-cell"><div class="result-label">Org.nr</div><div class="result-value" id="resOrgnr"></div></div>
           <div class="result-cell"><div class="result-label">Økonomisjef</div><div class="result-value" id="resOko"></div></div>
           <div class="result-cell"><div class="result-label">Økonomisjef tlf</div><div class="result-value" id="resOkoTlf"></div></div>
           <div class="result-cell"><div class="result-label">Kilde daglig leder</div><div class="result-value" id="resKilde"></div></div>
@@ -292,8 +292,8 @@ function requireLogin(){
   const script=document.createElement("script");
   script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   script.onload=async function(){
-    const SUPABASE_URL="https://lvhlslkiaazuytezajsw.supabase.co";
-    const SUPABASE_KEY="sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+    const SUPABASE_URL="DIN_SUPABASE_URL";
+    const SUPABASE_KEY="DIN_SUPABASE_ANON_KEY";
     const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     window._sb=sb;
     const {data:{session}}=await sb.auth.getSession();
@@ -331,16 +331,15 @@ async function doSingle(){
     const r=await fetch(`${API}/lookup?orgnr=${org}`);
     const d=await r.json();
     document.getElementById("resFirm").textContent=d["Firmanavn"]||"Ukjent";
-    document.getElementById("resBransjeHeader").textContent=d["Bransje"]||"";
+    document.getElementById("resOrgnr").textContent=d["Org.nr"]||org;
+    setVal("resBransje",d["Bransje"]);
     setVal("resKontakt",d["Daglig leder"]);
     setVal("resTittel",d["Daglig leder tittel"]);
     const tlf=d["Daglig leder telefon"];
     const tEl=document.getElementById("resTlf");
     if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className="result-value phone";}
     else{tEl.textContent="Ikke funnet";tEl.className="result-value empty";}
-    setVal("resBransje",d["Bransje"]);
     setVal("resOko",d["Økonomisjef"]);
-    document.getElementById("resOrgnr").textContent=d["Org.nr"]||org;
     const okoTlf=d["Økonomisjef telefon"];
     const oEl=document.getElementById("resOkoTlf");
     if(okoTlf){oEl.innerHTML=`<a href="tel:${okoTlf}" style="color:var(--accent2);text-decoration:none">${okoTlf}</a>`;oEl.className="result-value phone";}
