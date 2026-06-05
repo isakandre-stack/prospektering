@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>dialr — Finn direktenummeret til daglig leder</title>
+<meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
+<meta name="robots" content="index, follow">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--border:#22222e;--border2:#2e2e3e;
+  --text:#f0f0f5;--muted:#6b6b80;--muted2:#4a4a5a;--accent:#7c6af7;--accent2:#9b8cff;
+  --accent-bg:rgba(124,106,247,0.08);--accent-border:rgba(124,106,247,0.25);
+  --green:#34d399;--green-bg:rgba(52,211,153,0.08);--green-border:rgba(52,211,153,0.2);
+  --red:#f87171;--yellow:#fbbf24;--blue:#60a5fa;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+.page{max-width:960px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:60px;}
+.logo{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);text-decoration:none;letter-spacing:-0.02em;}
+.logo span{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.dropdown{position:relative;}
+.dropdown-btn{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:8px 12px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
+.dropdown-btn:hover{color:var(--text);background:var(--bg3)}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:180px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown-menu a{display:block;padding:10px 14px;font-size:14px;color:var(--muted);text-decoration:none;border-radius:8px;transition:all 0.12s;}
+.dropdown-menu a:hover{color:var(--text);background:var(--bg3)}
+.dropdown.open .dropdown-menu{display:block;}
+.nav-cta{padding:8px 18px;background:var(--accent);border-radius:8px;font-size:13px;font-weight:600;color:#fff;text-decoration:none;transition:background 0.15s;white-space:nowrap;}
+.nav-cta:hover{background:var(--accent2)}
+.nav-logout{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:none;}
+.nav-logout:hover{border-color:var(--accent);color:var(--accent2)}
+.hero{text-align:center;margin-bottom:56px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:100px;font-size:12px;color:var(--accent2);font-family:'DM Mono',monospace;letter-spacing:0.05em;margin-bottom:28px;}
+h1{font-size:clamp(40px,6vw,68px);font-weight:600;letter-spacing:-0.03em;line-height:1.05;color:var(--text);margin-bottom:20px;}
+h1 em{font-style:normal;color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;}
+.hero-sub{font-size:18px;color:var(--muted);font-weight:300;max-width:520px;margin:0 auto 40px;line-height:1.6;}
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;}
+.hero-stat-num{font-size:28px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
+.hero-stat-label{font-size:12px;color:var(--muted);margin-top:2px;text-align:center;}
+.hero-stat-divider{width:1px;height:36px;background:var(--border2);}
+.login-required{display:none;align-items:center;gap:12px;padding:14px 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:10px;margin-bottom:16px;font-size:14px;color:var(--accent2);}
+.login-required a{color:var(--accent2);font-weight:600;text-decoration:underline;}
+.app-shell{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:24px;}
+.app-header{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.app-dot{width:10px;height:10px;border-radius:50%;}
+.app-dot:nth-child(1){background:#ff5f57}.app-dot:nth-child(2){background:#febc2e}.app-dot:nth-child(3){background:#28c840}
+.app-tabs{display:flex;gap:2px;padding:16px 24px 0;background:var(--bg2);}
+.app-tab{padding:10px 20px;border-radius:10px 10px 0 0;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;border-bottom:none;position:relative;bottom:-1px;background:transparent;color:var(--muted);transition:all 0.15s;}
+.app-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border);border-bottom-color:var(--bg3);}
+.app-tab:not(.active):hover{color:var(--text)}
+.app-body{background:var(--bg3);border-top:1px solid var(--border);padding:32px;}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.search-row{display:flex;gap:10px;}
+.search-input{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:0 20px;height:52px;font-family:'DM Mono',monospace;font-size:17px;color:var(--text);outline:none;letter-spacing:0.05em;transition:border-color 0.15s,box-shadow 0.15s;}
+.search-input::placeholder{color:var(--muted2);font-size:15px;letter-spacing:0}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,247,0.15)}
+.search-btn{height:52px;padding:0 28px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;white-space:nowrap;font-family:'Inter',sans-serif;}
+.search-btn:hover{background:var(--accent2);transform:translateY(-1px)}.search-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.result-card{display:none;margin-top:20px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.result-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.result-company{font-size:16px;font-weight:600;}.result-orgnr{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;}
+.result-cell{padding:16px 20px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+.result-cell:nth-child(even){border-right:none}.result-cell:nth-last-child(-n+2){border-bottom:none}
+.result-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
+.result-value{font-size:14px;font-weight:500;color:var(--text);}
+.result-value.phone{font-family:'DM Mono',monospace;font-size:18px;color:var(--accent2);}
+.result-value.empty{color:var(--muted2);font-weight:400}
+.drop-zone{border:1.5px dashed var(--border2);border-radius:14px;padding:48px 32px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg2);}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:var(--accent-bg);}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.drop-icon{width:56px;height:56px;margin:0 auto 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;}
+.drop-zone:hover .drop-icon{transform:scale(1.05) rotate(-4deg)}
+.drop-title{font-size:15px;font-weight:500;margin-bottom:4px}.drop-sub{font-size:13px;color:var(--muted)}
+.file-pill{display:none;align-items:center;gap:10px;margin-top:14px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;}
+.file-pill-dot{width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;}
+.err-pill{display:none;align-items:center;gap:10px;margin-top:12px;padding:12px 16px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:10px;font-size:13px;color:var(--red);}
+.run-btn{display:inline-flex;align-items:center;gap:8px;margin-top:20px;height:48px;padding:0 28px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif;}
+.run-btn:hover{background:var(--accent2);transform:translateY(-1px)}.run-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+.progress-wrap{display:none;margin-top:24px;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.progress-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
+.progress-count{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent2);}
+.bar-bg{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;width:0;transition:width 0.3s ease;}
+.progress-cur{margin-top:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:18px;}
+.results-wrap{display:none;margin-top:20px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.stat-n{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--accent2);line-height:1;margin-bottom:4px;}
+.stat-l{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.07em;text-transform:uppercase;}
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.table-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);}
+.table-title{font-size:14px;font-weight:600;}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif;}
+.dl-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:10px 16px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);background:var(--bg3);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;}
+tbody tr:last-child{border-bottom:none}tbody tr:hover{background:rgba(124,106,247,0.04)}
+tbody td{padding:13px 16px;vertical-align:middle}
+.td-orgnr{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.td-firm{font-weight:500}.td-empty{color:var(--muted2)}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:10px;font-family:'DM Mono',monospace;}
+.source-nettside{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.source-1881{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+.source-brreg{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
+.source-empty{background:rgba(74,74,90,0.3);color:var(--muted2);border:1px solid var(--border2)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.55s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rowIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+tbody tr{animation:rowIn 0.18s ease both}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'DM Mono',monospace;font-size:14px;color:var(--muted);text-decoration:none;}
+.footer-logo span{color:var(--accent)}
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.15s;}
+.footer-links a:hover{color:var(--muted)}
+.footer-note{font-size:12px;color:var(--muted2);}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav>
+  <a class="logo" href="index.html">dial<span>r</span></a>
+  <div class="nav-right">
+    <div class="dropdown">
+      <button class="dropdown-btn">Produkt &#9662;</button>
+      <div class="dropdown-menu">
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropdown-btn">Om dialr &#9662;</button>
+      <div class="dropdown-menu">
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
+      </div>
+    </div>
+    <a class="nav-cta" href="login.html" id="loginNavBtn">Logg inn</a>
+    <button class="nav-logout" id="logoutNavBtn" onclick="doLogout()">Logg ut</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">🎯 &nbsp;Finn direktenummeret</div>
+  <h1>Kom forbi<br><em>sentralbordet</em></h1>
+  <p class="hero-sub">Slå opp org.nr og få direktenummer til daglig leder eller økonomisjef automatisk.</p>
+  <div class="hero-stats">
+    <div><div class="hero-stat-num">3</div><div class="hero-stat-label">Kilder sjekkes</div></div>
+    <div class="hero-stat-divider"></div>
+    <div><div class="hero-stat-num">~15s</div><div class="hero-stat-label">Per oppslag</div></div>
+    <div class="hero-stat-divider"></div>
+    <div><div class="hero-stat-num">&#8734;</div><div class="hero-stat-label">Masseoppslag</div></div>
+  </div>
+</div>
+
+<div class="login-required" id="loginRequired">
+  🔒 Du må <a href="login.html">opprette en bruker</a> for å kunne bruke dette.
+</div>
+
+<div class="app-shell">
+  <div class="app-header">
+    <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
+  </div>
+  <div class="app-tabs">
+    <button class="app-tab active" id="ftab-single" onclick="switchTab('single')">Enkeltoppslag</button>
+    <button class="app-tab" id="ftab-bulk" onclick="switchTab('bulk')">Masseoppslag</button>
+  </div>
+  <div class="app-body">
+
+    <div class="tab-panel active" id="fpanel-single">
+      <div class="search-row">
+        <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+        <button class="search-btn" id="singleBtn" onclick="doSingle()">
+          <span class="spin" id="sSpin" style="display:none"></span>
+          <span id="sBtnTxt">Søk opp</span>
+        </button>
+      </div>
+      <div class="err-pill" id="sErr" style="display:none"><span>⚠</span><span id="sErrTxt"></span></div>
+      <div class="result-card" id="resultCard">
+        <div class="result-header"><div class="result-company" id="resFirm"></div><div class="result-orgnr" id="resOrgnr"></div></div>
+        <div class="result-grid">
+          <div class="result-cell"><div class="result-label">Bransje</div><div class="result-value" id="resBransje"></div></div>
+          <div class="result-cell"><div class="result-label">Daglig leder tittel</div><div class="result-value" id="resTittel"></div></div>
+          <div class="result-cell"><div class="result-label">Daglig leder</div><div class="result-value" id="resKontakt"></div></div>
+          <div class="result-cell"><div class="result-label">Daglig leder tlf</div><div class="result-value" id="resTlf"></div></div>
+          <div class="result-cell"><div class="result-label">Økonomisjef</div><div class="result-value" id="resOko"></div></div>
+          <div class="result-cell"><div class="result-label">Økonomisjef tlf</div><div class="result-value" id="resOkoTlf"></div></div>
+          <div class="result-cell"><div class="result-label">Kilde daglig leder</div><div class="result-value" id="resKilde"></div></div>
+          <div class="result-cell"><div class="result-label">Kilde økonomisjef</div><div class="result-value" id="resKildeOko"></div></div>
+        </div>
+        <div id="resRollerWrap" style="display:none;border-top:1px solid var(--border);">
+          <div style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="toggleRoller()">
+            <div class="result-label" style="margin:0;">Andre roller daglig leder</div>
+            <span id="rollerArrow" style="color:var(--muted);font-size:12px;">&#9660;</span>
+          </div>
+          <div id="rollerList" style="display:none;padding:0 20px 16px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="fpanel-bulk">
+      <!-- Last opp og start -->
+      <div id="bulkUploadSection">
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+          <div class="drop-icon">📊</div>
+          <div class="drop-title">Dra og slipp Excel-fil her</div>
+          <div class="drop-sub">eller klikk for å velge</div>
+        </div>
+        <div class="file-pill" id="filePill"><div class="file-pill-dot"></div><span id="fName"></span><span style="margin-left:auto;color:var(--muted)" id="fCount"></span></div>
+        <div class="err-pill" id="bErr" style="display:none"><span>⚠</span><span id="bErrTxt"></span></div>
+        <button class="run-btn" id="runBtn" disabled>
+          <span class="spin" id="rSpin" style="display:none"></span>
+          <span id="rTxt">Start oppslag</span>
+        </button>
+      </div>
+
+      <!-- Jobb startet -->
+      <div id="bulkJobSection" style="display:none;">
+        <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:20px;margin-bottom:16px;">
+          <div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:8px;">✓ Jobb startet på serveren!</div>
+          <div style="font-size:13px;color:var(--muted);">Du kan lukke PC-en. Kom tilbake og skriv inn jobb-ID-en for å laste ned resultatet.</div>
+          <div style="margin-top:12px;padding:12px 16px;background:var(--bg3);border-radius:8px;font-family:'DM Mono',monospace;font-size:18px;color:var(--text);text-align:center;letter-spacing:0.1em;" id="jobIdDisplay"></div>
+          <div style="font-size:11px;color:var(--muted2);text-align:center;margin-top:6px;">Jobb-ID — ta vare på denne</div>
+        </div>
+        <div class="progress-wrap" id="progWrap" style="display:block;">
+          <div class="progress-top"><div class="progress-lbl">Fremdrift</div><div class="progress-count" id="progCount">0 / 0</div></div>
+          <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+          <div class="progress-cur" id="progCur">Starter...</div>
+        </div>
+        <button class="run-btn" id="dlJobBtn" style="display:none;background:var(--green);">
+          &#8595; Last ned Excel
+        </button>
+      </div>
+
+      <!-- Hent eksisterende jobb -->
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+        <div class="result-label" style="margin-bottom:8px;">Har du allerede en jobb-ID?</div>
+        <div class="search-row">
+          <input class="search-input" id="jobIdInput" type="text" placeholder="Jobb-ID (f.eks. a3f9b2c1)" style="font-family:'DM Mono',monospace;font-size:15px;letter-spacing:0.08em;">
+          <button class="search-btn" onclick="checkJobStatus()">Sjekk status</button>
+        </div>
+        <div id="jobStatusResult" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
+  <div class="footer-links">
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
+  </div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
+</footer>
+</div>
+
+<script>
+const API = "https://kontakt-api-production.up.railway.app";
+let orgnrs = [], results = [], isLoggedIn = false;
+
+// TABS
+function switchTab(t){
+  document.querySelectorAll(".app-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("ftab-"+t).classList.add("active");
+  document.getElementById("fpanel-"+t).classList.add("active");
+}
+
+// DROPDOWN
+document.querySelectorAll(".dropdown-btn").forEach(btn=>{
+  btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const dd=btn.closest(".dropdown");
+    const wasOpen=dd.classList.contains("open");
+    document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open"));
+    if(!wasOpen)dd.classList.add("open");
+  });
+});
+document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
+
+// AUTH CHECK
+function requireLogin(){
+  const el=document.getElementById("loginRequired");
+  el.style.display="flex";
+  setTimeout(()=>el.style.display="none",4000);
+}
+
+// Load Supabase and check auth
+(function(){
+  const script=document.createElement("script");
+  script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  script.onload=async function(){
+    const SUPABASE_URL="DIN_SUPABASE_URL";
+    const SUPABASE_KEY="DIN_SUPABASE_ANON_KEY";
+    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    window._sb=sb;
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){
+      const {data:profile}=await sb.from("profiles").select("approved").eq("email",session.user.email).single();
+      if(profile&&profile.approved){
+        isLoggedIn=true;
+        document.getElementById("loginNavBtn").style.display="none";
+        document.getElementById("logoutNavBtn").style.display="block";
+      }
+    }
+  };
+  document.head.appendChild(script);
+})();
+
+async function doLogout(){
+  if(window._sb) await window._sb.auth.signOut();
+  isLoggedIn=false;
+  document.getElementById("loginNavBtn").style.display="flex";
+  document.getElementById("logoutNavBtn").style.display="none";
+}
+
+// SINGLE
+document.getElementById("singleInput").addEventListener("keydown",e=>{if(e.key==="Enter")doSingle()});
+async function doSingle(){
+  if(!isLoggedIn){requireLogin();return;}
+  const org=document.getElementById("singleInput").value.replace(/[\s.]/g,"");
+  if(org.length<8){document.getElementById("sErrTxt").textContent="Skriv inn et gyldig org.nr";document.getElementById("sErr").style.display="flex";return;}
+  document.getElementById("sErr").style.display="none";
+  document.getElementById("resultCard").style.display="none";
+  document.getElementById("sSpin").style.display="inline-block";
+  document.getElementById("sBtnTxt").textContent="Henter...";
+  document.getElementById("singleBtn").disabled=true;
+  try{
+    const r=await fetch(`${API}/lookup?orgnr=${org}`);
+    const d=await r.json();
+    document.getElementById("resFirm").textContent=d["Firmanavn"]||"Ukjent";
+    document.getElementById("resOrgnr").textContent=d["Org.nr"]||org;
+    setVal("resBransje",d["Bransje"]);
+    setVal("resKontakt",d["Daglig leder"]);
+    setVal("resTittel",d["Daglig leder tittel"]);
+    const tlf=d["Daglig leder telefon"];
+    const tEl=document.getElementById("resTlf");
+    if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className="result-value phone";}
+    else{tEl.textContent="Ikke funnet";tEl.className="result-value empty";}
+    setVal("resOko",d["Økonomisjef"]);
+    const okoTlf=d["Økonomisjef telefon"];
+    const oEl=document.getElementById("resOkoTlf");
+    if(okoTlf){oEl.innerHTML=`<a href="tel:${okoTlf}" style="color:var(--accent2);text-decoration:none">${okoTlf}</a>`;oEl.className="result-value phone";}
+    else{oEl.textContent="Ikke funnet";oEl.className="result-value empty";}
+    document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde daglig leder"]||"")}">${d["Kilde daglig leder"]||"Ukjent"}</span>`;
+    document.getElementById("resKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="tag ${tagClass(d["Kilde økonomisjef"])}">${d["Kilde økonomisjef"]}</span>`:`<span class="result-value empty">Ikke funnet</span>`;
+    // Andre roller
+    const roller = d["Andre roller"] || [];
+    const rollerWrap = document.getElementById("resRollerWrap");
+    const rollerList = document.getElementById("rollerList");
+    if(roller.length > 0){
+      rollerList.innerHTML = roller.map(r=>`
+        <div style="display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--muted);min-width:120px;font-family:'DM Mono',monospace;font-size:11px;">${r.rolle}</span>
+          <span style="font-weight:500;flex:1;">${r.firma}</span>
+          <span style="color:var(--muted);font-size:12px;">${r.bransje}</span>
+        </div>`).join('');
+      rollerWrap.style.display = "block";
+    } else {
+      rollerWrap.style.display = "none";
+    }
+    document.getElementById("resultCard").style.display="block";
+  }catch{document.getElementById("sErrTxt").textContent="Noe gikk galt.";document.getElementById("sErr").style.display="flex";}
+  document.getElementById("sSpin").style.display="none";
+  document.getElementById("sBtnTxt").textContent="Søk opp";
+  document.getElementById("singleBtn").disabled=false;
+}
+
+function toggleRoller(){
+  const list = document.getElementById("rollerList");
+  const arrow = document.getElementById("rollerArrow");
+  if(list.style.display === "none"){
+    list.style.display = "block";
+    arrow.innerHTML = "&#9650;";
+  } else {
+    list.style.display = "none";
+    arrow.innerHTML = "&#9660;";
+  }
+}
+
+function setVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="result-value"+(val?"":" empty");}
+function tagClass(k){const l=(k||"").toLowerCase();if(l.includes("nettside"))return"tag source-nettside";if(l.includes("1881"))return"tag source-1881";if(l.includes("br"))return"tag source-brreg";return"tag source-empty";}
+
+// BULK
+const dz=document.getElementById("dropZone");
+// BULK - drag and drop
+const dz=document.getElementById("dropZone");
+let bulkFile = null;
+dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});
+dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
+dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");handleFile(e.dataTransfer.files[0])});
+document.getElementById("fileInput").addEventListener("change",e=>handleFile(e.target.files[0]));
+
+function handleFile(file){
+  if(!file)return;
+  bulkFile = file;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1});
+      let col=0;
+      if(data.length>0){const h=data[0].map(x=>String(x||"").toLowerCase());const f=h.findIndex(x=>x.includes("org"));if(f>=0)col=f;}
+      orgnrs=data.slice(1).map(r=>String(r[col]||"").replace(/[\s.]/g,"")).filter(n=>n.length>=8);
+      if(!orgnrs.length){document.getElementById("bErrTxt").textContent="Fant ingen org.nr.";document.getElementById("bErr").style.display="flex";return;}
+      document.getElementById("bErr").style.display="none";
+      document.getElementById("fName").textContent=file.name;
+      document.getElementById("fCount").textContent=`${orgnrs.length} selskaper`;
+      document.getElementById("filePill").style.display="flex";
+      document.getElementById("runBtn").disabled=false;
+    }catch{document.getElementById("bErrTxt").textContent="Kunne ikke lese filen.";document.getElementById("bErr").style.display="flex";}
+  };
+  rd.readAsBinaryString(file);
+}
+
+document.getElementById("runBtn").addEventListener("click",async()=>{
+  if(!isLoggedIn){requireLogin();return;}
+  if(!bulkFile)return;
+  document.getElementById("runBtn").disabled=true;
+  document.getElementById("rSpin").style.display="inline-block";
+  document.getElementById("rTxt").textContent="Sender til server...";
+
+  try{
+    const formData = new FormData();
+    formData.append("file", bulkFile);
+    const r = await fetch(`${API}/upload`, {method:"POST", body:formData});
+    const d = await r.json();
+    if(d.error){
+      document.getElementById("bErrTxt").textContent=d.error;
+      document.getElementById("bErr").style.display="flex";
+      document.getElementById("runBtn").disabled=false;
+      document.getElementById("rSpin").style.display="none";
+      document.getElementById("rTxt").textContent="Start oppslag";
+      return;
+    }
+    // Show job section
+    document.getElementById("bulkUploadSection").style.display="none";
+    document.getElementById("bulkJobSection").style.display="block";
+    document.getElementById("jobIdDisplay").textContent=d.job_id;
+    document.getElementById("progCount").textContent=`0 / ${d.total}`;
+    pollJobStatus(d.job_id, d.total);
+  }catch(e){
+    document.getElementById("bErrTxt").textContent="Kunne ikke starte jobb. Prøv igjen.";
+    document.getElementById("bErr").style.display="flex";
+    document.getElementById("runBtn").disabled=false;
+    document.getElementById("rSpin").style.display="none";
+    document.getElementById("rTxt").textContent="Start oppslag";
+  }
+});
+
+let pollInterval = null;
+function pollJobStatus(jobId, total){
+  pollInterval = setInterval(async()=>{
+    try{
+      const r = await fetch(`${API}/status/${jobId}`);
+      const d = await r.json();
+      const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
+      document.getElementById("progCount").textContent=`${d.progress} / ${total}`;
+      document.getElementById("barFill").style.width=`${pct}%`;
+      document.getElementById("progCur").textContent=d.current ? `Slår opp ${d.current}` : "";
+      if(d.status === "done"){
+        clearInterval(pollInterval);
+        document.getElementById("progCur").textContent="Ferdig!";
+        document.getElementById("barFill").style.width="100%";
+        document.getElementById("progCount").textContent=`${total} / ${total}`;
+        document.getElementById("dlJobBtn").style.display="inline-flex";
+        document.getElementById("dlJobBtn").onclick=()=>{
+          window.location.href=`${API}/download/${jobId}`;
+        };
+      }
+    }catch(e){}
+  }, 3000);
+}
+
+async function checkJobStatus(){
+  const jobId = document.getElementById("jobIdInput").value.trim();
+  if(!jobId)return;
+  try{
+    const r = await fetch(`${API}/status/${jobId}`);
+    const d = await r.json();
+    if(d.error){
+      document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Jobb ikke funnet</span>`;
+      return;
+    }
+    const statusText = d.status === "done" ? "Ferdig" : d.status === "running" ? "Kjører" : "Venter";
+    const pct = d.total > 0 ? Math.round((d.progress/d.total)*100) : 0;
+    document.getElementById("jobStatusResult").innerHTML=`
+      <div style="color:var(--text);margin-bottom:8px;">Status: <strong>${statusText}</strong> — ${d.progress}/${d.total} (${pct}%)</div>
+      ${d.status==="done" ? `<a href="${API}/download/${jobId}" class="run-btn" style="text-decoration:none;display:inline-flex;">&#8595; Last ned Excel</a>` : ""}
+    `;
+  }catch(e){
+    document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
+  }
+}
+</script>
+</body>
+</html>
