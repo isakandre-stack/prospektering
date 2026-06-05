@@ -311,8 +311,8 @@ function requireLogin(){
   const script=document.createElement("script");
   script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   script.onload=async function(){
-    const SUPABASE_URL="https://lvhlslkiaazuytezajsw.supabase.co";
-    const SUPABASE_KEY="sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+    const SUPABASE_URL="DIN_SUPABASE_URL";
+    const SUPABASE_KEY="DIN_SUPABASE_ANON_KEY";
     const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     window._sb=sb;
     const {data:{session}}=await sb.auth.getSession();
@@ -402,8 +402,6 @@ function toggleRoller(){
 function setVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="result-value"+(val?"":" empty");}
 function tagClass(k){const l=(k||"").toLowerCase();if(l.includes("nettside"))return"tag source-nettside";if(l.includes("1881"))return"tag source-1881";if(l.includes("br"))return"tag source-brreg";return"tag source-empty";}
 
-// BULK
-const dz=document.getElementById("dropZone");
 // BULK - drag and drop
 const dz=document.getElementById("dropZone");
 let bulkFile = null;
