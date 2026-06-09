@@ -109,6 +109,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .rapport-row:last-child{border-bottom:none}
 .rapport-row-header{background:var(--bg3);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;}
 .rapport-row:not(.rapport-row-header):hover{background:rgba(124,106,247,0.04)}
+@media(max-width:700px){
+  .rapport-row{grid-template-columns:1fr 90px 1fr;gap:6px;padding:12px 14px;}
+  .rapport-col-bransje,.rapport-col-motedato,.rapport-col-tid{display:none;}
+}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;width:90%;}
@@ -315,7 +319,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <button class="btn-secondary" style="padding:8px 16px;font-size:12px;" onclick="downloadRapport()">&#8595; Last ned Excel</button>
     </div>
     <div class="rapport-row rapport-row-header">
-      <div>Selskap</div><div>Bransje</div><div>Resultat</div><div>Møtedato</div><div>Kommentar</div><div>Tidspunkt</div>
+      <div>Selskap</div><div class="rapport-col-bransje">Bransje</div><div>Resultat</div><div class="rapport-col-motedato">Møtedato</div><div>Kommentar</div><div class="rapport-col-tid">Tidspunkt</div>
     </div>
     <div id="rapportRows"></div>
   </div>
@@ -629,7 +633,7 @@ async function updateRapport(){
 
   // Hent calls via join for å unngå for lang company_id liste
   const { data: calls } = await sb.from("calls")
-    .select("*, companies(firmanavn, bransje, list_id)")
+    .select("*, companies(firmanavn, bransje, list_id, orgnr, daglig_leder, daglig_leder_telefon, okonomisjef, okonomisjef_telefon, ansatte, driftsinntekter, regnskapsforer, kommune)")
     .eq("user_id", currentUser.id)
     .order("created_at", {ascending:false});
 
@@ -652,11 +656,11 @@ async function updateRapport(){
     const dato = new Date(call.created_at).toLocaleDateString("no",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
     return `<div class="rapport-row" style="cursor:pointer;" onclick="openEditModal(${i})" title="Klikk for å redigere">
       <div style="font-weight:500">${call.firmanavn||"—"}</div>
-      <div style="font-size:12px;color:var(--muted)">${call.bransje||"—"}</div>
+      <div class="rapport-col-bransje" style="font-size:12px;color:var(--muted)">${call.bransje||"—"}</div>
       <div style="color:${colors[call.resultat]||"var(--muted)"};font-size:12px;font-weight:500">${call.resultat}</div>
-      <div style="font-size:12px;color:var(--muted)">${call.motedato||"—"}</div>
+      <div class="rapport-col-motedato" style="font-size:12px;color:var(--muted)">${call.motedato||"—"}</div>
       <div style="font-size:12px;color:var(--muted)">${call.kommentar||"—"}</div>
-      <div style="font-size:12px;color:var(--muted2);display:flex;align-items:center;justify-content:space-between;">${dato}<span style="color:var(--accent2);font-size:11px;">✎</span></div>
+      <div class="rapport-col-tid" style="font-size:12px;color:var(--muted2);display:flex;align-items:center;justify-content:space-between;">${dato}<span style="color:var(--accent2);font-size:11px;">✎</span></div>
     </div>`;
   }).join("") || `<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">Ingen samtaler logget ennå</div>`;
 }
@@ -717,6 +721,15 @@ function downloadRapport(){
   const ws = XLSX.utils.json_to_sheet(rapportData.map(r => ({
     "Selskap": r.firmanavn,
     "Bransje": r.bransje,
+    "Org.nr": r.companies?.orgnr || "",
+    "Daglig leder": r.companies?.daglig_leder || "",
+    "DL telefon": r.companies?.daglig_leder_telefon || "",
+    "Økonomisjef": r.companies?.okonomisjef || "",
+    "ØK telefon": r.companies?.okonomisjef_telefon || "",
+    "Ansatte": r.companies?.ansatte || "",
+    "Driftsinntekter": r.companies?.driftsinntekter || "",
+    "Regnskapsfører": r.companies?.regnskapsforer || "",
+    "Kommune": r.companies?.kommune || "",
     "Resultat": r.resultat,
     "Møtedato": r.motedato || "",
     "Kommentar": r.kommentar || "",
