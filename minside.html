@@ -594,19 +594,19 @@ async function updateRapport(){
     return;
   }
 
-  const { data: companies } = await sb.from("companies").select("id,firmanavn,bransje").in("list_id", selectedIds);
-  const companyMap = Object.fromEntries((companies||[]).map(c=>[c.id,c]));
-  const companyIds = (companies||[]).map(c=>c.id);
-
+  // Hent calls via join med companies for å unngå for lang company_id liste
   const { data: calls } = await sb.from("calls")
-    .select("*").eq("user_id", currentUser.id)
-    .in("company_id", companyIds)
+    .select("*, companies(firmanavn, bransje, list_id)")
+    .eq("user_id", currentUser.id)
     .order("created_at", {ascending:false});
 
-  rapportData = (calls||[]).map(call => ({
+  // Filtrer på valgte lister
+  const filteredCalls = (calls||[]).filter(call => selectedIds.includes(call.companies?.list_id));
+
+  rapportData = filteredCalls.map(call => ({
     ...call,
-    firmanavn: companyMap[call.company_id]?.firmanavn || "",
-    bransje: companyMap[call.company_id]?.bransje || ""
+    firmanavn: call.companies?.firmanavn || "",
+    bransje: call.companies?.bransje || ""
   }));
 
   const c = rapportData;
