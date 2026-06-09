@@ -257,6 +257,39 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   </div>
 </div>
 
+<!-- REDIGER SAMTALE MODAL -->
+<div class="modal-overlay" id="editCallModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-title">Rediger samtale</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="editCallCompany"></div>
+    <div style="margin-bottom:16px;">
+      <div class="log-field" style="margin-bottom:0;">
+        <label>Utfall</label>
+        <div class="result-btns" style="margin-bottom:0;">
+          <button class="result-btn" onclick="setEditResultat('svarte')" id="edit-btn-svarte">✓ Svarte</button>
+          <button class="result-btn" onclick="setEditResultat('ikke svarte')" id="edit-btn-ikke svarte">✗ Svarte ikke</button>
+          <button class="result-btn" onclick="setEditResultat('telefonsvarer')" id="edit-btn-telefonsvarer">📱 Telefonsvarer</button>
+          <button class="result-btn" onclick="setEditResultat('møte')" id="edit-btn-møte">📅 Møte</button>
+        </div>
+      </div>
+    </div>
+    <div id="editMoteDateWrap" style="display:none;margin-bottom:16px;">
+      <div class="log-field" style="margin-bottom:0;">
+        <label>Møtedato</label>
+        <input type="date" id="editMoteDato" style="background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;width:200px;">
+      </div>
+    </div>
+    <div class="log-field">
+      <label>Kommentar</label>
+      <textarea id="editKommentar" rows="3" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;resize:none;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeEditModal()">Avbryt</button>
+      <button class="btn-primary" onclick="saveEditCall()">Lagre</button>
+    </div>
+  </div>
+</div>
+
 <!-- RAPPORT -->
 <div id="view-rapport">
   <div class="ring-header">
@@ -594,19 +627,19 @@ async function updateRapport(){
     return;
   }
 
-  // Hent calls via join med companies for å unngå for lang company_id liste
+  const { data: companies } = await sb.from("companies").select("id,firmanavn,bransje").in("list_id", selectedIds);
+  const companyMap = Object.fromEntries((companies||[]).map(c=>[c.id,c]));
+  const companyIds = (companies||[]).map(c=>c.id);
+
   const { data: calls } = await sb.from("calls")
-    .select("*, companies(firmanavn, bransje, list_id)")
-    .eq("user_id", currentUser.id)
+    .select("*").eq("user_id", currentUser.id)
+    .in("company_id", companyIds)
     .order("created_at", {ascending:false});
 
-  // Filtrer på valgte lister
-  const filteredCalls = (calls||[]).filter(call => selectedIds.includes(call.companies?.list_id));
-
-  rapportData = filteredCalls.map(call => ({
+  rapportData = (calls||[]).map(call => ({
     ...call,
-    firmanavn: call.companies?.firmanavn || "",
-    bransje: call.companies?.bransje || ""
+    firmanavn: companyMap[call.company_id]?.firmanavn || "",
+    bransje: companyMap[call.company_id]?.bransje || ""
   }));
 
   const c = rapportData;
@@ -616,17 +649,68 @@ async function updateRapport(){
   document.getElementById("rMote").textContent = c.filter(x=>x.resultat==="møte").length;
 
   const colors = {svarte:"var(--green)","ikke svarte":"var(--red)",telefonsvarer:"var(--yellow)",møte:"var(--accent2)"};
-  document.getElementById("rapportRows").innerHTML = c.map(call => {
+  document.getElementById("rapportRows").innerHTML = c.map((call, i) => {
     const dato = new Date(call.created_at).toLocaleDateString("no",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-    return `<div class="rapport-row">
+    return `<div class="rapport-row" style="cursor:pointer;" onclick="openEditModal(${i})" title="Klikk for å redigere">
       <div style="font-weight:500">${call.firmanavn||"—"}</div>
       <div style="font-size:12px;color:var(--muted)">${call.bransje||"—"}</div>
       <div style="color:${colors[call.resultat]||"var(--muted)"};font-size:12px;font-weight:500">${call.resultat}</div>
       <div style="font-size:12px;color:var(--muted)">${call.motedato||"—"}</div>
       <div style="font-size:12px;color:var(--muted)">${call.kommentar||"—"}</div>
-      <div style="font-size:12px;color:var(--muted2)">${dato}</div>
+      <div style="font-size:12px;color:var(--muted2);display:flex;align-items:center;justify-content:space-between;">${dato}<span style="color:var(--accent2);font-size:11px;">✎</span></div>
     </div>`;
   }).join("") || `<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">Ingen samtaler logget ennå</div>`;
+}
+
+let editCallIndex = null;
+let editResultat = null;
+
+function openEditModal(index){
+  editCallIndex = index;
+  const call = rapportData[index];
+  editResultat = call.resultat;
+  document.getElementById("editCallCompany").textContent = call.firmanavn || "Ukjent selskap";
+  document.getElementById("editKommentar").value = call.kommentar || "";
+  document.getElementById("editMoteDato").value = call.motedato || "";
+  document.getElementById("editMoteDateWrap").style.display = call.resultat === "møte" ? "block" : "none";
+  // Reset and set active button
+  document.querySelectorAll('[id^="edit-btn-"]').forEach(b => b.className = "result-btn");
+  const cls = call.resultat==="svarte"?"active-svarte":call.resultat==="møte"?"active-mote":call.resultat==="telefonsvarer"?"active-telefonsvarer":"active-ikke";
+  const btn = document.getElementById(`edit-btn-${call.resultat}`);
+  if(btn) btn.className = `result-btn ${cls}`;
+  document.getElementById("editCallModal").classList.add("open");
+}
+
+function closeEditModal(){
+  document.getElementById("editCallModal").classList.remove("open");
+  editCallIndex = null;
+  editResultat = null;
+}
+
+function setEditResultat(val){
+  editResultat = val;
+  document.querySelectorAll('[id^="edit-btn-"]').forEach(b => b.className = "result-btn");
+  const cls = val==="svarte"?"active-svarte":val==="møte"?"active-mote":val==="telefonsvarer"?"active-telefonsvarer":"active-ikke";
+  document.getElementById(`edit-btn-${val}`).className = `result-btn ${cls}`;
+  document.getElementById("editMoteDateWrap").style.display = val === "møte" ? "block" : "none";
+}
+
+async function saveEditCall(){
+  if(editCallIndex === null) return;
+  const call = rapportData[editCallIndex];
+  const kommentar = document.getElementById("editKommentar").value.trim();
+  const motedato = editResultat === "møte" && document.getElementById("editMoteDato").value ? document.getElementById("editMoteDato").value : null;
+
+  const { error } = await sb.from("calls").update({
+    resultat: editResultat,
+    kommentar: kommentar,
+    motedato: motedato
+  }).eq("id", call.id);
+
+  if(error){ alert("Kunne ikke lagre: " + error.message); return; }
+
+  closeEditModal();
+  updateRapport();
 }
 
 function downloadRapport(){
