@@ -201,8 +201,14 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
           <div class="result-cell"><div class="result-label">Daglig leder tittel</div><div class="result-value" id="resTittel"></div></div>
           <div class="result-cell"><div class="result-label">Daglig leder</div><div class="result-value" id="resKontakt"></div></div>
           <div class="result-cell"><div class="result-label">Daglig leder tlf</div><div class="result-value" id="resTlf"></div></div>
+          <div class="result-cell"><div class="result-label">Daglig leder e-post</div><div class="result-value" id="resDLEpost"></div></div>
           <div class="result-cell"><div class="result-label">Økonomisjef</div><div class="result-value" id="resOko"></div></div>
           <div class="result-cell"><div class="result-label">Økonomisjef tlf</div><div class="result-value" id="resOkoTlf"></div></div>
+          <div class="result-cell"><div class="result-label">Økonomisjef e-post</div><div class="result-value" id="resOkoEpost"></div></div>
+          <div class="result-cell"><div class="result-label">Ansatte</div><div class="result-value" id="resAnsatte"></div></div>
+          <div class="result-cell"><div class="result-label">Driftsinntekter</div><div class="result-value" id="resInntekter"></div></div>
+          <div class="result-cell"><div class="result-label">Regnskapsfører</div><div class="result-value" id="resRegnskap"></div></div>
+          <div class="result-cell"><div class="result-label">Kommune</div><div class="result-value" id="resKommune"></div></div>
           <div class="result-cell"><div class="result-label">Kilde daglig leder</div><div class="result-value" id="resKilde"></div></div>
           <div class="result-cell"><div class="result-label">Kilde økonomisjef</div><div class="result-value" id="resKildeOko"></div></div>
         </div>
@@ -371,6 +377,21 @@ async function doSingle(){
     const oEl=document.getElementById("resOkoTlf");
     if(okoTlf){oEl.innerHTML=`<a href="tel:${okoTlf}" style="color:var(--accent2);text-decoration:none">${okoTlf}</a>`;oEl.className="result-value phone";}
     else{oEl.textContent="Ikke funnet";oEl.className="result-value empty";}
+    const dlEpost=d["Daglig leder e-post"];
+    const dlEEl=document.getElementById("resDLEpost");
+    if(dlEpost){dlEEl.innerHTML=`<a href="mailto:${dlEpost}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${dlEpost}</a>`;dlEEl.className="result-value";}
+    else{dlEEl.textContent="Ikke funnet";dlEEl.className="result-value empty";}
+    const okoEpost=d["Økonomisjef e-post"];
+    const okoEEl=document.getElementById("resOkoEpost");
+    if(okoEpost){okoEEl.innerHTML=`<a href="mailto:${okoEpost}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${okoEpost}</a>`;okoEEl.className="result-value";}
+    else{okoEEl.textContent="Ikke funnet";okoEEl.className="result-value empty";}
+    setVal("resAnsatte",d["Ansatte"]);
+    const innt=d["Driftsinntekter"];
+    const inntEl=document.getElementById("resInntekter");
+    if(innt){inntEl.textContent=Number(innt).toLocaleString("no")+" kr";inntEl.className="result-value";}
+    else{inntEl.textContent="Ikke funnet";inntEl.className="result-value empty";}
+    setVal("resRegnskap",d["Regnskapsfører"]);
+    setVal("resKommune",d["Kommune"]);
     document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde daglig leder"]||"")}">${d["Kilde daglig leder"]||"Ukjent"}</span>`;
     document.getElementById("resKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="tag ${tagClass(d["Kilde økonomisjef"])}">${d["Kilde økonomisjef"]}</span>`:`<span class="result-value empty">Ikke funnet</span>`;
     // Andre roller
