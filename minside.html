@@ -304,8 +304,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <div class="ring-grid">
         <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ringDL"></div></div>
         <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ringDLTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder e-post</div><div class="ring-value" id="ringDLEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="ringOko"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef telefon</div><div class="ring-value" id="ringOkoTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef e-post</div><div class="ring-value" id="ringOkoEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="ringAnsatte"></div></div>
         <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="ringInntekter"></div></div>
         <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="ringRegnskap"></div></div>
@@ -622,8 +624,10 @@ function showCurrentCompany(){
       <div class="ring-grid">
         <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ringDL"></div></div>
         <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ringDLTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder e-post</div><div class="ring-value" id="ringDLEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="ringOko"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef telefon</div><div class="ring-value" id="ringOkoTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef e-post</div><div class="ring-value" id="ringOkoEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="ringAnsatte"></div></div>
         <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="ringInntekter"></div></div>
         <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="ringRegnskap"></div></div>
@@ -640,9 +644,13 @@ function showCurrentCompany(){
   document.getElementById("ringDL").textContent = c.daglig_leder || "Ikke funnet";
   const dlTlf = c.daglig_leder_telefon;
   document.getElementById("ringDLTlf").innerHTML = dlTlf ? `<a href="tel:${dlTlf}">${dlTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
+  const dlEpost = c.daglig_leder_epost;
+  document.getElementById("ringDLEpost").innerHTML = dlEpost ? `<a href="mailto:${dlEpost}" style="color:var(--accent2);text-decoration:none;">${dlEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
   document.getElementById("ringOko").textContent = c.okonomisjef || "Ikke funnet";
   const okoTlf = c.okonomisjef_telefon;
   document.getElementById("ringOkoTlf").innerHTML = okoTlf ? `<a href="tel:${okoTlf}">${okoTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
+  const okoEpost = c.okonomisjef_epost;
+  document.getElementById("ringOkoEpost").innerHTML = okoEpost ? `<a href="mailto:${okoEpost}" style="color:var(--accent2);text-decoration:none;">${okoEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
   document.getElementById("ringAnsatte").textContent = c.ansatte || "Ikke funnet";
   document.getElementById("ringInntekter").textContent = c.driftsinntekter ? Number(c.driftsinntekter).toLocaleString("no") + " kr" : "Ikke funnet";
   document.getElementById("ringRegnskap").textContent = c.regnskapsforer || "Ikke funnet";
@@ -892,7 +900,7 @@ async function updateRapport(){
 
   // Hent calls via join for å unngå for lang company_id liste
   const { data: calls } = await sb.from("calls")
-    .select("*, companies(firmanavn, bransje, list_id, orgnr, daglig_leder, daglig_leder_telefon, okonomisjef, okonomisjef_telefon, ansatte, driftsinntekter, regnskapsforer, kommune)")
+    .select("*, companies(firmanavn, bransje, list_id, orgnr, daglig_leder, daglig_leder_telefon, daglig_leder_epost, okonomisjef, okonomisjef_telefon, okonomisjef_epost, ansatte, driftsinntekter, regnskapsforer, kommune)")
     .eq("user_id", currentUser.id)
     .order("created_at", {ascending:false});
 
@@ -983,8 +991,10 @@ function downloadRapport(){
     "Org.nr": r.companies?.orgnr || "",
     "Daglig leder": r.companies?.daglig_leder || "",
     "DL telefon": r.companies?.daglig_leder_telefon || "",
+    "DL e-post": r.companies?.daglig_leder_epost || "",
     "Økonomisjef": r.companies?.okonomisjef || "",
     "ØK telefon": r.companies?.okonomisjef_telefon || "",
+    "ØK e-post": r.companies?.okonomisjef_epost || "",
     "Ansatte": r.companies?.ansatte || "",
     "Driftsinntekter": r.companies?.driftsinntekter || "",
     "Regnskapsfører": r.companies?.regnskapsforer || "",
