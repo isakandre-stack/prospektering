@@ -27,8 +27,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .nav-right{display:flex;align-items:center;gap:8px;}
 .nav-btn{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;text-decoration:none;}
 .nav-btn:hover{border-color:var(--accent);color:var(--accent2)}
-#view-lists,#view-ring,#view-rapport{display:none;}
-#view-lists.active,#view-ring.active,#view-rapport.active{display:block;}
+#view-idag,#view-lists,#view-ring,#view-rapport{display:none;}
+#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active{display:block;}
 .page-title{font-size:28px;font-weight:600;margin-bottom:8px;}
 .page-sub{font-size:15px;color:var(--muted);margin-bottom:32px;}
 .list-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:20px;}
@@ -121,6 +121,41 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.55s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
+.result-btn.active-ring{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.ring-back-date-wrap{display:none;margin-bottom:16px;}
+.idag-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
+@media(max-width:600px){.idag-stats{grid-template-columns:repeat(2,1fr)}}
+.idag-stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;text-align:center;}
+.idag-stat-n{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;line-height:1;margin-bottom:4px;color:var(--text);}
+.idag-stat-n.accent{color:var(--accent2);}
+.idag-stat-n.green{color:var(--green);}
+.idag-stat-n.yellow{color:var(--yellow);}
+.idag-stat-l{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.07em;}
+.idag-section{margin-bottom:28px;}
+.idag-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.idag-section-title{font-size:11px;font-weight:600;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;}
+.idag-badge{font-size:11px;padding:2px 10px;border-radius:100px;font-weight:500;}
+.idag-badge.red{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
+.idag-badge.accent{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border);}
+.idag-badge.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.idag-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color 0.15s;}
+.idag-item:hover{border-color:var(--border2);}
+.idag-item.forfalt{border-left:3px solid var(--red);border-radius:0 14px 14px 0;}
+.idag-item.idag-snart{border-left:3px solid var(--accent);border-radius:0 14px 14px 0;}
+.idag-item-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.idag-item-icon.ring{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.idag-item-icon.mote{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border);}
+.idag-item-info{flex:1;min-width:0;}
+.idag-item-company{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.idag-item-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.idag-item-time{font-size:12px;font-weight:600;white-space:nowrap;text-align:right;}
+.idag-item-time.red{color:var(--red);}
+.idag-item-time.accent{color:var(--accent2);}
+.idag-item-time.muted{color:var(--muted);}
+.idag-ring-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--green-border);background:var(--green-bg);color:var(--green);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.15s;}
+.idag-ring-btn:hover{background:rgba(52,211,153,0.15);}
+.idag-empty{text-align:center;padding:32px;color:var(--muted);font-size:14px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;}
+.idag-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
 </style>
 </head>
 <body>
@@ -130,7 +165,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   <a class="logo" href="index.html">dial<span>r</span></a>
   <div class="nav-right">
     <a href="index.html" class="nav-btn">Oppslag</a>
-    <button class="nav-btn" onclick="showRapport()">Rapport</button>
+    <button class="nav-btn" id="nav-idag" onclick="showIdag()">I dag</button>
+    <button class="nav-btn" id="nav-lister" onclick="showLists()">Mine lister</button>
+    <button class="nav-btn" id="nav-rapport" onclick="showRapport()">Rapport</button>
     <button class="nav-btn" onclick="doLogout()">Logg ut</button>
   </div>
 </nav>
@@ -147,8 +184,60 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   </div>
 </div>
 
+<!-- I DAG -->
+<div id="view-idag" class="active">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div class="page-title" id="idagDato"></div>
+      <div class="page-sub" style="margin-bottom:0;">Dine tilbakeringinger og møter for i dag.</div>
+    </div>
+  </div>
+
+  <div class="idag-stats" style="margin-top:24px;">
+    <div class="idag-stat"><div class="idag-stat-n accent" id="idagRingt">—</div><div class="idag-stat-l">Ringt i dag</div></div>
+    <div class="idag-stat"><div class="idag-stat-n green" id="idagMoter">—</div><div class="idag-stat-l">Møter booket</div></div>
+    <div class="idag-stat"><div class="idag-stat-n yellow" id="idagTilbake">—</div><div class="idag-stat-l">Ring tilbake</div></div>
+    <div class="idag-stat"><div class="idag-stat-n" id="idagForfalt" style="color:var(--red);">—</div><div class="idag-stat-l">Forfalt</div></div>
+  </div>
+
+  <div class="idag-section" id="idagSeksjonForfalt" style="display:none;">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Forfalt</div>
+      <span class="idag-badge red" id="idagForfaltBadge"></span>
+    </div>
+    <div id="idagForfaltListe"></div>
+  </div>
+
+  <div class="idag-section" id="idagSeksjonIdag">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Tilbakeringinger i dag</div>
+      <span class="idag-badge accent" id="idagTilbakeBadge"></span>
+    </div>
+    <div id="idagTilbakeListe"></div>
+  </div>
+
+  <hr class="idag-divider" id="idagDivider" style="display:none;">
+
+  <div class="idag-section" id="idagSeksjonMote" style="display:none;">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Møter i dag</div>
+      <span class="idag-badge green" id="idagMoteBadge"></span>
+    </div>
+    <div id="idagMoteListe"></div>
+  </div>
+
+  <hr class="idag-divider">
+
+  <div class="idag-section">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Kommende tilbakeringinger</div>
+    </div>
+    <div id="idagKommendeListe"></div>
+  </div>
+</div>
+
 <!-- LISTER -->
-<div id="view-lists" class="active">
+<div id="view-lists">
   <div class="page-title">Mine lister</div>
   <div class="page-sub">Dine prospekterte lister. Start ringing eller se rapport.</div>
   <div id="listsContainer">
@@ -215,10 +304,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <div class="ring-grid">
         <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ringDL"></div></div>
         <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ringDLTlf"></div></div>
-        <div class="ring-cell"><div class="ring-label">Daglig leder e-post</div><div class="ring-value" id="ringDLEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="ringOko"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef telefon</div><div class="ring-value" id="ringOkoTlf"></div></div>
-        <div class="ring-cell"><div class="ring-label">Økonomisjef e-post</div><div class="ring-value" id="ringOkoEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="ringAnsatte"></div></div>
         <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="ringInntekter"></div></div>
         <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="ringRegnskap"></div></div>
@@ -234,6 +321,19 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
         <button class="result-btn" onclick="setResultat('ikke svarte')" id="btn-ikke svarte">✗ Svarte ikke</button>
         <button class="result-btn" onclick="setResultat('telefonsvarer')" id="btn-telefonsvarer">📱 Telefonsvarer</button>
         <button class="result-btn" onclick="setResultat('møte')" id="btn-møte">📅 Møte</button>
+        <button class="result-btn" onclick="setResultat('ring tilbake')" id="btn-ring tilbake">📞 Ring tilbake</button>
+      </div>
+      <div class="ring-back-date-wrap" id="ringBackDateWrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="log-field">
+            <label>Ring tilbake dato</label>
+            <input type="date" id="ringBackDato" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+          </div>
+          <div class="log-field">
+            <label>Klokkeslett</label>
+            <input type="time" id="ringBackKlokke" value="09:00" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+          </div>
+        </div>
       </div>
       <div class="mote-date-wrap" id="moteDateWrap">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -248,10 +348,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
         </div>
         <div class="log-field">
           <label>E-post til deltaker</label>
-          <div style="position:relative;">
-            <input type="email" id="moteEpost" placeholder="navn@selskap.no" list="moteEpostOptions" autocomplete="off" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
-            <datalist id="moteEpostOptions"></datalist>
-          </div>
+          <input type="email" id="moteEpost" placeholder="navn@selskap.no" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
         </div>
         <button onclick="apneOutlook()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;font-family:Inter,sans-serif;margin-bottom:12px;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">
           📧 Åpne kalenderinvitasjon i Outlook
@@ -355,7 +452,7 @@ async function init(){
   const { data: profile } = await sb.from("profiles").select("approved").eq("email", session.user.email).single();
   if(!profile || !profile.approved){ await sb.auth.signOut(); window.location.href = "login.html"; return; }
   currentUser = session.user;
-  loadLists();
+  showIdag();
 }
 
 async function doLogout(){
@@ -363,17 +460,32 @@ async function doLogout(){
   window.location.href = "login.html";
 }
 
+function setActiveView(viewId){
+  ["view-idag","view-lists","view-ring","view-rapport"].forEach(id => document.getElementById(id).classList.remove("active"));
+  document.getElementById(viewId).classList.add("active");
+  ["nav-idag","nav-lister","nav-rapport"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.color = "";
+  });
+  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport"};
+  if(navMap[viewId]){
+    const el = document.getElementById(navMap[viewId]);
+    if(el){ el.style.color = "var(--accent2)"; el.style.borderColor = "var(--accent)"; }
+  }
+}
+
+function showIdag(){
+  setActiveView("view-idag");
+  loadIdag();
+}
+
 function showLists(){
-  document.getElementById("view-lists").classList.add("active");
-  document.getElementById("view-ring").classList.remove("active");
-  document.getElementById("view-rapport").classList.remove("active");
+  setActiveView("view-lists");
   loadLists();
 }
 
 function showRapport(){
-  document.getElementById("view-lists").classList.remove("active");
-  document.getElementById("view-ring").classList.remove("active");
-  document.getElementById("view-rapport").classList.add("active");
+  setActiveView("view-rapport");
   loadRapport();
 }
 
@@ -446,8 +558,7 @@ async function confirmDelete(){
 
 // RING MODE
 async function startRing(listId, listName){
-  document.getElementById("view-lists").classList.remove("active");
-  document.getElementById("view-ring").classList.add("active");
+  setActiveView("view-ring");
   document.getElementById("ringListName").textContent = listName;
 
   const { data: companies } = await sb.from("companies")
@@ -511,10 +622,8 @@ function showCurrentCompany(){
       <div class="ring-grid">
         <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ringDL"></div></div>
         <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ringDLTlf"></div></div>
-        <div class="ring-cell"><div class="ring-label">Daglig leder e-post</div><div class="ring-value" id="ringDLEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="ringOko"></div></div>
         <div class="ring-cell"><div class="ring-label">Økonomisjef telefon</div><div class="ring-value" id="ringOkoTlf"></div></div>
-        <div class="ring-cell"><div class="ring-label">Økonomisjef e-post</div><div class="ring-value" id="ringOkoEpost"></div></div>
         <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="ringAnsatte"></div></div>
         <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="ringInntekter"></div></div>
         <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="ringRegnskap"></div></div>
@@ -531,13 +640,9 @@ function showCurrentCompany(){
   document.getElementById("ringDL").textContent = c.daglig_leder || "Ikke funnet";
   const dlTlf = c.daglig_leder_telefon;
   document.getElementById("ringDLTlf").innerHTML = dlTlf ? `<a href="tel:${dlTlf}">${dlTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
-  const dlEpost = c.daglig_leder_epost;
-  document.getElementById("ringDLEpost").innerHTML = dlEpost ? `<a href="mailto:${dlEpost}" style="font-size:13px;">${dlEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
   document.getElementById("ringOko").textContent = c.okonomisjef || "Ikke funnet";
   const okoTlf = c.okonomisjef_telefon;
   document.getElementById("ringOkoTlf").innerHTML = okoTlf ? `<a href="tel:${okoTlf}">${okoTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
-  const okoEpost = c.okonomisjef_epost;
-  document.getElementById("ringOkoEpost").innerHTML = okoEpost ? `<a href="mailto:${okoEpost}" style="font-size:13px;">${okoEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
   document.getElementById("ringAnsatte").textContent = c.ansatte || "Ikke funnet";
   document.getElementById("ringInntekter").textContent = c.driftsinntekter ? Number(c.driftsinntekter).toLocaleString("no") + " kr" : "Ikke funnet";
   document.getElementById("ringRegnskap").textContent = c.regnskapsforer || "Ikke funnet";
@@ -548,26 +653,17 @@ function showCurrentCompany(){
   document.getElementById("callKommentar").value = "";
   document.getElementById("moteDato").value = "";
   document.getElementById("moteDateWrap").style.display = "none";
-
-  // Fyll dropdown med e-poster vi har funnet
-  const datalist = document.getElementById("moteEpostOptions");
-  datalist.innerHTML = "";
-  const emails = [c.daglig_leder_epost, c.okonomisjef_epost].filter(Boolean);
-  emails.forEach(email => {
-    const option = document.createElement("option");
-    option.value = email;
-    datalist.appendChild(option);
-  });
-  // Forhåndsutfyll med første e-post hvis bare én
-  document.getElementById("moteEpost").value = emails.length === 1 ? emails[0] : "";
+  document.getElementById("ringBackDato").value = "";
+  document.getElementById("ringBackDateWrap").style.display = "none";
 }
 
 function setResultat(val){
   currentResultat = val;
   document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
-  const cls = val==="svarte"?"active-svarte":val==="møte"?"active-mote":val==="telefonsvarer"?"active-telefonsvarer":"active-ikke";
+  const cls = val==="svarte"?"active-svarte":val==="møte"?"active-mote":val==="telefonsvarer"?"active-telefonsvarer":val==="ring tilbake"?"active-ring":"active-ikke";
   document.getElementById(`btn-${val}`).className = `result-btn ${cls}`;
   document.getElementById("moteDateWrap").style.display = val==="møte" ? "block" : "none";
+  document.getElementById("ringBackDateWrap").style.display = val==="ring tilbake" ? "block" : "none";
 }
 
 function apneOutlook(){
@@ -608,15 +704,155 @@ function apneOutlook(){
 async function saveAndNext(){
   if(!currentResultat){ alert("Velg et utfall"); return; }
   const c = filteredCompanies[currentIndex];
+  let tilbakeringing_dato = null;
+  if(currentResultat==="ring tilbake" && document.getElementById("ringBackDato").value){
+    const d = document.getElementById("ringBackDato").value;
+    const t = document.getElementById("ringBackKlokke").value || "09:00";
+    tilbakeringing_dato = d + "T" + t + ":00";
+  }
   await sb.from("calls").insert({
     company_id: c.id,
     user_id: currentUser.id,
     resultat: currentResultat,
     kommentar: document.getElementById("callKommentar").value.trim(),
-    motedato: currentResultat==="møte" && document.getElementById("moteDato").value ? document.getElementById("moteDato").value : null
+    motedato: currentResultat==="møte" && document.getElementById("moteDato").value ? document.getElementById("moteDato").value : null,
+    tilbakeringing_dato: tilbakeringing_dato
   });
   currentIndex++;
   showCurrentCompany();
+}
+
+// I DAG
+async function loadIdag(){
+  const now = new Date();
+  const dagNavn = ["søndag","mandag","tirsdag","onsdag","torsdag","fredag","lørdag"][now.getDay()];
+  const mndNavn = ["januar","februar","mars","april","mai","juni","juli","august","september","oktober","november","desember"][now.getMonth()];
+  document.getElementById("idagDato").textContent = dagNavn.charAt(0).toUpperCase()+dagNavn.slice(1)+" "+now.getDate()+". "+mndNavn+" "+now.getFullYear();
+
+  const todayStr = now.toISOString().split("T")[0];
+
+  const { data: calls } = await sb.from("calls")
+    .select("*, companies(firmanavn, daglig_leder, daglig_leder_telefon, okonomisjef, okonomisjef_telefon, list_id)")
+    .eq("user_id", currentUser.id);
+
+  const allCalls = calls || [];
+
+  // Count ringt i dag
+  const ringtIdag = allCalls.filter(c => c.created_at && c.created_at.startsWith(todayStr)).length;
+  const moterBooket = allCalls.filter(c => c.resultat === "møte").length;
+
+  // Tilbakeringinger
+  const alleRingTilbake = allCalls.filter(c => c.resultat === "ring tilbake" && c.tilbakeringing_dato);
+
+  const idagRingTilbake = alleRingTilbake.filter(c => c.tilbakeringing_dato.startsWith(todayStr));
+  const forfalt = idagRingTilbake.filter(c => new Date(c.tilbakeringing_dato) < now);
+  const kommende_idag = idagRingTilbake.filter(c => new Date(c.tilbakeringing_dato) >= now);
+  const fremtidige = alleRingTilbake.filter(c => !c.tilbakeringing_dato.startsWith(todayStr) && new Date(c.tilbakeringing_dato) > now)
+    .sort((a,b) => new Date(a.tilbakeringing_dato) - new Date(b.tilbakeringing_dato));
+
+  // Møter i dag
+  const moterIdag = allCalls.filter(c => c.resultat === "møte" && c.motedato && c.motedato.startsWith(todayStr));
+
+  // Oppdater stats
+  document.getElementById("idagRingt").textContent = ringtIdag;
+  document.getElementById("idagMoter").textContent = moterBooket;
+  document.getElementById("idagTilbake").textContent = alleRingTilbake.length;
+  document.getElementById("idagForfalt").textContent = forfalt.length;
+
+  function fmtKlokke(isoStr){
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString("no",{hour:"2-digit",minute:"2-digit"});
+  }
+  function fmtDato(isoStr){
+    const d = new Date(isoStr);
+    return d.toLocaleDateString("no",{day:"numeric",month:"short"});
+  }
+
+  function renderRingItem(c, cls, timeStr, timeColor){
+    const navn = c.companies?.daglig_leder || "";
+    const tlf = c.companies?.daglig_leder_telefon || c.companies?.okonomisjef_telefon || "";
+    const firma = c.companies?.firmanavn || "Ukjent";
+    const kommentar = c.kommentar ? `· ${c.kommentar}` : "";
+    return `<div class="idag-item ${cls}">
+      <div class="idag-item-icon ring">📞</div>
+      <div class="idag-item-info">
+        <div class="idag-item-company">${firma}</div>
+        <div class="idag-item-meta">${navn}${tlf?" · "+tlf:""}${kommentar?` · <em style='color:var(--muted)'>${kommentar}</em>`:""}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="idag-item-time ${timeColor}">${timeStr}</div>
+        ${tlf ? `<a href="tel:${tlf}" class="idag-ring-btn">Ring nå</a>` : ""}
+      </div>
+    </div>`;
+  }
+
+  // Forfalt
+  const forfaltSeksjon = document.getElementById("idagSeksjonForfalt");
+  if(forfalt.length){
+    forfaltSeksjon.style.display = "block";
+    document.getElementById("idagForfaltBadge").textContent = forfalt.length+" forfalt";
+    document.getElementById("idagForfaltListe").innerHTML = forfalt
+      .sort((a,b)=>new Date(a.tilbakeringing_dato)-new Date(b.tilbakeringing_dato))
+      .map(c => renderRingItem(c,"forfalt","Forfalt "+fmtKlokke(c.tilbakeringing_dato),"red")).join("");
+  } else {
+    forfaltSeksjon.style.display = "none";
+  }
+
+  // Tilbakeringinger i dag
+  const tilbakeListe = document.getElementById("idagTilbakeListe");
+  document.getElementById("idagTilbakeBadge").textContent = kommende_idag.length ? kommende_idag.length+" planlagt" : "";
+  if(kommende_idag.length){
+    tilbakeListe.innerHTML = kommende_idag
+      .sort((a,b)=>new Date(a.tilbakeringing_dato)-new Date(b.tilbakeringing_dato))
+      .map(c => renderRingItem(c,"idag-snart",fmtKlokke(c.tilbakeringing_dato),"accent")).join("");
+  } else {
+    tilbakeListe.innerHTML = `<div class="idag-empty">Ingen tilbakeringinger planlagt for i dag 👍</div>`;
+  }
+
+  // Møter i dag
+  const moteSeksjon = document.getElementById("idagSeksjonMote");
+  const divider = document.getElementById("idagDivider");
+  if(moterIdag.length){
+    moteSeksjon.style.display = "block";
+    divider.style.display = "block";
+    document.getElementById("idagMoteBadge").textContent = moterIdag.length+" møte"+(moterIdag.length>1?"r":"");
+    document.getElementById("idagMoteListe").innerHTML = moterIdag.map(c => {
+      const firma = c.companies?.firmanavn || "Ukjent";
+      const navn = c.companies?.daglig_leder || "";
+      const klokke = c.motedato && c.motedato.includes("T") ? fmtKlokke(c.motedato) : (c.motedato||"");
+      return `<div class="idag-item idag-snart">
+        <div class="idag-item-icon mote">📅</div>
+        <div class="idag-item-info">
+          <div class="idag-item-company">${firma}</div>
+          <div class="idag-item-meta">${navn}${c.kommentar ? " · "+c.kommentar : ""}</div>
+        </div>
+        <div class="idag-item-time accent">${klokke}</div>
+      </div>`;
+    }).join("");
+  } else {
+    moteSeksjon.style.display = "none";
+    divider.style.display = moterIdag.length || kommende_idag.length || forfalt.length ? "block" : "none";
+  }
+
+  // Kommende
+  const kommendeListe = document.getElementById("idagKommendeListe");
+  if(fremtidige.length){
+    kommendeListe.innerHTML = fremtidige.slice(0,10).map(c => {
+      const firma = c.companies?.firmanavn || "Ukjent";
+      const navn = c.companies?.daglig_leder || "";
+      const tlf = c.companies?.daglig_leder_telefon || c.companies?.okonomisjef_telefon || "";
+      return `<div class="idag-item" style="opacity:0.75;">
+        <div class="idag-item-icon ring">📞</div>
+        <div class="idag-item-info">
+          <div class="idag-item-company">${firma}</div>
+          <div class="idag-item-meta">${navn}${tlf?" · "+tlf:""}</div>
+        </div>
+        <div class="idag-item-time muted">${fmtDato(c.tilbakeringing_dato)} · ${fmtKlokke(c.tilbakeringing_dato)}</div>
+      </div>`;
+    }).join("");
+  } else {
+    kommendeListe.innerHTML = `<div class="idag-empty">Ingen kommende tilbakeringinger</div>`;
+  }
 }
 
 // RAPPORT
@@ -788,13 +1024,11 @@ function handleManualFile(file) {
         orgnr: headers.findIndex(h => h.includes("org")),
         firmanavn: headers.findIndex(h => h.includes("firma") || h.includes("selskap") || h.includes("navn")),
         bransje: headers.findIndex(h => h.includes("bransje")),
-        daglig_leder: headers.findIndex(h => h.includes("daglig") && !h.includes("telefon") && !h.includes("tlf") && !h.includes("e-post") && !h.includes("epost")),
+        daglig_leder: headers.findIndex(h => h.includes("daglig") || h.includes("leder")),
         daglig_leder_tittel: headers.findIndex(h => h.includes("tittel")),
-        daglig_leder_telefon: headers.findIndex(h => (h.includes("telefon") || h.includes("tlf")) && h.includes("daglig")),
-        daglig_leder_epost: headers.findIndex(h => h.includes("daglig") && (h.includes("e-post") || h.includes("epost") || h.includes("mail"))),
-        okonomisjef: headers.findIndex(h => h.includes("øko") && !h.includes("telefon") && !h.includes("tlf") && !h.includes("e-post") && !h.includes("epost")),
+        daglig_leder_telefon: headers.findIndex(h => (h.includes("telefon") || h.includes("tlf")) && !h.includes("øko")),
+        okonomisjef: headers.findIndex(h => h.includes("øko") && !h.includes("telefon") && !h.includes("tlf")),
         okonomisjef_telefon: headers.findIndex(h => h.includes("øko") && (h.includes("telefon") || h.includes("tlf"))),
-        okonomisjef_epost: headers.findIndex(h => h.includes("øko") && (h.includes("e-post") || h.includes("epost") || h.includes("mail"))),
       };
 
       manualRows = data.slice(1).filter(r => r.some(c => c)).map((row, i) => ({
@@ -805,10 +1039,8 @@ function handleManualFile(file) {
         daglig_leder: cols.daglig_leder >= 0 ? String(row[cols.daglig_leder] || "") : "",
         daglig_leder_tittel: cols.daglig_leder_tittel >= 0 ? String(row[cols.daglig_leder_tittel] || "") : "",
         daglig_leder_telefon: cols.daglig_leder_telefon >= 0 ? String(row[cols.daglig_leder_telefon] || "").replace(/[\s.]/g, "") : "",
-        daglig_leder_epost: cols.daglig_leder_epost >= 0 ? String(row[cols.daglig_leder_epost] || "") : "",
         okonomisjef: cols.okonomisjef >= 0 ? String(row[cols.okonomisjef] || "") : "",
         okonomisjef_telefon: cols.okonomisjef_telefon >= 0 ? String(row[cols.okonomisjef_telefon] || "").replace(/[\s.]/g, "") : "",
-        okonomisjef_epost: cols.okonomisjef_epost >= 0 ? String(row[cols.okonomisjef_epost] || "") : "",
         kilde: "manuell",
       }));
 
