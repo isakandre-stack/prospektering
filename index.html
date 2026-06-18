@@ -189,6 +189,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   <div class="app-tabs">
     <button class="app-tab active" id="ftab-single" onclick="switchTab('single')">Enkeltoppslag</button>
     <button class="app-tab" id="ftab-bulk" onclick="switchTab('bulk')">Masseoppslag</button>
+    <button class="app-tab" id="ftab-bizweb" onclick="switchTab('bizweb')">Bizweb-import</button>
   </div>
   <div class="app-body">
 
@@ -276,6 +277,42 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
           <button class="search-btn" onclick="checkJobStatus()">Sjekk status</button>
         </div>
         <div id="jobStatusResult" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
+      </div>
+    </div>
+
+    <!-- BIZWEB IMPORT -->
+    <div class="tab-panel" id="fpanel-bizweb">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;color:var(--muted);margin-bottom:16px;">Last opp en Bizweb-eksportfil. Firmanavn, daglig leder, ansatte og driftsinntekter hentes direkte fra filen — bare direktenummer og økonomisjef slås opp.</div>
+        <div id="bwUploadSection">
+          <div class="drop-zone" id="bwDropZone">
+            <input type="file" id="bwFileInput" accept=".xlsx,.xls">
+            <div class="drop-icon">📋</div>
+            <div class="drop-title">Dra og slipp Bizweb-fil her</div>
+            <div class="drop-sub">eller klikk for å velge</div>
+          </div>
+          <div class="file-pill" id="bwFilePill"><div class="file-pill-dot"></div><span id="bwFName"></span><span style="margin-left:auto;color:var(--muted)" id="bwFCount"></span></div>
+          <div class="err-pill" id="bwErr" style="display:none"><span>⚠</span><span id="bwErrTxt"></span></div>
+          <div style="margin-top:16px;">
+            <div class="result-label" style="margin-bottom:8px;">Gi listen et navn</div>
+            <input class="search-input" id="bwListName" type="text" placeholder="F.eks. Akvakultur juni 2026" style="font-size:15px;height:48px;">
+          </div>
+          <button class="run-btn" id="bwRunBtn" disabled>
+            <span class="spin" id="bwSpin" style="display:none"></span>
+            <span id="bwTxt">Start Bizweb-import</span>
+          </button>
+        </div>
+        <div id="bwJobSection" style="display:none;">
+          <div class="progress-wrap" style="display:block;">
+            <div class="progress-top">
+              <div class="progress-lbl">Jobb-ID: <span id="bwJobIdDisplay" style="color:var(--accent2);"></span></div>
+              <div class="progress-count" id="bwProgCount">0 / 0</div>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" id="bwBarFill"></div></div>
+            <div class="progress-cur" id="bwProgCur"></div>
+          </div>
+          <button class="run-btn" id="bwDlBtn" style="display:none;background:var(--green);">&#8595; Last ned Excel</button>
+        </div>
       </div>
     </div>
 
@@ -583,6 +620,94 @@ async function checkJobStatus(){
   }catch(e){
     document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
   }
+}
+
+// ── BIZWEB IMPORT ──
+let bwFile = null;
+let bwPollInterval = null;
+
+document.getElementById("bwDropZone").addEventListener("dragover", e=>{e.preventDefault();document.getElementById("bwDropZone").classList.add("over");});
+document.getElementById("bwDropZone").addEventListener("dragleave", ()=>document.getElementById("bwDropZone").classList.remove("over"));
+document.getElementById("bwDropZone").addEventListener("drop", e=>{e.preventDefault();document.getElementById("bwDropZone").classList.remove("over");handleBwFile(e.dataTransfer.files[0]);});
+document.getElementById("bwFileInput").addEventListener("change", e=>handleBwFile(e.target.files[0]));
+
+function handleBwFile(file){
+  if(!file) return;
+  bwFile = file;
+  const rd = new FileReader();
+  rd.onload = e=>{
+    try{
+      const wb = XLSX.read(e.target.result, {type:"binary"});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, {header:1});
+      const count = data.length - 1;
+      if(count < 1){document.getElementById("bwErrTxt").textContent="Fant ingen rader.";document.getElementById("bwErr").style.display="flex";return;}
+      document.getElementById("bwErr").style.display="none";
+      document.getElementById("bwFName").textContent=file.name;
+      document.getElementById("bwFCount").textContent=`${count} selskaper`;
+      document.getElementById("bwFilePill").style.display="flex";
+      document.getElementById("bwRunBtn").disabled=false;
+    }catch{document.getElementById("bwErrTxt").textContent="Kunne ikke lese filen.";document.getElementById("bwErr").style.display="flex";}
+  };
+  rd.readAsBinaryString(file);
+}
+
+document.getElementById("bwRunBtn").addEventListener("click", async()=>{
+  if(!isLoggedIn){requireLogin();return;}
+  if(!bwFile) return;
+  document.getElementById("bwRunBtn").disabled=true;
+  document.getElementById("bwSpin").style.display="inline-block";
+  document.getElementById("bwTxt").textContent="Sender til server...";
+  try{
+    const formData = new FormData();
+    formData.append("file", bwFile);
+    const listName = document.getElementById("bwListName").value.trim() || "Bizweb-import";
+    formData.append("list_name", listName);
+    const {data:{session}} = await sb.auth.getSession();
+    if(session) formData.append("user_id", session.user.id);
+    const r = await fetch(`${API}/upload-bizweb`, {method:"POST", body:formData});
+    const d = await r.json();
+    if(d.error){
+      document.getElementById("bwErrTxt").textContent=d.error;
+      document.getElementById("bwErr").style.display="flex";
+      document.getElementById("bwRunBtn").disabled=false;
+      document.getElementById("bwSpin").style.display="none";
+      document.getElementById("bwTxt").textContent="Start Bizweb-import";
+      return;
+    }
+    document.getElementById("bwUploadSection").style.display="none";
+    document.getElementById("bwJobSection").style.display="block";
+    document.getElementById("bwJobIdDisplay").textContent=d.job_id;
+    document.getElementById("bwProgCount").textContent=`0 / ${d.total}`;
+    bwPollJobStatus(d.job_id, d.total);
+  }catch(e){
+    document.getElementById("bwErrTxt").textContent="Kunne ikke starte jobb. Prøv igjen.";
+    document.getElementById("bwErr").style.display="flex";
+    document.getElementById("bwRunBtn").disabled=false;
+    document.getElementById("bwSpin").style.display="none";
+    document.getElementById("bwTxt").textContent="Start Bizweb-import";
+  }
+});
+
+function bwPollJobStatus(jobId, total){
+  bwPollInterval = setInterval(async()=>{
+    try{
+      const r = await fetch(`${API}/status/${jobId}`);
+      const d = await r.json();
+      const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
+      document.getElementById("bwProgCount").textContent=`${d.progress} / ${total}`;
+      document.getElementById("bwBarFill").style.width=`${pct}%`;
+      document.getElementById("bwProgCur").textContent=d.current ? `Slår opp ${d.current}` : "";
+      if(d.status === "done"){
+        clearInterval(bwPollInterval);
+        document.getElementById("bwProgCur").textContent="Ferdig!";
+        document.getElementById("bwBarFill").style.width="100%";
+        document.getElementById("bwProgCount").textContent=`${total} / ${total}`;
+        document.getElementById("bwDlBtn").style.display="inline-flex";
+        document.getElementById("bwDlBtn").onclick=()=>{ window.location.href=`${API}/download/${jobId}`; };
+      }
+    }catch(e){}
+  }, 3000);
 }
 </script>
 </body>
