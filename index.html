@@ -4,16 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<title>dialr — Finn direktenummeret til daglig leder i norske selskaper</title>
-<meta name="description" content="Slå opp org.nr og få direktenummer og e-post til daglig leder eller økonomisjef automatisk. Norges raskeste prospekteringsverktøy for B2B-selgere og møtebookere.">
-<meta name="keywords" content="finn direktenummer daglig leder, prospektering Norge, B2B leads norske selskaper, kontaktinfo beslutningstakere, møtebooker verktøy, outbound salg Norge, salgsprospekter, finn telefonnummer sjef, omgå sentralbord, organisasjonsnummer oppslag">
+<title>dialr — Finn direktenummeret til daglig leder</title>
+<meta name="description" content="dialr henter direktenummer og kontaktinfo til beslutningstakere i norske selskaper automatisk. Ideelt for møtebookere, selgere og SDR-er.">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="dialr — Finn direktenummeret til daglig leder i norske selskaper">
-<meta property="og:description" content="Slå opp org.nr og få direktenummer og e-post til daglig leder eller økonomisjef automatisk. Norges raskeste prospekteringsverktøy for B2B-selgere og møtebookere.">
-<meta property="og:url" content="https://dialr.no/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="dialr">
-<link rel="canonical" href="https://dialr.no/">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -141,26 +134,26 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 <div class="page">
 
 <nav>
-  <a class="logo" href="/">dial<span>r</span></a>
+  <a class="logo" href="index.html">dial<span>r</span></a>
   <div class="nav-right">
     <div class="dropdown">
       <button class="dropdown-btn">Produkt &#9662;</button>
       <div class="dropdown-menu">
-        <a href="/hvordan-det-fungerer">Slik fungerer det</a>
-        <a href="/pris">Pris</a>
+        <a href="hvordan.html">Slik fungerer det</a>
+        <a href="pris.html">Pris</a>
       </div>
     </div>
     <div class="dropdown">
       <button class="dropdown-btn">Om dialr &#9662;</button>
       <div class="dropdown-menu">
-        <a href="/om-oss">Om oss</a>
-        <a href="/kontakt">Kontakt</a>
-        <a href="/personvern">Personvern</a>
-        <a href="/vilkar">Vilkår for bruk</a>
+        <a href="om.html">Om oss</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="personvern.html">Personvern</a>
+        <a href="vilkar.html">Vilkår for bruk</a>
       </div>
     </div>
-    <a class="nav-cta" href="/login" id="loginNavBtn">Logg inn</a>
-    <a class="nav-cta" href="/minside" id="minSideNavBtn" style="display:none;">Min side</a>
+    <a class="nav-cta" href="login.html" id="loginNavBtn">Logg inn</a>
+    <a class="nav-cta" href="minside.html" id="minSideNavBtn" style="display:none;">Min side</a>
     <button class="nav-logout" id="logoutNavBtn" onclick="doLogout()">Logg ut</button>
   </div>
 </nav>
@@ -168,7 +161,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 <div class="hero">
   <div class="hero-eyebrow">🎯 &nbsp;Finn direktenummeret</div>
   <h1>Kom forbi<br><em>sentralbordet</em></h1>
-  <p class="hero-sub">Slå opp org.nr og få direktenummer til daglig leder eller økonomisjef automatisk. Prospektering for norske B2B-selgere.</p>
+  <p class="hero-sub">Slå opp org.nr og få direktenummer til daglig leder eller økonomisjef automatisk.</p>
   <div class="hero-stats">
     <div><div class="hero-stat-num">3</div><div class="hero-stat-label">Kilder sjekkes</div></div>
     <div class="hero-stat-divider"></div>
@@ -179,7 +172,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 </div>
 
 <div class="login-required" id="loginRequired">
-  🔒 Du må <a href="/login">opprette en bruker</a> for å kunne bruke dette.
+  🔒 Du må <a href="login.html">opprette en bruker</a> for å kunne bruke dette.
 </div>
 
 <div class="app-shell">
@@ -189,7 +182,6 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   <div class="app-tabs">
     <button class="app-tab active" id="ftab-single" onclick="switchTab('single')">Enkeltoppslag</button>
     <button class="app-tab" id="ftab-bulk" onclick="switchTab('bulk')">Masseoppslag</button>
-    <button class="app-tab" id="ftab-bizweb" onclick="switchTab('bizweb')">Bizweb-import</button>
   </div>
   <div class="app-body">
 
@@ -280,86 +272,19 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
       </div>
     </div>
 
-    <!-- BIZWEB IMPORT -->
-    <div class="tab-panel" id="fpanel-bizweb">
-      <div style="margin-bottom:16px;">
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px;">Last opp en Bizweb-eksportfil. Firmanavn, daglig leder, ansatte og driftsinntekter hentes direkte fra filen — bare direktenummer og økonomisjef slås opp.</div>
-        <div id="bwUploadSection">
-          <div class="drop-zone" id="bwDropZone">
-            <input type="file" id="bwFileInput" accept=".xlsx,.xls">
-            <div class="drop-icon">📋</div>
-            <div class="drop-title">Dra og slipp Bizweb-fil her</div>
-            <div class="drop-sub">eller klikk for å velge</div>
-          </div>
-          <div class="file-pill" id="bwFilePill"><div class="file-pill-dot"></div><span id="bwFName"></span><span style="margin-left:auto;color:var(--muted)" id="bwFCount"></span></div>
-          <div class="err-pill" id="bwErr" style="display:none"><span>⚠</span><span id="bwErrTxt"></span></div>
-          <div style="margin-top:16px;">
-            <div class="result-label" style="margin-bottom:8px;">Gi listen et navn</div>
-            <input class="search-input" id="bwListName" type="text" placeholder="F.eks. Akvakultur juni 2026" style="font-size:15px;height:48px;">
-          </div>
-          <button class="run-btn" id="bwRunBtn" disabled>
-            <span class="spin" id="bwSpin" style="display:none"></span>
-            <span id="bwTxt">Start Bizweb-import</span>
-          </button>
-        </div>
-        <div id="bwJobSection" style="display:none;">
-          <div class="progress-wrap" style="display:block;">
-            <div class="progress-top">
-              <div class="progress-lbl">Jobb-ID: <span id="bwJobIdDisplay" style="color:var(--accent2);"></span></div>
-              <div class="progress-count" id="bwProgCount">0 / 0</div>
-            </div>
-            <div class="bar-bg"><div class="bar-fill" id="bwBarFill"></div></div>
-            <div class="progress-cur" id="bwProgCur"></div>
-          </div>
-          <button class="run-btn" id="bwDlBtn" style="display:none;background:var(--green);">&#8595; Last ned Excel</button>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
 <footer>
-  <a class="footer-logo" href="/">dial<span>r</span>.no</a>
+  <a class="footer-logo" href="index.html">dial<span>r</span>.no</a>
   <div class="footer-links">
-    <a href="/hvordan-det-fungerer">Slik fungerer det</a>
-    <a href="/pris">Pris</a>
-    <a href="/om-oss">Om oss</a>
-    <a href="/personvern">Personvern</a>
-    <a href="/vilkar">Vilkår for bruk</a>
-    <a href="/kontakt">Kontakt</a>
+    <a href="personvern.html">Personvern</a>
+    <a href="vilkar.html">Vilkår for bruk</a>
+    <a href="kontakt.html">Kontakt</a>
   </div>
-  <div class="footer-note">Norsk prospekteringsverktøy for B2B-salg · Finn direktenummer til daglig leder via org.nr · Brreg, nettside og 1881</div>
+  <div class="footer-note">Henter data fra Brreg, nettsider og 1881 &nbsp;·&nbsp; Bygget av Isak Bjørnstad</div>
 </footer>
 </div>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "dialr",
-  "url": "https://dialr.no",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web",
-  "description": "dialr er et norsk prospekteringsverktøy som automatisk finner direktenummer og e-post til daglig leder og økonomisjef i norske selskaper via organisasjonsnummer. Ideelt for B2B-selgere, møtebookere og SDR-er.",
-  "offers": {
-    "@type": "Offer",
-    "price": "249",
-    "priceCurrency": "NOK",
-    "description": "Ubegrenset bruk, ingen bindingstid. Lanseringspris."
-  },
-  "creator": {
-    "@type": "Person",
-    "name": "Isak André Bjørnstad"
-  },
-  "featureList": [
-    "Finn direktenummer til daglig leder",
-    "Finn telefonnummer til økonomisjef",
-    "Masseoppslag via Excel med org.nr",
-    "Automatisk prospektering av norske selskaper",
-    "Eksport av kontaktliste til Excel"
-  ]
-}
-</script>
 
 <script>
 const API = "https://kontakt-api-production.up.railway.app";
@@ -551,7 +476,15 @@ document.getElementById("runBtn").addEventListener("click",async()=>{
     formData.append("list_name", listName);
     // Get user_id from Supabase session
     const {data:{session}} = await sb.auth.getSession();
-    if(session) formData.append("user_id", session.user.id);
+    if(!session || !session.user?.id){
+      document.getElementById("bErrTxt").textContent="Sesjon utløpt. Logg ut og inn igjen og prøv på nytt.";
+      document.getElementById("bErr").style.display="flex";
+      document.getElementById("runBtn").disabled=false;
+      document.getElementById("rSpin").style.display="none";
+      document.getElementById("rTxt").textContent="Start oppslag";
+      return;
+    }
+    formData.append("user_id", session.user.id);
     const r = await fetch(`${API}/upload`, {method:"POST", body:formData});
     const d = await r.json();
     if(d.error){
@@ -620,94 +553,6 @@ async function checkJobStatus(){
   }catch(e){
     document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
   }
-}
-
-// ── BIZWEB IMPORT ──
-let bwFile = null;
-let bwPollInterval = null;
-
-document.getElementById("bwDropZone").addEventListener("dragover", e=>{e.preventDefault();document.getElementById("bwDropZone").classList.add("over");});
-document.getElementById("bwDropZone").addEventListener("dragleave", ()=>document.getElementById("bwDropZone").classList.remove("over"));
-document.getElementById("bwDropZone").addEventListener("drop", e=>{e.preventDefault();document.getElementById("bwDropZone").classList.remove("over");handleBwFile(e.dataTransfer.files[0]);});
-document.getElementById("bwFileInput").addEventListener("change", e=>handleBwFile(e.target.files[0]));
-
-function handleBwFile(file){
-  if(!file) return;
-  bwFile = file;
-  const rd = new FileReader();
-  rd.onload = e=>{
-    try{
-      const wb = XLSX.read(e.target.result, {type:"binary"});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, {header:1});
-      const count = data.length - 1;
-      if(count < 1){document.getElementById("bwErrTxt").textContent="Fant ingen rader.";document.getElementById("bwErr").style.display="flex";return;}
-      document.getElementById("bwErr").style.display="none";
-      document.getElementById("bwFName").textContent=file.name;
-      document.getElementById("bwFCount").textContent=`${count} selskaper`;
-      document.getElementById("bwFilePill").style.display="flex";
-      document.getElementById("bwRunBtn").disabled=false;
-    }catch{document.getElementById("bwErrTxt").textContent="Kunne ikke lese filen.";document.getElementById("bwErr").style.display="flex";}
-  };
-  rd.readAsBinaryString(file);
-}
-
-document.getElementById("bwRunBtn").addEventListener("click", async()=>{
-  if(!isLoggedIn){requireLogin();return;}
-  if(!bwFile) return;
-  document.getElementById("bwRunBtn").disabled=true;
-  document.getElementById("bwSpin").style.display="inline-block";
-  document.getElementById("bwTxt").textContent="Sender til server...";
-  try{
-    const formData = new FormData();
-    formData.append("file", bwFile);
-    const listName = document.getElementById("bwListName").value.trim() || "Bizweb-import";
-    formData.append("list_name", listName);
-    const {data:{session}} = await sb.auth.getSession();
-    if(session) formData.append("user_id", session.user.id);
-    const r = await fetch(`${API}/upload-bizweb`, {method:"POST", body:formData});
-    const d = await r.json();
-    if(d.error){
-      document.getElementById("bwErrTxt").textContent=d.error;
-      document.getElementById("bwErr").style.display="flex";
-      document.getElementById("bwRunBtn").disabled=false;
-      document.getElementById("bwSpin").style.display="none";
-      document.getElementById("bwTxt").textContent="Start Bizweb-import";
-      return;
-    }
-    document.getElementById("bwUploadSection").style.display="none";
-    document.getElementById("bwJobSection").style.display="block";
-    document.getElementById("bwJobIdDisplay").textContent=d.job_id;
-    document.getElementById("bwProgCount").textContent=`0 / ${d.total}`;
-    bwPollJobStatus(d.job_id, d.total);
-  }catch(e){
-    document.getElementById("bwErrTxt").textContent="Kunne ikke starte jobb. Prøv igjen.";
-    document.getElementById("bwErr").style.display="flex";
-    document.getElementById("bwRunBtn").disabled=false;
-    document.getElementById("bwSpin").style.display="none";
-    document.getElementById("bwTxt").textContent="Start Bizweb-import";
-  }
-});
-
-function bwPollJobStatus(jobId, total){
-  bwPollInterval = setInterval(async()=>{
-    try{
-      const r = await fetch(`${API}/status/${jobId}`);
-      const d = await r.json();
-      const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
-      document.getElementById("bwProgCount").textContent=`${d.progress} / ${total}`;
-      document.getElementById("bwBarFill").style.width=`${pct}%`;
-      document.getElementById("bwProgCur").textContent=d.current ? `Slår opp ${d.current}` : "";
-      if(d.status === "done"){
-        clearInterval(bwPollInterval);
-        document.getElementById("bwProgCur").textContent="Ferdig!";
-        document.getElementById("bwBarFill").style.width="100%";
-        document.getElementById("bwProgCount").textContent=`${total} / ${total}`;
-        document.getElementById("bwDlBtn").style.display="inline-flex";
-        document.getElementById("bwDlBtn").onclick=()=>{ window.location.href=`${API}/download/${jobId}`; };
-      }
-    }catch(e){}
-  }, 3000);
 }
 </script>
 </body>
