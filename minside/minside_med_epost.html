@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Min side — dialr</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--border:#22222e;--border2:#2e2e3e;
+  --text:#f0f0f5;--muted:#6b6b80;--muted2:#4a4a5a;--accent:#7c6af7;--accent2:#9b8cff;
+  --accent-bg:rgba(124,106,247,0.08);--accent-border:rgba(124,106,247,0.25);
+  --green:#34d399;--green-bg:rgba(52,211,153,0.08);--green-border:rgba(52,211,153,0.2);
+  --red:#f87171;--yellow:#fbbf24;--blue:#60a5fa;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+.page{max-width:960px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:48px;}
+.logo{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);text-decoration:none;}
+.logo span{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;text-decoration:none;}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent2)}
+#view-idag,#view-lists,#view-ring,#view-rapport{display:none;}
+#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active{display:block;}
+.page-title{font-size:28px;font-weight:600;margin-bottom:8px;}
+.page-sub{font-size:15px;color:var(--muted);margin-bottom:32px;}
+.list-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:20px;}
+.list-info{flex:1;}
+.list-name{font-size:16px;font-weight:600;margin-bottom:4px;}
+.list-meta{font-size:13px;color:var(--muted);}
+.list-stats{display:flex;gap:20px;margin-right:16px;}
+.list-stat{text-align:center;}
+.list-stat-n{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);}
+.list-stat-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.list-actions{display:flex;gap:8px;}
+.btn-primary{padding:10px 20px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{padding:10px 20px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent2)}
+.btn-danger{padding:10px 14px;background:transparent;border:1px solid rgba(248,113,113,0.3);border-radius:8px;color:var(--red);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.btn-danger:hover{background:rgba(248,113,113,0.08)}
+.empty-state{text-align:center;padding:60px 0;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:16px;}
+.empty-title{font-size:18px;font-weight:500;color:var(--text);margin-bottom:8px;}
+.ring-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+.ring-back{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:8px 16px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;}
+.ring-back:hover{color:var(--text)}
+.ring-progress{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);margin-left:auto;}
+.ring-controls{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;}
+.toggle-wrap{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;}
+.toggle{width:36px;height:20px;background:var(--border2);border-radius:100px;position:relative;transition:background 0.2s;cursor:pointer;flex-shrink:0;}
+.toggle.on{background:var(--accent);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left 0.2s;}
+.toggle.on::after{left:19px;}
+.ring-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:20px;}
+.ring-card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ring-company{font-size:20px;font-weight:600;}
+.ring-bransje{font-size:13px;color:var(--muted);margin-top:2px;}
+.ring-grid{display:grid;grid-template-columns:1fr 1fr;}
+.ring-cell{padding:16px 24px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+.ring-cell:nth-child(even){border-right:none}
+.ring-cell:nth-last-child(-n+2){border-bottom:none}
+.ring-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
+.ring-value{font-size:14px;font-weight:500;}
+.ring-value a{color:var(--accent2);text-decoration:none;font-family:'DM Mono',monospace;font-size:18px;}
+.ring-value.empty{color:var(--muted2);font-weight:400;}
+.log-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.log-title{font-size:15px;font-weight:600;margin-bottom:20px;}
+.result-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.result-btn{padding:10px 18px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.result-btn.active-svarte{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.result-btn.active-ikke{border-color:var(--red);background:rgba(248,113,113,0.08);color:var(--red);}
+.result-btn.active-telefonsvarer{border-color:var(--yellow);background:rgba(251,191,36,0.08);color:var(--yellow);}
+.result-btn.active-mote{border-color:var(--accent);background:var(--accent-bg);color:var(--accent2);}
+.log-field{margin-bottom:16px;}
+.log-field label{display:block;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.log-field textarea{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;resize:none;transition:border-color 0.15s;}
+.log-field textarea:focus{border-color:var(--accent)}
+.log-field input[type=date]{background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;}
+.mote-date-wrap{display:none;}
+.next-btn{width:100%;height:52px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;}
+.next-btn:hover{background:var(--accent2)}
+.done-card{padding:40px;text-align:center;}
+.done-icon{font-size:48px;margin-bottom:16px;}
+.done-title{font-size:20px;font-weight:600;margin-bottom:8px;color:var(--green);}
+.done-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.rapport-filters{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;}
+.rapport-filter-title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.rapport-list-check{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.rapport-list-check:last-child{border-bottom:none}
+.rapport-list-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--accent);}
+.rapport-list-name{font-size:14px;font-weight:500;}
+.rapport-list-meta{font-size:12px;color:var(--muted);margin-left:auto;}
+.rapport-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+@media(max-width:600px){.rapport-stats{grid-template-columns:repeat(2,1fr)}}
+.rapport-stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
+.rapport-stat-n{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--accent2);line-height:1;margin-bottom:6px;}
+.rapport-stat-l{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.07em;}
+.rapport-table{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.rapport-table-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+.rapport-row{display:grid;grid-template-columns:1.5fr 1fr 100px 110px 1.5fr 110px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:13px;align-items:center;}
+.rapport-row:last-child{border-bottom:none}
+.rapport-row-header{background:var(--bg3);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;}
+.rapport-row:not(.rapport-row-header):hover{background:rgba(124,106,247,0.04)}
+@media(max-width:700px){
+  .rapport-row{grid-template-columns:1fr 90px 1fr;gap:6px;padding:12px 14px;}
+  .rapport-col-bransje,.rapport-col-motedato,.rapport-col-tid{display:none;}
+}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;width:90%;}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:8px;}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.55s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result-btn.active-ring{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.ring-back-date-wrap{display:none;margin-bottom:16px;}
+.idag-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
+@media(max-width:600px){.idag-stats{grid-template-columns:repeat(2,1fr)}}
+.idag-stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;text-align:center;}
+.idag-stat-n{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;line-height:1;margin-bottom:4px;color:var(--text);}
+.idag-stat-n.accent{color:var(--accent2);}
+.idag-stat-n.green{color:var(--green);}
+.idag-stat-n.yellow{color:var(--yellow);}
+.idag-stat-l{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.07em;}
+.idag-section{margin-bottom:28px;}
+.idag-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.idag-section-title{font-size:11px;font-weight:600;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;}
+.idag-badge{font-size:11px;padding:2px 10px;border-radius:100px;font-weight:500;}
+.idag-badge.red{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
+.idag-badge.accent{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border);}
+.idag-badge.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.idag-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color 0.15s;}
+.idag-item:hover{border-color:var(--border2);}
+.idag-item.forfalt{border-left:3px solid var(--red);border-radius:0 14px 14px 0;}
+.idag-item.idag-snart{border-left:3px solid var(--accent);border-radius:0 14px 14px 0;}
+.idag-item-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.idag-item-icon.ring{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.idag-item-icon.mote{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border);}
+.idag-item-info{flex:1;min-width:0;}
+.idag-item-company{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.idag-item-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.idag-item-time{font-size:12px;font-weight:600;white-space:nowrap;text-align:right;}
+.idag-item-time.red{color:var(--red);}
+.idag-item-time.accent{color:var(--accent2);}
+.idag-item-time.muted{color:var(--muted);}
+.idag-ring-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--green-border);background:var(--green-bg);color:var(--green);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.15s;}
+.idag-ring-btn:hover{background:rgba(52,211,153,0.15);}
+.idag-empty{text-align:center;padding:32px;color:var(--muted);font-size:14px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;}
+.idag-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav>
+  <a class="logo" href="index.html">dial<span>r</span></a>
+  <div class="nav-right">
+    <a href="/" class="nav-btn">Oppslag</a>
+    <button class="nav-btn" id="nav-idag" onclick="showIdag()">I dag</button>
+    <button class="nav-btn" id="nav-lister" onclick="showLists()">Mine lister</button>
+    <button class="nav-btn" id="nav-rapport" onclick="showRapport()">Rapport</button>
+    <button class="nav-btn" onclick="doLogout()">Logg ut</button>
+  </div>
+</nav>
+
+<!-- SLETT BEKREFTELSE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">Slett liste</div>
+    <div class="modal-sub" id="deleteModalText">Er du sikker på at du vil slette denne listen? Dette kan ikke angres.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeDeleteModal()">Avbryt</button>
+      <button class="btn-danger" onclick="confirmDelete()">Slett</button>
+    </div>
+  </div>
+</div>
+
+<!-- I DAG -->
+<div id="view-idag" class="active">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div class="page-title" id="idagDato"></div>
+      <div class="page-sub" style="margin-bottom:0;">Dine tilbakeringinger og møter for i dag.</div>
+    </div>
+  </div>
+
+  <div class="idag-stats" style="margin-top:24px;">
+    <div class="idag-stat"><div class="idag-stat-n accent" id="idagRingt">—</div><div class="idag-stat-l">Ringt i dag</div></div>
+    <div class="idag-stat"><div class="idag-stat-n green" id="idagMoter">—</div><div class="idag-stat-l">Møter booket</div></div>
+    <div class="idag-stat"><div class="idag-stat-n yellow" id="idagTilbake">—</div><div class="idag-stat-l">Ring tilbake</div></div>
+    <div class="idag-stat"><div class="idag-stat-n" id="idagForfalt" style="color:var(--red);">—</div><div class="idag-stat-l">Forfalt</div></div>
+  </div>
+
+  <div class="idag-section" id="idagSeksjonForfalt" style="display:none;">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Forfalt</div>
+      <span class="idag-badge red" id="idagForfaltBadge"></span>
+    </div>
+    <div id="idagForfaltListe"></div>
+  </div>
+
+  <div class="idag-section" id="idagSeksjonIdag">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Tilbakeringinger i dag</div>
+      <span class="idag-badge accent" id="idagTilbakeBadge"></span>
+    </div>
+    <div id="idagTilbakeListe"></div>
+  </div>
+
+  <hr class="idag-divider" id="idagDivider" style="display:none;">
+
+  <div class="idag-section" id="idagSeksjonMote" style="display:none;">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Møter i dag</div>
+      <span class="idag-badge green" id="idagMoteBadge"></span>
+    </div>
+    <div id="idagMoteListe"></div>
+  </div>
+
+  <hr class="idag-divider">
+
+  <div class="idag-section">
+    <div class="idag-section-hdr">
+      <div class="idag-section-title">Kommende tilbakeringinger</div>
+    </div>
+    <div id="idagKommendeListe"></div>
+  </div>
+</div>
+
+<!-- LISTER -->
+<div id="view-lists">
+  <div class="page-title">Mine lister</div>
+  <div class="page-sub">Dine prospekterte lister. Start ringing eller se rapport.</div>
+  <div id="listsContainer">
+    <div class="empty-state">
+      <div class="spin" style="width:24px;height:24px;border-color:rgba(124,106,247,0.3);border-top-color:var(--accent);margin:0 auto 16px;"></div>
+      <div>Laster lister...</div>
+    </div>
+  </div>
+
+  <!-- Last opp egen liste -->
+  <div style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border);">
+    <div style="font-size:18px;font-weight:600;margin-bottom:8px;">Last opp egen liste</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Last opp en ferdig kontaktliste uten prospektering. Filen må ha kolonnene: Firmanavn, Daglig leder, Daglig leder telefon.</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;">
+      <div style="margin-bottom:16px;">
+        <div class="result-label" style="margin-bottom:8px;">Listens navn</div>
+        <input id="manualListName" type="text" placeholder="F.eks. Egne kontakter juni 2026" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+      </div>
+      <div style="border:1.5px dashed var(--border2);border-radius:12px;padding:32px;text-align:center;cursor:pointer;position:relative;margin-bottom:16px;" id="manualDropZone">
+        <input type="file" id="manualFileInput" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+        <div style="font-size:24px;margin-bottom:8px;">📋</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Dra og slipp Excel-fil her</div>
+        <div style="font-size:12px;color:var(--muted);">eller klikk for å velge</div>
+      </div>
+      <div id="manualFilePill" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;">
+        <div style="width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;"></div>
+        <span id="manualFileName"></span>
+        <span style="margin-left:auto;" id="manualFileCount"></span>
+      </div>
+      <div id="manualErr" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:12px 16px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:10px;font-size:13px;color:var(--red);">
+        <span id="manualErrTxt"></span>
+      </div>
+      <button class="btn-primary" id="manualUploadBtn" disabled onclick="uploadManualList()">Last opp liste</button>
+    </div>
+  </div>
+</div>
+
+<!-- RING MODE -->
+<div id="view-ring">
+  <div class="ring-header">
+    <button class="ring-back" onclick="showLists()">&#8592; Tilbake</button>
+    <div style="font-size:16px;font-weight:600;" id="ringListName"></div>
+    <div class="ring-progress" id="ringProgress"></div>
+  </div>
+
+  <div class="ring-controls">
+    <div class="toggle-wrap" onclick="toggleKunMedTlf()">
+      <div class="toggle" id="toggleKunTlf"></div>
+      <span>Kun selskaper med telefon</span>
+    </div>
+    <div style="flex:1;"></div>
+    <button class="btn-secondary" style="padding:8px 14px;font-size:12px;" onclick="startFraToppen()">&#8635; Start fra toppen</button>
+  </div>
+
+  <div id="ringCardWrap">
+    <div class="ring-card" id="ringCard">
+      <div class="ring-card-header">
+        <div>
+          <div class="ring-company" id="ringCompany"></div>
+          <div class="ring-bransje" id="ringBransje"></div>
+        </div>
+        <div id="ringOrgnr" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div class="ring-grid">
+        <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ringDL"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ringDLTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="ringOko"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef telefon</div><div class="ring-value" id="ringOkoTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="ringAnsatte"></div></div>
+        <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="ringInntekter"></div></div>
+        <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="ringRegnskap"></div></div>
+        <div class="ring-cell" style="border-bottom:none;"><div class="ring-label">Kommune</div><div class="ring-value" id="ringKommune"></div></div>
+        <div class="ring-cell" style="border-bottom:none;"></div>
+      </div>
+    </div>
+
+    <div class="log-card" id="logCard">
+      <div class="log-title">Logg samtale</div>
+      <div class="result-btns">
+        <button class="result-btn" onclick="setResultat('svarte')" id="btn-svarte">✓ Svarte</button>
+        <button class="result-btn" onclick="setResultat('ikke svarte')" id="btn-ikke svarte">✗ Svarte ikke</button>
+        <button class="result-btn" onclick="setResultat('telefonsvarer')" id="btn-telefonsvarer">📱 Telefonsvarer</button>
+        <button class="result-btn" onclick="setResultat('møte')" id="btn-møte">📅 Møte</button>
+        <button class="result-btn" onclick="setResultat('ring tilbake')" id="btn-ring tilbake">📞 Ring tilbake</button>
+      </div>
+      <div class="ring-back-date-wrap" id="ringBackDateWrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="log-field">
+            <label>Ring tilbake dato</label>
+            <input type="date" id="ringBackDato" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+          </div>
+          <div class="log-field">
+            <label>Klokkeslett</label>
+            <input type="time" id="ringBackKlokke" value="09:00" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+          </div>
+        </div>
+      </div>
+      <div class="mote-date-wrap" id="moteDateWrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="log-field">
+            <label>Møtedato</label>
+            <input type="date" id="moteDato" style="width:100%;">
+          </div>
+          <div class="log-field">
+            <label>Klokkeslett</label>
+            <input type="time" id="moteKlokke" value="09:00" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+          </div>
+        </div>
+        <div class="log-field">
+          <label>E-post til deltaker</label>
+          <input type="email" id="moteEpost" placeholder="navn@selskap.no" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+        </div>
+        <button onclick="apneOutlook()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;font-family:Inter,sans-serif;margin-bottom:12px;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">
+          📧 Åpne kalenderinvitasjon i Outlook
+        </button>
+      </div>
+      <div class="log-field">
+        <label>Kommentar</label>
+        <textarea id="callKommentar" rows="3" placeholder="Hva ble sagt? Notater fra samtalen..."></textarea>
+      </div>
+      <button class="next-btn" onclick="saveAndNext()">Lagre og neste &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- REDIGER SAMTALE MODAL -->
+<div class="modal-overlay" id="editCallModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-title">Rediger samtale</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="editCallCompany"></div>
+    <div style="margin-bottom:16px;">
+      <div class="log-field" style="margin-bottom:0;">
+        <label>Utfall</label>
+        <div class="result-btns" style="margin-bottom:0;">
+          <button class="result-btn" onclick="setEditResultat('svarte')" id="edit-btn-svarte">✓ Svarte</button>
+          <button class="result-btn" onclick="setEditResultat('ikke svarte')" id="edit-btn-ikke svarte">✗ Svarte ikke</button>
+          <button class="result-btn" onclick="setEditResultat('telefonsvarer')" id="edit-btn-telefonsvarer">📱 Telefonsvarer</button>
+          <button class="result-btn" onclick="setEditResultat('møte')" id="edit-btn-møte">📅 Møte</button>
+        </div>
+      </div>
+    </div>
+    <div id="editMoteDateWrap" style="display:none;margin-bottom:16px;">
+      <div class="log-field" style="margin-bottom:0;">
+        <label>Møtedato</label>
+        <input type="date" id="editMoteDato" style="background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;width:200px;">
+      </div>
+    </div>
+    <div class="log-field">
+      <label>Kommentar</label>
+      <textarea id="editKommentar" rows="3" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;resize:none;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeEditModal()">Avbryt</button>
+      <button class="btn-primary" onclick="saveEditCall()">Lagre</button>
+    </div>
+  </div>
+</div>
+
+<!-- RAPPORT -->
+<div id="view-rapport">
+  <div class="ring-header">
+    <button class="ring-back" onclick="showLists()">&#8592; Tilbake</button>
+    <div style="font-size:20px;font-weight:600;">Rapport</div>
+  </div>
+
+  <div class="rapport-filters">
+    <div class="rapport-filter-title">Velg lister</div>
+    <div id="rapportListChecks"></div>
+  </div>
+
+  <div class="rapport-stats">
+    <div class="rapport-stat"><div class="rapport-stat-n" id="rTotalt">0</div><div class="rapport-stat-l">Totalt ringt</div></div>
+    <div class="rapport-stat"><div class="rapport-stat-n" id="rSvarte">0</div><div class="rapport-stat-l">Svarte</div></div>
+    <div class="rapport-stat"><div class="rapport-stat-n" id="rIkke">0</div><div class="rapport-stat-l">Svarte ikke</div></div>
+    <div class="rapport-stat"><div class="rapport-stat-n" id="rMote">0</div><div class="rapport-stat-l">Møter</div></div>
+  </div>
+
+  <div class="rapport-table">
+    <div class="rapport-table-header">
+      <span>Detaljer per samtale</span>
+      <button class="btn-secondary" style="padding:8px 16px;font-size:12px;" onclick="downloadRapport()">&#8595; Last ned Excel</button>
+    </div>
+    <div class="rapport-row rapport-row-header">
+      <div>Selskap</div><div class="rapport-col-bransje">Bransje</div><div>Resultat</div><div class="rapport-col-motedato">Møtedato</div><div>Kommentar</div><div class="rapport-col-tid">Tidspunkt</div>
+    </div>
+    <div id="rapportRows"></div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let allLists = [];
+let currentList = null;
+let currentCompanies = [];
+let filteredCompanies = [];
+let currentIndex = 0;
+let currentResultat = null;
+let kunMedTlf = false;
+let listToDelete = null;
+let rapportData = [];
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = "login.html"; return; }
+  const { data: profile } = await sb.from("profiles").select("approved").eq("email", session.user.email).single();
+  if(!profile || !profile.approved){ await sb.auth.signOut(); window.location.href = "login.html"; return; }
+  currentUser = session.user;
+  showIdag();
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  window.location.href = "login.html";
+}
+
+function setActiveView(viewId){
+  ["view-idag","view-lists","view-ring","view-rapport"].forEach(id => document.getElementById(id).classList.remove("active"));
+  document.getElementById(viewId).classList.add("active");
+  ["nav-idag","nav-lister","nav-rapport"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.color = "";
+  });
+  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport"};
+  if(navMap[viewId]){
+    const el = document.getElementById(navMap[viewId]);
+    if(el){ el.style.color = "var(--accent2)"; el.style.borderColor = "var(--accent)"; }
+  }
+}
+
+function showIdag(){
+  setActiveView("view-idag");
+  loadIdag();
+}
+
+function showLists(){
+  setActiveView("view-lists");
+  loadLists();
+}
+
+function showRapport(){
+  setActiveView("view-rapport");
+  loadRapport();
+}
+
+async function loadLists(){
+  const { data: lists } = await sb.from("lists")
+    .select("*, companies(count)")
+    .eq("user_id", currentUser.id)
+    .order("created_at", { ascending: false });
+  allLists = lists || [];
+  renderLists();
+}
+
+async function renderLists(){
+  const container = document.getElementById("listsContainer");
+  if(!allLists.length){
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">Ingen lister ennå</div>
+      <div class="empty-sub">Gå til <a href="index.html" style="color:var(--accent2)">oppslag</a> og kjør et masseoppslag.</div>
+    </div>`;
+    return;
+  }
+
+  const { data: calls } = await sb.from("calls")
+    .select("company_id, resultat, companies(list_id)")
+    .eq("user_id", currentUser.id);
+
+  container.innerHTML = allLists.map(list => {
+    const count = list.companies?.[0]?.count || 0;
+    const listCalls = (calls || []).filter(c => c.companies?.list_id === list.id);
+    const ringt = listCalls.length;
+    const mote = listCalls.filter(c => c.resultat === "møte").length;
+    const dato = new Date(list.created_at).toLocaleDateString("no", {day:"numeric",month:"short",year:"numeric"});
+    return `<div class="list-card">
+      <div class="list-info">
+        <div class="list-name">${list.name}</div>
+        <div class="list-meta">${dato} &nbsp;·&nbsp; ${count} selskaper</div>
+      </div>
+      <div class="list-stats">
+        <div class="list-stat"><div class="list-stat-n">${ringt}</div><div class="list-stat-l">Ringt</div></div>
+        <div class="list-stat"><div class="list-stat-n">${mote}</div><div class="list-stat-l">Møter</div></div>
+      </div>
+      <div class="list-actions">
+        <button class="btn-primary" onclick="startRing('${list.id}','${list.name.replace(/'/g,"\\'")}')">
+          ${ringt > 0 ? "Fortsett" : "Start ringing"}
+        </button>
+        <button class="btn-secondary" onclick="showRapportForList('${list.id}')">Rapport</button>
+        <button class="btn-danger" onclick="openDeleteModal('${list.id}','${list.name.replace(/'/g,"\\'")}')">🗑</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// DELETE
+function openDeleteModal(listId, listName){
+  listToDelete = listId;
+  document.getElementById("deleteModalText").textContent = `Er du sikker på at du vil slette "${listName}"? Alle samtalelogger slettes også. Dette kan ikke angres.`;
+  document.getElementById("deleteModal").classList.add("open");
+}
+function closeDeleteModal(){
+  document.getElementById("deleteModal").classList.remove("open");
+  listToDelete = null;
+}
+async function confirmDelete(){
+  if(!listToDelete) return;
+  await sb.from("lists").delete().eq("id", listToDelete);
+  closeDeleteModal();
+  loadLists();
+}
+
+// RING MODE
+async function startRing(listId, listName){
+  setActiveView("view-ring");
+  document.getElementById("ringListName").textContent = listName;
+
+  const { data: companies } = await sb.from("companies")
+    .select("*").eq("list_id", listId).order("sort_order");
+
+  const { data: calls } = await sb.from("calls")
+    .select("company_id").eq("user_id", currentUser.id);
+
+  const calledIds = new Set((calls || []).map(c => c.company_id));
+  currentCompanies = companies || [];
+  currentList = { id: listId, name: listName };
+  applyFilter();
+
+  currentIndex = filteredCompanies.findIndex(c => !calledIds.has(c.id));
+  if(currentIndex === -1) currentIndex = 0;
+  showCurrentCompany();
+}
+
+function applyFilter(){
+  if(kunMedTlf){
+    filteredCompanies = currentCompanies.filter(c => c.daglig_leder_telefon || c.okonomisjef_telefon);
+  } else {
+    filteredCompanies = [...currentCompanies];
+  }
+}
+
+function toggleKunMedTlf(){
+  kunMedTlf = !kunMedTlf;
+  document.getElementById("toggleKunTlf").className = "toggle" + (kunMedTlf ? " on" : "");
+  applyFilter();
+  showCurrentCompany();
+}
+
+function startFraToppen(){
+  currentIndex = 0;
+  showCurrentCompany();
+}
+
+function showCurrentCompany(){
+  if(currentIndex >= filteredCompanies.length){
+    document.getElementById("ringCard").innerHTML = `
+      <div class="done-card">
+        <div class="done-icon">🎉</div>
+        <div class="done-title">Alle selskaper er ringt!</div>
+        <div class="done-sub">Du har gått gjennom alle ${filteredCompanies.length} selskaper i listen.</div>
+        <button class="btn-primary" onclick="startFraToppen()">&#8635; Start fra toppen</button>
+      </div>`;
+    document.getElementById("logCard").style.display = "none";
+    document.getElementById("ringProgress").textContent = `${filteredCompanies.length} / ${filteredCompanies.length}`;
+    return;
+  }
+
+  document.getElementById("logCard").style.display = "block";
+  // Restore ring-card structure if needed
+  if(!document.getElementById("ringCompany")){
+    document.getElementById("ringCard").innerHTML = `
+      <div class="ring-card-header">
+        <div><div class="ring-company" id="ringCompany"></div><div class="ring-bransje" id="ringBransje"></div></div>
+        <div id="ringOrgnr" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div class="ring-grid">
+        <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ringDL"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ringDLTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder e-post</div><div class="ring-value" id="ringDLEpost"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="ringOko"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef telefon</div><div class="ring-value" id="ringOkoTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef e-post</div><div class="ring-value" id="ringOkoEpost"></div></div>
+        <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="ringAnsatte"></div></div>
+        <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="ringInntekter"></div></div>
+        <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="ringRegnskap"></div></div>
+        <div class="ring-cell" style="border-bottom:none;"><div class="ring-label">Kommune</div><div class="ring-value" id="ringKommune"></div></div>
+        <div class="ring-cell" style="border-bottom:none;"></div>
+      </div>`;
+  }
+
+  const c = filteredCompanies[currentIndex];
+  document.getElementById("ringProgress").textContent = `${currentIndex+1} / ${filteredCompanies.length}`;
+  document.getElementById("ringCompany").textContent = c.firmanavn || "Ukjent";
+  document.getElementById("ringBransje").textContent = c.bransje || "";
+  document.getElementById("ringOrgnr").textContent = c.orgnr || "";
+  document.getElementById("ringDL").textContent = c.daglig_leder || "Ikke funnet";
+  const dlTlf = c.daglig_leder_telefon;
+  document.getElementById("ringDLTlf").innerHTML = dlTlf ? `<a href="tel:${dlTlf}">${dlTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
+  const dlEpost = c.daglig_leder_epost;
+  document.getElementById("ringDLEpost").innerHTML = dlEpost ? `<a href="mailto:${dlEpost}" style="color:var(--accent2);font-size:13px;">${dlEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
+  document.getElementById("ringOko").textContent = c.okonomisjef || "Ikke funnet";
+  const okoTlf = c.okonomisjef_telefon;
+  document.getElementById("ringOkoTlf").innerHTML = okoTlf ? `<a href="tel:${okoTlf}">${okoTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
+  const okoEpost = c.okonomisjef_epost;
+  document.getElementById("ringOkoEpost").innerHTML = okoEpost ? `<a href="mailto:${okoEpost}" style="color:var(--accent2);font-size:13px;">${okoEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
+  document.getElementById("ringAnsatte").textContent = c.ansatte || "Ikke funnet";
+  document.getElementById("ringInntekter").textContent = c.driftsinntekter ? Number(c.driftsinntekter).toLocaleString("no") + " kr" : "Ikke funnet";
+  document.getElementById("ringRegnskap").textContent = c.regnskapsforer || "Ikke funnet";
+  document.getElementById("ringKommune").textContent = c.kommune || "Ikke funnet";
+
+  currentResultat = null;
+  document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
+  document.getElementById("callKommentar").value = "";
+  document.getElementById("moteDato").value = "";
+  document.getElementById("moteDateWrap").style.display = "none";
+  document.getElementById("ringBackDato").value = "";
+  document.getElementById("ringBackDateWrap").style.display = "none";
+}
+
+function setResultat(val){
+  currentResultat = val;
+  document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
+  const cls = val==="svarte"?"active-svarte":val==="møte"?"active-mote":val==="telefonsvarer"?"active-telefonsvarer":val==="ring tilbake"?"active-ring":"active-ikke";
+  document.getElementById(`btn-${val}`).className = `result-btn ${cls}`;
+  document.getElementById("moteDateWrap").style.display = val==="møte" ? "block" : "none";
+  document.getElementById("ringBackDateWrap").style.display = val==="ring tilbake" ? "block" : "none";
+}
+
+function apneOutlook(){
+  const c = filteredCompanies[currentIndex];
+  const dato = document.getElementById("moteDato").value;
+  const klokke = document.getElementById("moteKlokke").value || "09:00";
+  const epost = document.getElementById("moteEpost").value.trim();
+  const firmanavn = c ? c.firmanavn : "";
+  const navn = c ? (c.daglig_leder || "") : "";
+
+  if(!dato){ alert("Velg møtedato først"); return; }
+
+  // Build datetime strings
+  const start = dato + "T" + klokke + ":00";
+  const [h, m] = klokke.split(":").map(Number);
+  const endH = String(h + 1).padStart(2, "0");
+  const end = dato + "T" + endH + ":" + String(m).padStart(2, "0") + ":00";
+
+  const subject = encodeURIComponent("Møte med " + firmanavn);
+  const body = encodeURIComponent(
+    "Hei " + navn + ",\n\nSom avtalt setter jeg opp et møte.\n\nMvh\nIsak Bjørnstad\nInside Sales | Aspia"
+  );
+
+  // Outlook calendar link
+  const startEnc = start.replace(/[-:]/g, "").replace("T", "T");
+  const endEnc = end.replace(/[-:]/g, "").replace("T", "T");
+
+  let url;
+  if(epost) {
+    // mailto with calendar invite
+    url = `mailto:${epost}?subject=${subject}&body=${body}`;
+  } else {
+    url = `mailto:?subject=${subject}&body=${body}`;
+  }
+  window.location.href = url;
+}
+
+async function saveAndNext(){
+  if(!currentResultat){ alert("Velg et utfall"); return; }
+  const c = filteredCompanies[currentIndex];
+  let tilbakeringing_dato = null;
+  if(currentResultat==="ring tilbake" && document.getElementById("ringBackDato").value){
+    const d = document.getElementById("ringBackDato").value;
+    const t = document.getElementById("ringBackKlokke").value || "09:00";
+    tilbakeringing_dato = d + "T" + t + ":00";
+  }
+  await sb.from("calls").insert({
+    company_id: c.id,
+    user_id: currentUser.id,
+    resultat: currentResultat,
+    kommentar: document.getElementById("callKommentar").value.trim(),
+    motedato: currentResultat==="møte" && document.getElementById("moteDato").value ? document.getElementById("moteDato").value : null,
+    tilbakeringing_dato: tilbakeringing_dato
+  });
+  currentIndex++;
+  showCurrentCompany();
+}
+
+// I DAG
+async function loadIdag(){
+  const now = new Date();
+  const dagNavn = ["søndag","mandag","tirsdag","onsdag","torsdag","fredag","lørdag"][now.getDay()];
+  const mndNavn = ["januar","februar","mars","april","mai","juni","juli","august","september","oktober","november","desember"][now.getMonth()];
+  document.getElementById("idagDato").textContent = dagNavn.charAt(0).toUpperCase()+dagNavn.slice(1)+" "+now.getDate()+". "+mndNavn+" "+now.getFullYear();
+
+  const todayStr = now.toISOString().split("T")[0];
+
+  const { data: calls } = await sb.from("calls")
+    .select("*, companies(firmanavn, daglig_leder, daglig_leder_telefon, okonomisjef, okonomisjef_telefon, list_id)")
+    .eq("user_id", currentUser.id);
+
+  const allCalls = calls || [];
+
+  // Count ringt i dag
+  const ringtIdag = allCalls.filter(c => c.created_at && c.created_at.startsWith(todayStr)).length;
+  const moterBooket = allCalls.filter(c => c.resultat === "møte").length;
+
+  // Tilbakeringinger
+  const alleRingTilbake = allCalls.filter(c => c.resultat === "ring tilbake" && c.tilbakeringing_dato);
+
+  const idagRingTilbake = alleRingTilbake.filter(c => c.tilbakeringing_dato.startsWith(todayStr));
+  const forfalt = idagRingTilbake.filter(c => new Date(c.tilbakeringing_dato) < now);
+  const kommende_idag = idagRingTilbake.filter(c => new Date(c.tilbakeringing_dato) >= now);
+  const fremtidige = alleRingTilbake.filter(c => !c.tilbakeringing_dato.startsWith(todayStr) && new Date(c.tilbakeringing_dato) > now)
+    .sort((a,b) => new Date(a.tilbakeringing_dato) - new Date(b.tilbakeringing_dato));
+
+  // Møter i dag
+  const moterIdag = allCalls.filter(c => c.resultat === "møte" && c.motedato && c.motedato.startsWith(todayStr));
+
+  // Oppdater stats
+  document.getElementById("idagRingt").textContent = ringtIdag;
+  document.getElementById("idagMoter").textContent = moterBooket;
+  document.getElementById("idagTilbake").textContent = alleRingTilbake.length;
+  document.getElementById("idagForfalt").textContent = forfalt.length;
+
+  function fmtKlokke(isoStr){
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString("no",{hour:"2-digit",minute:"2-digit"});
+  }
+  function fmtDato(isoStr){
+    const d = new Date(isoStr);
+    return d.toLocaleDateString("no",{day:"numeric",month:"short"});
+  }
+
+  function renderRingItem(c, cls, timeStr, timeColor){
+    const navn = c.companies?.daglig_leder || "";
+    const tlf = c.companies?.daglig_leder_telefon || c.companies?.okonomisjef_telefon || "";
+    const firma = c.companies?.firmanavn || "Ukjent";
+    const kommentar = c.kommentar ? `· ${c.kommentar}` : "";
+    return `<div class="idag-item ${cls}">
+      <div class="idag-item-icon ring">📞</div>
+      <div class="idag-item-info">
+        <div class="idag-item-company">${firma}</div>
+        <div class="idag-item-meta">${navn}${tlf?" · "+tlf:""}${kommentar?` · <em style='color:var(--muted)'>${kommentar}</em>`:""}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="idag-item-time ${timeColor}">${timeStr}</div>
+        ${tlf ? `<a href="tel:${tlf}" class="idag-ring-btn">Ring nå</a>` : ""}
+      </div>
+    </div>`;
+  }
+
+  // Forfalt
+  const forfaltSeksjon = document.getElementById("idagSeksjonForfalt");
+  if(forfalt.length){
+    forfaltSeksjon.style.display = "block";
+    document.getElementById("idagForfaltBadge").textContent = forfalt.length+" forfalt";
+    document.getElementById("idagForfaltListe").innerHTML = forfalt
+      .sort((a,b)=>new Date(a.tilbakeringing_dato)-new Date(b.tilbakeringing_dato))
+      .map(c => renderRingItem(c,"forfalt","Forfalt "+fmtKlokke(c.tilbakeringing_dato),"red")).join("");
+  } else {
+    forfaltSeksjon.style.display = "none";
+  }
+
+  // Tilbakeringinger i dag
+  const tilbakeListe = document.getElementById("idagTilbakeListe");
+  document.getElementById("idagTilbakeBadge").textContent = kommende_idag.length ? kommende_idag.length+" planlagt" : "";
+  if(kommende_idag.length){
+    tilbakeListe.innerHTML = kommende_idag
+      .sort((a,b)=>new Date(a.tilbakeringing_dato)-new Date(b.tilbakeringing_dato))
+      .map(c => renderRingItem(c,"idag-snart",fmtKlokke(c.tilbakeringing_dato),"accent")).join("");
+  } else {
+    tilbakeListe.innerHTML = `<div class="idag-empty">Ingen tilbakeringinger planlagt for i dag 👍</div>`;
+  }
+
+  // Møter i dag
+  const moteSeksjon = document.getElementById("idagSeksjonMote");
+  const divider = document.getElementById("idagDivider");
+  if(moterIdag.length){
+    moteSeksjon.style.display = "block";
+    divider.style.display = "block";
+    document.getElementById("idagMoteBadge").textContent = moterIdag.length+" møte"+(moterIdag.length>1?"r":"");
+    document.getElementById("idagMoteListe").innerHTML = moterIdag.map(c => {
+      const firma = c.companies?.firmanavn || "Ukjent";
+      const navn = c.companies?.daglig_leder || "";
+      const klokke = c.motedato && c.motedato.includes("T") ? fmtKlokke(c.motedato) : (c.motedato||"");
+      return `<div class="idag-item idag-snart">
+        <div class="idag-item-icon mote">📅</div>
+        <div class="idag-item-info">
+          <div class="idag-item-company">${firma}</div>
+          <div class="idag-item-meta">${navn}${c.kommentar ? " · "+c.kommentar : ""}</div>
+        </div>
+        <div class="idag-item-time accent">${klokke}</div>
+      </div>`;
+    }).join("");
+  } else {
+    moteSeksjon.style.display = "none";
+    divider.style.display = moterIdag.length || kommende_idag.length || forfalt.length ? "block" : "none";
+  }
+
+  // Kommende
+  const kommendeListe = document.getElementById("idagKommendeListe");
+  if(fremtidige.length){
+    kommendeListe.innerHTML = fremtidige.slice(0,10).map(c => {
+      const firma = c.companies?.firmanavn || "Ukjent";
+      const navn = c.companies?.daglig_leder || "";
+      const tlf = c.companies?.daglig_leder_telefon || c.companies?.okonomisjef_telefon || "";
+      return `<div class="idag-item" style="opacity:0.75;">
+        <div class="idag-item-icon ring">📞</div>
+        <div class="idag-item-info">
+          <div class="idag-item-company">${firma}</div>
+          <div class="idag-item-meta">${navn}${tlf?" · "+tlf:""}</div>
+        </div>
+        <div class="idag-item-time muted">${fmtDato(c.tilbakeringing_dato)} · ${fmtKlokke(c.tilbakeringing_dato)}</div>
+      </div>`;
+    }).join("");
+  } else {
+    kommendeListe.innerHTML = `<div class="idag-empty">Ingen kommende tilbakeringinger</div>`;
+  }
+}
+
+// RAPPORT
+async function loadRapport(){
+  await loadLists();
+  const container = document.getElementById("rapportListChecks");
+  container.innerHTML = allLists.map(l => `
+    <div class="rapport-list-check">
+      <input type="checkbox" id="check-${l.id}" checked onchange="updateRapport()">
+      <label for="check-${l.id}" class="rapport-list-name">${l.name}</label>
+      <span class="rapport-list-meta">${new Date(l.created_at).toLocaleDateString("no")}</span>
+    </div>`).join("");
+  updateRapport();
+}
+
+async function showRapportForList(listId){
+  showRapport();
+  await new Promise(r => setTimeout(r, 100));
+  allLists.forEach(l => {
+    const el = document.getElementById(`check-${l.id}`);
+    if(el) el.checked = l.id === listId;
+  });
+  updateRapport();
+}
+
+async function updateRapport(){
+  const selectedIds = allLists.filter(l => document.getElementById(`check-${l.id}`)?.checked).map(l => l.id);
+  if(!selectedIds.length){
+    document.getElementById("rTotalt").textContent="0";
+    document.getElementById("rSvarte").textContent="0";
+    document.getElementById("rIkke").textContent="0";
+    document.getElementById("rMote").textContent="0";
+    document.getElementById("rapportRows").innerHTML="";
+    rapportData = [];
+    return;
+  }
+
+  // Hent calls via join for å unngå for lang company_id liste
+  const { data: calls } = await sb.from("calls")
+    .select("*, companies(firmanavn, bransje, list_id, orgnr, daglig_leder, daglig_leder_telefon, okonomisjef, okonomisjef_telefon, ansatte, driftsinntekter, regnskapsforer, kommune)")
+    .eq("user_id", currentUser.id)
+    .order("created_at", {ascending:false});
+
+  const filteredCalls = (calls||[]).filter(call => selectedIds.includes(call.companies?.list_id));
+
+  rapportData = filteredCalls.map(call => ({
+    ...call,
+    firmanavn: call.companies?.firmanavn || "",
+    bransje: call.companies?.bransje || ""
+  }));
+
+  const c = rapportData;
+  document.getElementById("rTotalt").textContent = c.length;
+  document.getElementById("rSvarte").textContent = c.filter(x=>x.resultat==="svarte").length;
+  document.getElementById("rIkke").textContent = c.filter(x=>x.resultat==="ikke svarte").length;
+  document.getElementById("rMote").textContent = c.filter(x=>x.resultat==="møte").length;
+
+  const colors = {svarte:"var(--green)","ikke svarte":"var(--red)",telefonsvarer:"var(--yellow)",møte:"var(--accent2)"};
+  document.getElementById("rapportRows").innerHTML = c.map((call, i) => {
+    const dato = new Date(call.created_at).toLocaleDateString("no",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+    return `<div class="rapport-row" style="cursor:pointer;" onclick="openEditModal(${i})" title="Klikk for å redigere">
+      <div style="font-weight:500">${call.firmanavn||"—"}</div>
+      <div class="rapport-col-bransje" style="font-size:12px;color:var(--muted)">${call.bransje||"—"}</div>
+      <div style="color:${colors[call.resultat]||"var(--muted)"};font-size:12px;font-weight:500">${call.resultat}</div>
+      <div class="rapport-col-motedato" style="font-size:12px;color:var(--muted)">${call.motedato||"—"}</div>
+      <div style="font-size:12px;color:var(--muted)">${call.kommentar||"—"}</div>
+      <div class="rapport-col-tid" style="font-size:12px;color:var(--muted2);display:flex;align-items:center;justify-content:space-between;">${dato}<span style="color:var(--accent2);font-size:11px;">✎</span></div>
+    </div>`;
+  }).join("") || `<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">Ingen samtaler logget ennå</div>`;
+}
+
+let editCallIndex = null;
+let editResultat = null;
+
+function openEditModal(index){
+  editCallIndex = index;
+  const call = rapportData[index];
+  editResultat = call.resultat;
+  document.getElementById("editCallCompany").textContent = call.firmanavn || "Ukjent selskap";
+  document.getElementById("editKommentar").value = call.kommentar || "";
+  document.getElementById("editMoteDato").value = call.motedato || "";
+  document.getElementById("editMoteDateWrap").style.display = call.resultat === "møte" ? "block" : "none";
+  // Reset and set active button
+  document.querySelectorAll('[id^="edit-btn-"]').forEach(b => b.className = "result-btn");
+  const cls = call.resultat==="svarte"?"active-svarte":call.resultat==="møte"?"active-mote":call.resultat==="telefonsvarer"?"active-telefonsvarer":"active-ikke";
+  const btn = document.getElementById(`edit-btn-${call.resultat}`);
+  if(btn) btn.className = `result-btn ${cls}`;
+  document.getElementById("editCallModal").classList.add("open");
+}
+
+function closeEditModal(){
+  document.getElementById("editCallModal").classList.remove("open");
+  editCallIndex = null;
+  editResultat = null;
+}
+
+function setEditResultat(val){
+  editResultat = val;
+  document.querySelectorAll('[id^="edit-btn-"]').forEach(b => b.className = "result-btn");
+  const cls = val==="svarte"?"active-svarte":val==="møte"?"active-mote":val==="telefonsvarer"?"active-telefonsvarer":"active-ikke";
+  document.getElementById(`edit-btn-${val}`).className = `result-btn ${cls}`;
+  document.getElementById("editMoteDateWrap").style.display = val === "møte" ? "block" : "none";
+}
+
+async function saveEditCall(){
+  if(editCallIndex === null) return;
+  const call = rapportData[editCallIndex];
+  const kommentar = document.getElementById("editKommentar").value.trim();
+  const motedato = editResultat === "møte" && document.getElementById("editMoteDato").value ? document.getElementById("editMoteDato").value : null;
+
+  const { error } = await sb.from("calls").update({
+    resultat: editResultat,
+    kommentar: kommentar,
+    motedato: motedato
+  }).eq("id", call.id);
+
+  if(error){ alert("Kunne ikke lagre: " + error.message); return; }
+
+  closeEditModal();
+  updateRapport();
+}
+
+function downloadRapport(){
+  if(!rapportData.length){ alert("Ingen data å laste ned"); return; }
+  const ws = XLSX.utils.json_to_sheet(rapportData.map(r => ({
+    "Selskap": r.firmanavn,
+    "Bransje": r.bransje,
+    "Org.nr": r.companies?.orgnr || "",
+    "Daglig leder": r.companies?.daglig_leder || "",
+    "DL telefon": r.companies?.daglig_leder_telefon || "",
+    "DL e-post": r.companies?.daglig_leder_epost || "",
+    "Økonomisjef": r.companies?.okonomisjef || "",
+    "ØK telefon": r.companies?.okonomisjef_telefon || "",
+    "ØK e-post": r.companies?.okonomisjef_epost || "",
+    "Ansatte": r.companies?.ansatte || "",
+    "Driftsinntekter": r.companies?.driftsinntekter || "",
+    "Regnskapsfører": r.companies?.regnskapsforer || "",
+    "Kommune": r.companies?.kommune || "",
+    "Resultat": r.resultat,
+    "Møtedato": r.motedato || "",
+    "Kommentar": r.kommentar || "",
+    "Tidspunkt": new Date(r.created_at).toLocaleString("no")
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rapport");
+  XLSX.writeFile(wb, "dialr-rapport.xlsx");
+}
+
+// MANUAL LIST UPLOAD
+let manualRows = [];
+
+document.getElementById("manualDropZone").addEventListener("dragover", e => { e.preventDefault(); document.getElementById("manualDropZone").style.borderColor = "var(--accent)"; });
+document.getElementById("manualDropZone").addEventListener("dragleave", () => { document.getElementById("manualDropZone").style.borderColor = "var(--border2)"; });
+document.getElementById("manualDropZone").addEventListener("drop", e => { e.preventDefault(); document.getElementById("manualDropZone").style.borderColor = "var(--border2)"; handleManualFile(e.dataTransfer.files[0]); });
+document.getElementById("manualFileInput").addEventListener("change", e => handleManualFile(e.target.files[0]));
+
+function handleManualFile(file) {
+  if (!file) return;
+  const rd = new FileReader();
+  rd.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: "binary" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if (data.length < 2) { showManualErr("Filen er tom"); return; }
+
+      const headers = data[0].map(h => String(h || "").toLowerCase());
+
+      // Find column indices
+      const cols = {
+        orgnr: headers.findIndex(h => h.includes("org")),
+        firmanavn: headers.findIndex(h => h.includes("firma") || h.includes("selskap") || h.includes("navn")),
+        bransje: headers.findIndex(h => h.includes("bransje")),
+        daglig_leder: headers.findIndex(h => h.includes("daglig") || h.includes("leder")),
+        daglig_leder_tittel: headers.findIndex(h => h.includes("tittel")),
+        daglig_leder_telefon: headers.findIndex(h => (h.includes("telefon") || h.includes("tlf")) && !h.includes("øko")),
+        okonomisjef: headers.findIndex(h => h.includes("øko") && !h.includes("telefon") && !h.includes("tlf")),
+        okonomisjef_telefon: headers.findIndex(h => h.includes("øko") && (h.includes("telefon") || h.includes("tlf"))),
+      };
+
+      manualRows = data.slice(1).filter(r => r.some(c => c)).map((row, i) => ({
+        sort_order: i,
+        orgnr: cols.orgnr >= 0 ? String(row[cols.orgnr] || "").replace(/[\s.]/g, "") : "",
+        firmanavn: cols.firmanavn >= 0 ? String(row[cols.firmanavn] || "") : "",
+        bransje: cols.bransje >= 0 ? String(row[cols.bransje] || "") : "",
+        daglig_leder: cols.daglig_leder >= 0 ? String(row[cols.daglig_leder] || "") : "",
+        daglig_leder_tittel: cols.daglig_leder_tittel >= 0 ? String(row[cols.daglig_leder_tittel] || "") : "",
+        daglig_leder_telefon: cols.daglig_leder_telefon >= 0 ? String(row[cols.daglig_leder_telefon] || "").replace(/[\s.]/g, "") : "",
+        okonomisjef: cols.okonomisjef >= 0 ? String(row[cols.okonomisjef] || "") : "",
+        okonomisjef_telefon: cols.okonomisjef_telefon >= 0 ? String(row[cols.okonomisjef_telefon] || "").replace(/[\s.]/g, "") : "",
+        kilde: "manuell",
+      }));
+
+      if (!manualRows.length) { showManualErr("Fant ingen rader i filen"); return; }
+
+      document.getElementById("manualFilePill").style.display = "flex";
+      document.getElementById("manualFileName").textContent = file.name;
+      document.getElementById("manualFileCount").textContent = manualRows.length + " rader";
+      document.getElementById("manualErr").style.display = "none";
+      document.getElementById("manualUploadBtn").disabled = false;
+    } catch(err) {
+      showManualErr("Kunne ikke lese filen: " + err.message);
+    }
+  };
+  rd.readAsBinaryString(file);
+}
+
+function showManualErr(msg) {
+  document.getElementById("manualErrTxt").textContent = msg;
+  document.getElementById("manualErr").style.display = "flex";
+}
+
+async function uploadManualList() {
+  if (!manualRows.length) return;
+  const name = document.getElementById("manualListName").value.trim() || "Manuell liste";
+  const btn = document.getElementById("manualUploadBtn");
+  btn.disabled = true;
+  btn.textContent = "Laster opp...";
+
+  try {
+    const listData = await sb.from("lists").insert({
+      user_id: currentUser.id,
+      name: name,
+      job_id: null
+    }).select().single();
+
+    const listId = listData.data.id;
+    const companies = manualRows.map(r => ({ ...r, list_id: listId }));
+
+    // Insert in batches of 50
+    for (let i = 0; i < companies.length; i += 50) {
+      await sb.from("companies").insert(companies.slice(i, i + 50));
+    }
+
+    btn.textContent = "✓ Liste lastet opp!";
+    setTimeout(() => {
+      btn.textContent = "Last opp liste";
+      btn.disabled = false;
+      document.getElementById("manualFilePill").style.display = "none";
+      document.getElementById("manualListName").value = "";
+      manualRows = [];
+      loadLists();
+    }, 2000);
+  } catch(err) {
+    showManualErr("Feil ved opplasting: " + err.message);
+    btn.disabled = false;
+    btn.textContent = "Last opp liste";
+  }
+}
+
+init();
+</script>
+</body>
+</html>
