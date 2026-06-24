@@ -1203,16 +1203,14 @@ function handleManualFile(file) {
 }
 
 function openMapper() {
-  // Bygg chips
   const chipsEl = document.getElementById("mapperChips");
-  chipsEl.innerHTML = mapperHeaders.map(h =>
-    `<div class="mapper-chip" draggable="true" data-col="${esc(h)}" id="chip-${esc(h)}"
-      ondragstart="chipDragStart(event,'${h.replace(/'/g,"\\'")}')">
+  chipsEl.innerHTML = mapperHeaders.map((h, i) =>
+    `<div class="mapper-chip" draggable="true" data-idx="${i}"
+      ondragstart="chipDragStart(event,${i})">
       ${esc(h)}
     </div>`
   ).join("");
 
-  // Bygg felt-rader
   const fieldsEl = document.getElementById("mapperFields");
   fieldsEl.innerHTML = DIALR_FIELDS.map(f =>
     `<div class="mapper-field-row">
@@ -1240,32 +1238,32 @@ function closeMapper() {
   document.getElementById("manualFileInput").value = "";
 }
 
-let dragCol = null;
-function chipDragStart(e, col) {
-  dragCol = col;
+let dragIdx = null;
+function chipDragStart(e, idx) {
+  dragIdx = idx;
+  e.dataTransfer.setData("text/plain", String(idx));
   e.dataTransfer.effectAllowed = "move";
-  setTimeout(() => { const c = document.getElementById(`chip-${col}`); if(c) c.classList.add("dragging"); }, 0);
 }
-function dropOver(e) { e.preventDefault(); e.currentTarget.classList.add("over"); }
+function dropOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; e.currentTarget.classList.add("over"); }
 function dropLeave(e) { e.currentTarget.classList.remove("over"); }
 
 function dropOn(e, fieldKey) {
   e.preventDefault();
   e.currentTarget.classList.remove("over");
-  if (!dragCol) return;
+  const idx = parseInt(e.dataTransfer.getData("text/plain"));
+  if (isNaN(idx) || idx < 0 || idx >= mapperHeaders.length) return;
+  const col = mapperHeaders[idx];
 
-  // Fjern col fra eventuelt annet felt den var mappet til
   Object.keys(mapperMapping).forEach(k => {
-    if (mapperMapping[k] === dragCol && k !== fieldKey) {
+    if (mapperMapping[k] === col && k !== fieldKey) {
       delete mapperMapping[k];
       renderDropZone(k, null);
     }
   });
 
-  mapperMapping[fieldKey] = dragCol;
-  renderDropZone(fieldKey, dragCol);
+  mapperMapping[fieldKey] = col;
+  renderDropZone(fieldKey, col);
   updateMapperState();
-  dragCol = null;
 }
 
 function renderDropZone(fieldKey, col) {
