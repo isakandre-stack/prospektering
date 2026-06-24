@@ -179,6 +179,36 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .idag-ring-btn:hover{background:rgba(52,211,153,0.15);}
 .idag-empty{text-align:center;padding:32px;color:var(--muted);font-size:14px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;}
 .idag-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+/* Kolonnemapper modal */
+.mapper-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.mapper-overlay.open{display:flex;}
+.mapper-modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.mapper-header{padding:24px 28px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mapper-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+.mapper-sub{font-size:13px;color:var(--muted);}
+.mapper-chips{padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mapper-chips-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+.mapper-chips-row{display:flex;flex-wrap:wrap;gap:8px;min-height:36px;}
+.mapper-chip{padding:6px 14px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:100px;font-size:12px;font-weight:500;color:var(--text);cursor:grab;user-select:none;transition:all 0.15s;white-space:nowrap;}
+.mapper-chip:hover{border-color:var(--accent);color:var(--accent2);}
+.mapper-chip.dragging{opacity:0.4;}
+.mapper-chip.used{opacity:0.3;cursor:default;pointer-events:none;}
+.mapper-fields{flex:1;overflow-y:auto;padding:16px 28px;}
+.mapper-field-row{display:grid;grid-template-columns:180px 1fr;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.mapper-field-row:last-child{border-bottom:none;}
+.mapper-field-label{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.mapper-field-req{font-size:10px;color:var(--red);font-family:'DM Mono',monospace;}
+.mapper-drop{min-height:38px;border:1.5px dashed var(--border2);border-radius:8px;display:flex;align-items:center;padding:4px 10px;gap:8px;flex-wrap:wrap;transition:all 0.15s;background:var(--bg3);}
+.mapper-drop.over{border-color:var(--accent);background:var(--accent-bg);}
+.mapper-drop.filled{border-style:solid;border-color:var(--green-border);background:var(--green-bg);}
+.mapper-drop-placeholder{font-size:12px;color:var(--muted2);}
+.mapper-drop-chip{padding:4px 10px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:100px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;}
+.mapper-drop-chip-x{cursor:pointer;opacity:0.6;font-size:14px;line-height:1;}
+.mapper-drop-chip-x:hover{opacity:1;}
+.mapper-footer{padding:20px 28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.mapper-footer-hint{font-size:12px;color:var(--muted);}
+
 </style>
 </head>
 <body>
@@ -194,6 +224,28 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
     <button class="nav-btn" onclick="doLogout()">Logg ut</button>
   </div>
 </nav>
+
+<!-- KOLONNEMAPPER MODAL -->
+<div class="mapper-overlay" id="mapperOverlay">
+  <div class="mapper-modal">
+    <div class="mapper-header">
+      <div class="mapper-title">Koble kolonner</div>
+      <div class="mapper-sub">Dra kolonner fra filen din til riktig Dialr-felt. Org.nr og Firmanavn er påkrevd.</div>
+    </div>
+    <div class="mapper-chips">
+      <div class="mapper-chips-label">Kolonner i filen din</div>
+      <div class="mapper-chips-row" id="mapperChips"></div>
+    </div>
+    <div class="mapper-fields" id="mapperFields"></div>
+    <div class="mapper-footer">
+      <span class="mapper-footer-hint" id="mapperHint">Koble Org.nr og Firmanavn for å fortsette</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-secondary" onclick="closeMapper()">Avbryt</button>
+        <button class="btn-primary" id="mapperUploadBtn" disabled onclick="doMapperUpload()">Last opp liste</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- SLETT BEKREFTELSE MODAL -->
 <div class="modal-overlay" id="deleteModal">
@@ -273,7 +325,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   <!-- Last opp egen liste -->
   <div style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border);">
     <div style="font-size:18px;font-weight:600;margin-bottom:8px;">Last opp egen liste</div>
-    <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Last opp en ferdig kontaktliste uten prospektering. Filen må ha kolonnene: Firmanavn, Daglig leder, Daglig leder telefon.</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Last opp en ferdig kontaktliste. Du kobler selv Excel-kolonnene til Dialr-feltene.</div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;">
       <div style="margin-bottom:16px;">
         <div class="result-label" style="margin-bottom:8px;">Listens navn</div>
@@ -285,15 +337,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
         <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Dra og slipp Excel-fil her</div>
         <div style="font-size:12px;color:var(--muted);">eller klikk for å velge</div>
       </div>
-      <div id="manualFilePill" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;">
-        <div style="width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;"></div>
-        <span id="manualFileName"></span>
-        <span style="margin-left:auto;" id="manualFileCount"></span>
-      </div>
       <div id="manualErr" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:12px 16px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:10px;font-size:13px;color:var(--red);">
         <span id="manualErrTxt"></span>
       </div>
-      <button class="btn-primary" id="manualUploadBtn" disabled onclick="uploadManualList()">Last opp liste</button>
     </div>
   </div>
 </div>
@@ -1106,8 +1152,28 @@ function downloadRapport(){
   XLSX.writeFile(wb, "dialr-rapport.xlsx");
 }
 
-// MANUAL LIST UPLOAD
+// MANUAL LIST UPLOAD — kolonnemapper
 let manualRows = [];
+let mapperFileData = []; // rådata fra Excel
+let mapperHeaders = []; // brukerens kolonnenavn
+let mapperMapping = {}; // dialrFelt -> excelKolonne
+
+const DIALR_FIELDS = [
+  { key: "orgnr",                label: "Org.nr",                required: true,  type: "str" },
+  { key: "firmanavn",            label: "Firmanavn",             required: true,  type: "str" },
+  { key: "bransje",              label: "Bransje",               required: false, type: "str" },
+  { key: "daglig_leder",        label: "Daglig leder",          required: false, type: "str" },
+  { key: "daglig_leder_tittel", label: "DL tittel",             required: false, type: "str" },
+  { key: "daglig_leder_telefon",label: "DL telefon",            required: false, type: "tlf" },
+  { key: "daglig_leder_epost",  label: "DL e-post",             required: false, type: "str" },
+  { key: "okonomisjef",         label: "Økonomisjef",           required: false, type: "str" },
+  { key: "okonomisjef_telefon", label: "ØK telefon",            required: false, type: "tlf" },
+  { key: "okonomisjef_epost",   label: "ØK e-post",             required: false, type: "str" },
+  { key: "ansatte",             label: "Ansatte",               required: false, type: "num" },
+  { key: "driftsinntekter",     label: "Driftsinntekter",       required: false, type: "num" },
+  { key: "regnskapsforer",      label: "Regnskapsfører",        required: false, type: "str" },
+  { key: "kommune",             label: "Kommune",               required: false, type: "str" },
+];
 
 document.getElementById("manualDropZone").addEventListener("dragover", e => { e.preventDefault(); document.getElementById("manualDropZone").style.borderColor = "var(--accent)"; });
 document.getElementById("manualDropZone").addEventListener("dragleave", () => { document.getElementById("manualDropZone").style.borderColor = "var(--border2)"; });
@@ -1123,61 +1189,11 @@ function handleManualFile(file) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
       if (data.length < 2) { showManualErr("Filen er tom"); return; }
-
-      const headers = data[0].map(h => String(h || "").toLowerCase());
-
-      // Find column indices
-      const cols = {
-        orgnr:                headers.findIndex(h => h.includes("org")),
-        firmanavn:            headers.findIndex(h => h.includes("firma") || h.includes("selskap") || (h.includes("navn") && !h.includes("daglig") && !h.includes("øko") && !h.includes("regn"))),
-        bransje:              headers.findIndex(h => h.includes("bransje")),
-        daglig_leder:         headers.findIndex(h => h.includes("daglig") && !h.includes("telefon") && !h.includes("tlf") && !h.includes("e-post") && !h.includes("epost") && !h.includes("tittel") && !h.includes("kilde")),
-        daglig_leder_tittel:  headers.findIndex(h => h.includes("tittel")),
-        daglig_leder_telefon: headers.findIndex(h => (h.includes("telefon") || h.includes("tlf")) && h.includes("daglig")),
-        daglig_leder_epost:   headers.findIndex(h => (h.includes("e-post") || h.includes("epost")) && h.includes("daglig")),
-        okonomisjef:          headers.findIndex(h => h.includes("øko") && !h.includes("telefon") && !h.includes("tlf") && !h.includes("e-post") && !h.includes("epost") && !h.includes("kilde")),
-        okonomisjef_telefon:  headers.findIndex(h => h.includes("øko") && (h.includes("telefon") || h.includes("tlf"))),
-        okonomisjef_epost:    headers.findIndex(h => h.includes("øko") && (h.includes("e-post") || h.includes("epost"))),
-        ansatte:              headers.findIndex(h => h.includes("ansatt")),
-        driftsinntekter:      headers.findIndex(h => h.includes("drifts") || h.includes("inntekt")),
-        regnskapsforer:       headers.findIndex(h => h.includes("regnskap")),
-        kommune:              headers.findIndex(h => h.includes("kommune")),
-      };
-
-      const str = (row, col) => col >= 0 && row[col] != null ? String(row[col]).trim() : "";
-      const tlf = (row, col) => col >= 0 && row[col] != null ? String(row[col]).replace(/[\s.]/g, "") : "";
-      const num = (row, col) => {
-        if(col < 0 || row[col] == null || row[col] === "") return null;
-        const n = parseFloat(row[col]);
-        return isNaN(n) ? null : n;
-      };
-
-      manualRows = data.slice(1).filter(r => r.some(c => c)).map((row, i) => ({
-        sort_order: i,
-        orgnr:                (() => { const v = tlf(row, cols.orgnr); return v.endsWith(".0") ? v.slice(0,-2) : v; })(),
-        firmanavn:            str(row, cols.firmanavn),
-        bransje:              str(row, cols.bransje),
-        daglig_leder:         str(row, cols.daglig_leder),
-        daglig_leder_tittel:  str(row, cols.daglig_leder_tittel),
-        daglig_leder_telefon: tlf(row, cols.daglig_leder_telefon),
-        daglig_leder_epost:   str(row, cols.daglig_leder_epost),
-        okonomisjef:          str(row, cols.okonomisjef),
-        okonomisjef_telefon:  tlf(row, cols.okonomisjef_telefon),
-        okonomisjef_epost:    str(row, cols.okonomisjef_epost),
-        ansatte:              num(row, cols.ansatte),
-        driftsinntekter:      num(row, cols.driftsinntekter),
-        regnskapsforer:       str(row, cols.regnskapsforer),
-        kommune:              str(row, cols.kommune),
-        kilde: "manuell",
-      }));
-
-      if (!manualRows.length) { showManualErr("Fant ingen rader i filen"); return; }
-
-      document.getElementById("manualFilePill").style.display = "flex";
-      document.getElementById("manualFileName").textContent = file.name;
-      document.getElementById("manualFileCount").textContent = manualRows.length + " rader";
+      mapperHeaders = data[0].map(h => String(h || "").trim()).filter(h => h);
+      mapperFileData = data.slice(1).filter(r => r.some(c => c != null && c !== ""));
+      mapperMapping = {};
       document.getElementById("manualErr").style.display = "none";
-      document.getElementById("manualUploadBtn").disabled = false;
+      openMapper();
     } catch(err) {
       showManualErr("Kunne ikke lese filen: " + err.message);
     }
@@ -1185,47 +1201,167 @@ function handleManualFile(file) {
   rd.readAsBinaryString(file);
 }
 
-function showManualErr(msg) {
-  document.getElementById("manualErrTxt").textContent = msg;
-  document.getElementById("manualErr").style.display = "flex";
+function openMapper() {
+  // Bygg chips
+  const chipsEl = document.getElementById("mapperChips");
+  chipsEl.innerHTML = mapperHeaders.map(h =>
+    `<div class="mapper-chip" draggable="true" data-col="${esc(h)}" id="chip-${esc(h)}"
+      ondragstart="chipDragStart(event,'${h.replace(/'/g,"\\'")}')">
+      ${esc(h)}
+    </div>`
+  ).join("");
+
+  // Bygg felt-rader
+  const fieldsEl = document.getElementById("mapperFields");
+  fieldsEl.innerHTML = DIALR_FIELDS.map(f =>
+    `<div class="mapper-field-row">
+      <div class="mapper-field-label">
+        ${esc(f.label)}
+        ${f.required ? '<span class="mapper-field-req">påkrevd</span>' : ''}
+      </div>
+      <div class="mapper-drop" id="drop-${f.key}"
+        ondragover="dropOver(event)"
+        ondragleave="dropLeave(event)"
+        ondrop="dropOn(event,'${f.key}')">
+        <span class="mapper-drop-placeholder">Dra hit</span>
+      </div>
+    </div>`
+  ).join("");
+
+  mapperMapping = {};
+  updateMapperState();
+  document.getElementById("mapperOverlay").classList.add("open");
 }
 
-async function uploadManualList() {
-  if (!manualRows.length) return;
+function closeMapper() {
+  document.getElementById("mapperOverlay").classList.remove("open");
+  // Reset filinput
+  document.getElementById("manualFileInput").value = "";
+}
+
+let dragCol = null;
+function chipDragStart(e, col) {
+  dragCol = col;
+  e.dataTransfer.effectAllowed = "move";
+  setTimeout(() => { const c = document.getElementById(`chip-${col}`); if(c) c.classList.add("dragging"); }, 0);
+}
+function dropOver(e) { e.preventDefault(); e.currentTarget.classList.add("over"); }
+function dropLeave(e) { e.currentTarget.classList.remove("over"); }
+
+function dropOn(e, fieldKey) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("over");
+  if (!dragCol) return;
+
+  // Fjern col fra eventuelt annet felt den var mappet til
+  Object.keys(mapperMapping).forEach(k => {
+    if (mapperMapping[k] === dragCol && k !== fieldKey) {
+      delete mapperMapping[k];
+      renderDropZone(k, null);
+    }
+  });
+
+  mapperMapping[fieldKey] = dragCol;
+  renderDropZone(fieldKey, dragCol);
+  updateMapperState();
+  dragCol = null;
+}
+
+function renderDropZone(fieldKey, col) {
+  const drop = document.getElementById(`drop-${fieldKey}`);
+  if (!drop) return;
+  if (col) {
+    drop.classList.add("filled");
+    drop.innerHTML = `<div class="mapper-drop-chip">${esc(col)}<span class="mapper-drop-chip-x" onclick="removeMapping('${fieldKey}')">×</span></div>`;
+  } else {
+    drop.classList.remove("filled");
+    drop.innerHTML = `<span class="mapper-drop-placeholder">Dra hit</span>`;
+  }
+}
+
+function removeMapping(fieldKey) {
+  delete mapperMapping[fieldKey];
+  renderDropZone(fieldKey, null);
+  updateMapperState();
+}
+
+function updateMapperState() {
+  // Oppdater chip used-state
+  mapperHeaders.forEach(h => {
+    const chip = document.getElementById(`chip-${h}`);
+    if (!chip) return;
+    const inUse = Object.values(mapperMapping).includes(h);
+    chip.classList.toggle("used", inUse);
+  });
+
+  const reqOk = DIALR_FIELDS.filter(f => f.required).every(f => mapperMapping[f.key]);
+  document.getElementById("mapperUploadBtn").disabled = !reqOk;
+  const missing = DIALR_FIELDS.filter(f => f.required && !mapperMapping[f.key]).map(f => f.label);
+  document.getElementById("mapperHint").textContent = reqOk
+    ? `${Object.keys(mapperMapping).length} felt koblet — klar til opplasting`
+    : `Koble ${missing.join(" og ")} for å fortsette`;
+}
+
+function parseVal(raw, type) {
+  if (raw == null || raw === "") return null;
+  const s = String(raw).trim();
+  if (s === "" || s === "nan") return null;
+  if (type === "tlf") return s.replace(/[\s.]/g, "").replace(/\.0$/, "");
+  if (type === "num") {
+    const f = parseFloat(s);
+    return isNaN(f) ? null : Math.round(f);
+  }
+  return s;
+}
+
+async function doMapperUpload() {
   const name = document.getElementById("manualListName").value.trim() || "Manuell liste";
-  const btn = document.getElementById("manualUploadBtn");
+  const btn = document.getElementById("mapperUploadBtn");
   btn.disabled = true;
   btn.textContent = "Laster opp...";
 
   try {
-    const listData = await sb.from("lists").insert({
-      user_id: currentUser.id,
-      name: name,
-      job_id: null
+    // Bygg rader
+    const rows = mapperFileData.map((row, i) => {
+      const obj = { sort_order: i, kilde: "manuell" };
+      DIALR_FIELDS.forEach(f => {
+        const col = mapperMapping[f.key];
+        if (!col) { obj[f.key] = null; return; }
+        const colIdx = mapperHeaders.indexOf(col);
+        obj[f.key] = parseVal(colIdx >= 0 ? row[colIdx] : null, f.type);
+      });
+      // Rens orgnr
+      if (obj.orgnr) obj.orgnr = String(obj.orgnr).replace(/\.0$/, "").replace(/[\s.]/g, "");
+      return obj;
+    }).filter(r => r.orgnr || r.firmanavn);
+
+    if (!rows.length) { alert("Ingen gyldige rader funnet"); btn.disabled = false; btn.textContent = "Last opp liste"; return; }
+
+    const { data: listData, error: listErr } = await sb.from("lists").insert({
+      user_id: currentUser.id, name, job_id: null
     }).select().single();
+    if (listErr) throw listErr;
 
-    const listId = listData.data.id;
-    const companies = manualRows.map(r => ({ ...r, list_id: listId }));
-
-    // Insert in batches of 50
-    for (let i = 0; i < companies.length; i += 50) {
-      await sb.from("companies").insert(companies.slice(i, i + 50));
+    const listId = listData.id;
+    for (let i = 0; i < rows.length; i += 50) {
+      const { error } = await sb.from("companies").insert(rows.slice(i, i+50).map(r => ({ ...r, list_id: listId })));
+      if (error) throw error;
     }
 
-    btn.textContent = "✓ Liste lastet opp!";
-    setTimeout(() => {
-      btn.textContent = "Last opp liste";
-      btn.disabled = false;
-      document.getElementById("manualFilePill").style.display = "none";
-      document.getElementById("manualListName").value = "";
-      manualRows = [];
-      loadLists();
-    }, 2000);
+    closeMapper();
+    btn.textContent = "Last opp liste";
+    document.getElementById("manualListName").value = "";
+    loadLists();
   } catch(err) {
-    showManualErr("Feil ved opplasting: " + err.message);
+    alert("Feil ved opplasting: " + err.message);
     btn.disabled = false;
     btn.textContent = "Last opp liste";
   }
+}
+
+function showManualErr(msg) {
+  document.getElementById("manualErrTxt").textContent = msg;
+  document.getElementById("manualErr").style.display = "flex";
 }
 
 init();
