@@ -290,6 +290,9 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 const API = "https://kontakt-api-production.up.railway.app";
 let orgnrs = [], results = [], isLoggedIn = false;
 
+// Escape dynamisk tekst før innsetting i innerHTML (mot XSS fra scrapede data)
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
 // TABS
 function switchTab(t){
   document.querySelectorAll(".app-tab").forEach(b=>b.classList.remove("active"));
@@ -318,6 +321,27 @@ function requireLogin(){
 }
 
 let sb = null;
+
+// Hent ferskt access-token og bygg Authorization-header
+async function authHeaders(){
+  if(!sb) return {};
+  const {data:{session}} = await sb.auth.getSession();
+  return session?.access_token ? {Authorization:`Bearer ${session.access_token}`} : {};
+}
+
+// Last ned jobb-Excel med auth-header (kan ikke bruke window.location som ikke sender headere)
+async function downloadJob(jobId){
+  try{
+    const r = await fetch(`${API}/download/${jobId}`, {headers: await authHeaders()});
+    if(!r.ok) throw new Error("download feilet");
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `dialr-${jobId}.xlsx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){ alert("Kunne ikke laste ned filen. Prøv igjen."); }
+}
 
 // Load Supabase and check auth
 (function(){
@@ -361,7 +385,7 @@ async function doSingle(){
   document.getElementById("sBtnTxt").textContent="Henter...";
   document.getElementById("singleBtn").disabled=true;
   try{
-    const r=await fetch(`${API}/lookup?orgnr=${org}`);
+    const r=await fetch(`${API}/lookup?orgnr=${org}`, {headers: await authHeaders()});
     const d=await r.json();
     document.getElementById("resFirm").textContent=d["Firmanavn"]||"Ukjent";
     document.getElementById("resOrgnr").textContent=d["Org.nr"]||org;
@@ -370,20 +394,20 @@ async function doSingle(){
     setVal("resTittel",d["Daglig leder tittel"]);
     const tlf=d["Daglig leder telefon"];
     const tEl=document.getElementById("resTlf");
-    if(tlf){tEl.innerHTML=`<a href="tel:${tlf}" style="color:var(--accent2);text-decoration:none">${tlf}</a>`;tEl.className="result-value phone";}
+    if(tlf){tEl.innerHTML=`<a href="tel:${esc(tlf)}" style="color:var(--accent2);text-decoration:none">${esc(tlf)}</a>`;tEl.className="result-value phone";}
     else{tEl.textContent="Ikke funnet";tEl.className="result-value empty";}
     setVal("resOko",d["Økonomisjef"]);
     const okoTlf=d["Økonomisjef telefon"];
     const oEl=document.getElementById("resOkoTlf");
-    if(okoTlf){oEl.innerHTML=`<a href="tel:${okoTlf}" style="color:var(--accent2);text-decoration:none">${okoTlf}</a>`;oEl.className="result-value phone";}
+    if(okoTlf){oEl.innerHTML=`<a href="tel:${esc(okoTlf)}" style="color:var(--accent2);text-decoration:none">${esc(okoTlf)}</a>`;oEl.className="result-value phone";}
     else{oEl.textContent="Ikke funnet";oEl.className="result-value empty";}
     const dlEpost=d["Daglig leder e-post"];
     const dlEEl=document.getElementById("resDLEpost");
-    if(dlEpost){dlEEl.innerHTML=`<a href="mailto:${dlEpost}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${dlEpost}</a>`;dlEEl.className="result-value";}
+    if(dlEpost){dlEEl.innerHTML=`<a href="mailto:${esc(dlEpost)}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${esc(dlEpost)}</a>`;dlEEl.className="result-value";}
     else{dlEEl.textContent="Ikke funnet";dlEEl.className="result-value empty";}
     const okoEpost=d["Økonomisjef e-post"];
     const okoEEl=document.getElementById("resOkoEpost");
-    if(okoEpost){okoEEl.innerHTML=`<a href="mailto:${okoEpost}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${okoEpost}</a>`;okoEEl.className="result-value";}
+    if(okoEpost){okoEEl.innerHTML=`<a href="mailto:${esc(okoEpost)}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${esc(okoEpost)}</a>`;okoEEl.className="result-value";}
     else{okoEEl.textContent="Ikke funnet";okoEEl.className="result-value empty";}
     setVal("resAnsatte",d["Ansatte"]);
     const innt=d["Driftsinntekter"];
@@ -392,8 +416,8 @@ async function doSingle(){
     else{inntEl.textContent="Ikke funnet";inntEl.className="result-value empty";}
     setVal("resRegnskap",d["Regnskapsfører"]);
     setVal("resKommune",d["Kommune"]);
-    document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde daglig leder"]||"")}">${d["Kilde daglig leder"]||"Ukjent"}</span>`;
-    document.getElementById("resKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="tag ${tagClass(d["Kilde økonomisjef"])}">${d["Kilde økonomisjef"]}</span>`:`<span class="result-value empty">Ikke funnet</span>`;
+    document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde daglig leder"]||"")}">${esc(d["Kilde daglig leder"]||"Ukjent")}</span>`;
+    document.getElementById("resKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="tag ${tagClass(d["Kilde økonomisjef"])}">${esc(d["Kilde økonomisjef"])}</span>`:`<span class="result-value empty">Ikke funnet</span>`;
     // Andre roller
     const roller = d["Andre roller"] || [];
     const rollerWrap = document.getElementById("resRollerWrap");
@@ -401,9 +425,9 @@ async function doSingle(){
     if(roller.length > 0){
       rollerList.innerHTML = roller.map(r=>`
         <div style="display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-          <span style="color:var(--muted);min-width:120px;font-family:'DM Mono',monospace;font-size:11px;">${r.rolle}</span>
-          <span style="font-weight:500;flex:1;">${r.firma}</span>
-          <span style="color:var(--muted);font-size:12px;">${r.bransje}</span>
+          <span style="color:var(--muted);min-width:120px;font-family:'DM Mono',monospace;font-size:11px;">${esc(r.rolle)}</span>
+          <span style="font-weight:500;flex:1;">${esc(r.firma)}</span>
+          <span style="color:var(--muted);font-size:12px;">${esc(r.bransje)}</span>
         </div>`).join('');
       rollerWrap.style.display = "block";
     } else {
@@ -484,8 +508,7 @@ document.getElementById("runBtn").addEventListener("click",async()=>{
       document.getElementById("rTxt").textContent="Start oppslag";
       return;
     }
-    formData.append("user_id", session.user.id);
-    const r = await fetch(`${API}/upload`, {method:"POST", body:formData});
+    const r = await fetch(`${API}/upload`, {method:"POST", body:formData, headers: await authHeaders()});
     const d = await r.json();
     if(d.error){
       document.getElementById("bErrTxt").textContent=d.error;
@@ -514,7 +537,7 @@ let pollInterval = null;
 function pollJobStatus(jobId, total){
   pollInterval = setInterval(async()=>{
     try{
-      const r = await fetch(`${API}/status/${jobId}`);
+      const r = await fetch(`${API}/status/${jobId}`, {headers: await authHeaders()});
       const d = await r.json();
       const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
       document.getElementById("progCount").textContent=`${d.progress} / ${total}`;
@@ -526,9 +549,7 @@ function pollJobStatus(jobId, total){
         document.getElementById("barFill").style.width="100%";
         document.getElementById("progCount").textContent=`${total} / ${total}`;
         document.getElementById("dlJobBtn").style.display="inline-flex";
-        document.getElementById("dlJobBtn").onclick=()=>{
-          window.location.href=`${API}/download/${jobId}`;
-        };
+        document.getElementById("dlJobBtn").onclick=()=>downloadJob(jobId);
       }
     }catch(e){}
   }, 3000);
@@ -538,7 +559,7 @@ async function checkJobStatus(){
   const jobId = document.getElementById("jobIdInput").value.trim();
   if(!jobId)return;
   try{
-    const r = await fetch(`${API}/status/${jobId}`);
+    const r = await fetch(`${API}/status/${jobId}`, {headers: await authHeaders()});
     const d = await r.json();
     if(d.error){
       document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Jobb ikke funnet</span>`;
@@ -548,7 +569,7 @@ async function checkJobStatus(){
     const pct = d.total > 0 ? Math.round((d.progress/d.total)*100) : 0;
     document.getElementById("jobStatusResult").innerHTML=`
       <div style="color:var(--text);margin-bottom:8px;">Status: <strong>${statusText}</strong> — ${d.progress}/${d.total} (${pct}%)</div>
-      ${d.status==="done" ? `<a href="${API}/download/${jobId}" class="run-btn" style="text-decoration:none;display:inline-flex;">&#8595; Last ned Excel</a>` : ""}
+      ${d.status==="done" ? `<button onclick="downloadJob('${esc(jobId)}')" class="run-btn" style="display:inline-flex;">&#8595; Last ned Excel</button>` : ""}
     `;
   }catch(e){
     document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
