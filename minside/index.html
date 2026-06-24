@@ -1128,26 +1128,46 @@ function handleManualFile(file) {
 
       // Find column indices
       const cols = {
-        orgnr: headers.findIndex(h => h.includes("org")),
-        firmanavn: headers.findIndex(h => h.includes("firma") || h.includes("selskap") || h.includes("navn")),
-        bransje: headers.findIndex(h => h.includes("bransje")),
-        daglig_leder: headers.findIndex(h => h.includes("daglig") || h.includes("leder")),
-        daglig_leder_tittel: headers.findIndex(h => h.includes("tittel")),
-        daglig_leder_telefon: headers.findIndex(h => (h.includes("telefon") || h.includes("tlf")) && !h.includes("øko")),
-        okonomisjef: headers.findIndex(h => h.includes("øko") && !h.includes("telefon") && !h.includes("tlf")),
-        okonomisjef_telefon: headers.findIndex(h => h.includes("øko") && (h.includes("telefon") || h.includes("tlf"))),
+        orgnr:                headers.findIndex(h => h.includes("org")),
+        firmanavn:            headers.findIndex(h => h.includes("firma") || h.includes("selskap") || (h.includes("navn") && !h.includes("daglig") && !h.includes("øko") && !h.includes("regn"))),
+        bransje:              headers.findIndex(h => h.includes("bransje")),
+        daglig_leder:         headers.findIndex(h => h.includes("daglig") && !h.includes("telefon") && !h.includes("tlf") && !h.includes("e-post") && !h.includes("epost") && !h.includes("tittel") && !h.includes("kilde")),
+        daglig_leder_tittel:  headers.findIndex(h => h.includes("tittel")),
+        daglig_leder_telefon: headers.findIndex(h => (h.includes("telefon") || h.includes("tlf")) && h.includes("daglig")),
+        daglig_leder_epost:   headers.findIndex(h => (h.includes("e-post") || h.includes("epost")) && h.includes("daglig")),
+        okonomisjef:          headers.findIndex(h => h.includes("øko") && !h.includes("telefon") && !h.includes("tlf") && !h.includes("e-post") && !h.includes("epost") && !h.includes("kilde")),
+        okonomisjef_telefon:  headers.findIndex(h => h.includes("øko") && (h.includes("telefon") || h.includes("tlf"))),
+        okonomisjef_epost:    headers.findIndex(h => h.includes("øko") && (h.includes("e-post") || h.includes("epost"))),
+        ansatte:              headers.findIndex(h => h.includes("ansatt")),
+        driftsinntekter:      headers.findIndex(h => h.includes("drifts") || h.includes("inntekt")),
+        regnskapsforer:       headers.findIndex(h => h.includes("regnskap")),
+        kommune:              headers.findIndex(h => h.includes("kommune")),
+      };
+
+      const str = (row, col) => col >= 0 && row[col] != null ? String(row[col]).trim() : "";
+      const tlf = (row, col) => col >= 0 && row[col] != null ? String(row[col]).replace(/[\s.]/g, "") : "";
+      const num = (row, col) => {
+        if(col < 0 || row[col] == null || row[col] === "") return null;
+        const n = parseFloat(row[col]);
+        return isNaN(n) ? null : n;
       };
 
       manualRows = data.slice(1).filter(r => r.some(c => c)).map((row, i) => ({
         sort_order: i,
-        orgnr: cols.orgnr >= 0 ? String(row[cols.orgnr] || "").replace(/[\s.]/g, "") : "",
-        firmanavn: cols.firmanavn >= 0 ? String(row[cols.firmanavn] || "") : "",
-        bransje: cols.bransje >= 0 ? String(row[cols.bransje] || "") : "",
-        daglig_leder: cols.daglig_leder >= 0 ? String(row[cols.daglig_leder] || "") : "",
-        daglig_leder_tittel: cols.daglig_leder_tittel >= 0 ? String(row[cols.daglig_leder_tittel] || "") : "",
-        daglig_leder_telefon: cols.daglig_leder_telefon >= 0 ? String(row[cols.daglig_leder_telefon] || "").replace(/[\s.]/g, "") : "",
-        okonomisjef: cols.okonomisjef >= 0 ? String(row[cols.okonomisjef] || "") : "",
-        okonomisjef_telefon: cols.okonomisjef_telefon >= 0 ? String(row[cols.okonomisjef_telefon] || "").replace(/[\s.]/g, "") : "",
+        orgnr:                (() => { const v = tlf(row, cols.orgnr); return v.endsWith(".0") ? v.slice(0,-2) : v; })(),
+        firmanavn:            str(row, cols.firmanavn),
+        bransje:              str(row, cols.bransje),
+        daglig_leder:         str(row, cols.daglig_leder),
+        daglig_leder_tittel:  str(row, cols.daglig_leder_tittel),
+        daglig_leder_telefon: tlf(row, cols.daglig_leder_telefon),
+        daglig_leder_epost:   str(row, cols.daglig_leder_epost),
+        okonomisjef:          str(row, cols.okonomisjef),
+        okonomisjef_telefon:  tlf(row, cols.okonomisjef_telefon),
+        okonomisjef_epost:    str(row, cols.okonomisjef_epost),
+        ansatte:              num(row, cols.ansatte),
+        driftsinntekter:      num(row, cols.driftsinntekter),
+        regnskapsforer:       str(row, cols.regnskapsforer),
+        kommune:              str(row, cols.kommune),
         kilde: "manuell",
       }));
 
