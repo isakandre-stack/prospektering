@@ -515,7 +515,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+// Escape for bruk inne i en enkeltsitert JS-streng i et onclick-attributt
+const escAttr = s => String(s==null?"":s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
 let currentUser = null;
 let allLists = [];
@@ -605,7 +607,7 @@ async function renderLists(){
     const dato = new Date(list.created_at).toLocaleDateString("no", {day:"numeric",month:"short",year:"numeric"});
     return `<div class="list-card">
       <div class="list-info">
-        <div class="list-name">${list.name}</div>
+        <div class="list-name">${esc(list.name)}</div>
         <div class="list-meta">${dato} &nbsp;·&nbsp; ${count} selskaper</div>
       </div>
       <div class="list-stats">
@@ -613,11 +615,11 @@ async function renderLists(){
         <div class="list-stat"><div class="list-stat-n">${mote}</div><div class="list-stat-l">Møter</div></div>
       </div>
       <div class="list-actions">
-        <button class="btn-primary" onclick="startRing('${list.id}','${list.name.replace(/'/g,"\\'")}')">
+        <button class="btn-primary" onclick="startRing('${escAttr(list.id)}','${escAttr(list.name)}')">
           ${ringt > 0 ? "Fortsett" : "Start ringing"}
         </button>
-        <button class="btn-secondary" onclick="showRapportForList('${list.id}')">Rapport</button>
-        <button class="btn-danger" onclick="openDeleteModal('${list.id}','${list.name.replace(/'/g,"\\'")}')">🗑</button>
+        <button class="btn-secondary" onclick="showRapportForList('${escAttr(list.id)}')">Rapport</button>
+        <button class="btn-danger" onclick="openDeleteModal('${escAttr(list.id)}','${escAttr(list.name)}')">🗑</button>
       </div>
     </div>`;
   }).join("");
@@ -729,14 +731,14 @@ function showCurrentCompany(){
   document.getElementById("ringOrgnr").textContent = c.orgnr || "";
   document.getElementById("ringDL").textContent = c.daglig_leder || "Ikke funnet";
   const dlTlf = c.daglig_leder_telefon;
-  document.getElementById("ringDLTlf").innerHTML = dlTlf ? `<a href="tel:${dlTlf}">${dlTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
+  document.getElementById("ringDLTlf").innerHTML = dlTlf ? `<a href="tel:${esc(dlTlf)}">${esc(dlTlf)}</a>` : `<span class="empty">Ikke funnet</span>`;
   const dlEpost = c.daglig_leder_epost;
-  document.getElementById("ringDLEpost").innerHTML = dlEpost ? `<a href="mailto:${dlEpost}" style="color:var(--accent2);font-size:13px;">${dlEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
+  document.getElementById("ringDLEpost").innerHTML = dlEpost ? `<a href="mailto:${esc(dlEpost)}" style="color:var(--accent2);font-size:13px;">${esc(dlEpost)}</a>` : `<span class="empty">Ikke funnet</span>`;
   document.getElementById("ringOko").textContent = c.okonomisjef || "Ikke funnet";
   const okoTlf = c.okonomisjef_telefon;
-  document.getElementById("ringOkoTlf").innerHTML = okoTlf ? `<a href="tel:${okoTlf}">${okoTlf}</a>` : `<span class="empty">Ikke funnet</span>`;
+  document.getElementById("ringOkoTlf").innerHTML = okoTlf ? `<a href="tel:${esc(okoTlf)}">${esc(okoTlf)}</a>` : `<span class="empty">Ikke funnet</span>`;
   const okoEpost = c.okonomisjef_epost;
-  document.getElementById("ringOkoEpost").innerHTML = okoEpost ? `<a href="mailto:${okoEpost}" style="color:var(--accent2);font-size:13px;">${okoEpost}</a>` : `<span class="empty">Ikke funnet</span>`;
+  document.getElementById("ringOkoEpost").innerHTML = okoEpost ? `<a href="mailto:${esc(okoEpost)}" style="color:var(--accent2);font-size:13px;">${esc(okoEpost)}</a>` : `<span class="empty">Ikke funnet</span>`;
   document.getElementById("ringAnsatte").textContent = c.ansatte || "Ikke funnet";
   document.getElementById("ringInntekter").textContent = c.driftsinntekter ? Number(c.driftsinntekter).toLocaleString("no") + " kr" : "Ikke funnet";
   document.getElementById("ringRegnskap").textContent = c.regnskapsforer || "Ikke funnet";
@@ -926,12 +928,12 @@ async function loadIdag(){
     return `<div class="idag-item ${cls}">
       <div class="idag-item-icon ring">📞</div>
       <div class="idag-item-info">
-        <div class="idag-item-company">${firma}</div>
-        <div class="idag-item-meta">${navn}${tlf?" · "+tlf:""}${kommentar?` · <em style='color:var(--muted)'>${kommentar}</em>`:""}</div>
+        <div class="idag-item-company">${esc(firma)}</div>
+        <div class="idag-item-meta">${esc(navn)}${tlf?" · "+esc(tlf):""}${kommentar?` · <em style='color:var(--muted)'>${esc(kommentar)}</em>`:""}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
         <div class="idag-item-time ${timeColor}">${timeStr}</div>
-        ${tlf ? `<a href="tel:${tlf}" class="idag-ring-btn">Ring nå</a>` : ""}
+        ${tlf ? `<a href="tel:${esc(tlf)}" class="idag-ring-btn">Ring nå</a>` : ""}
       </div>
     </div>`;
   }
@@ -973,10 +975,10 @@ async function loadIdag(){
       return `<div class="idag-item idag-snart">
         <div class="idag-item-icon mote">📅</div>
         <div class="idag-item-info">
-          <div class="idag-item-company">${firma}</div>
-          <div class="idag-item-meta">${navn}${c.kommentar ? " · "+c.kommentar : ""}</div>
+          <div class="idag-item-company">${esc(firma)}</div>
+          <div class="idag-item-meta">${esc(navn)}${c.kommentar ? " · "+esc(c.kommentar) : ""}</div>
         </div>
-        <div class="idag-item-time accent">${klokke}</div>
+        <div class="idag-item-time accent">${esc(klokke)}</div>
       </div>`;
     }).join("");
   } else {
@@ -994,8 +996,8 @@ async function loadIdag(){
       return `<div class="idag-item" style="opacity:0.75;">
         <div class="idag-item-icon ring">📞</div>
         <div class="idag-item-info">
-          <div class="idag-item-company">${firma}</div>
-          <div class="idag-item-meta">${navn}${tlf?" · "+tlf:""}</div>
+          <div class="idag-item-company">${esc(firma)}</div>
+          <div class="idag-item-meta">${esc(navn)}${tlf?" · "+esc(tlf):""}</div>
         </div>
         <div class="idag-item-time muted">${fmtDato(c.tilbakeringing_dato)} · ${fmtKlokke(c.tilbakeringing_dato)}</div>
       </div>`;
@@ -1012,7 +1014,7 @@ async function loadRapport(){
   container.innerHTML = allLists.map(l => `
     <div class="rapport-list-check">
       <input type="checkbox" id="check-${l.id}" checked onchange="updateRapport()">
-      <label for="check-${l.id}" class="rapport-list-name">${l.name}</label>
+      <label for="check-${l.id}" class="rapport-list-name">${esc(l.name)}</label>
       <span class="rapport-list-meta">${new Date(l.created_at).toLocaleDateString("no")}</span>
     </div>`).join("");
   updateRapport();
@@ -1064,12 +1066,12 @@ async function updateRapport(){
   document.getElementById("rapportRows").innerHTML = c.map((call, i) => {
     const dato = new Date(call.created_at).toLocaleDateString("no",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
     return `<div class="rapport-row" style="cursor:pointer;" onclick="openEditModal(${i})" title="Klikk for å redigere">
-      <div style="font-weight:500">${call.firmanavn||"—"}</div>
-      <div class="rapport-col-bransje" style="font-size:12px;color:var(--muted)">${call.bransje||"—"}</div>
-      <div style="color:${colors[call.resultat]||"var(--muted)"};font-size:12px;font-weight:500">${call.resultat}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:13px;text-align:center;">${call.antall_ring||0}</div>
-      <div class="rapport-col-motedato" style="font-size:12px;color:var(--muted)">${call.motedato||"—"}</div>
-      <div style="font-size:12px;color:var(--muted)">${call.kommentar||"—"}</div>
+      <div style="font-weight:500">${esc(call.firmanavn||"—")}</div>
+      <div class="rapport-col-bransje" style="font-size:12px;color:var(--muted)">${esc(call.bransje||"—")}</div>
+      <div style="color:${colors[call.resultat]||"var(--muted)"};font-size:12px;font-weight:500">${esc(call.resultat)}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;text-align:center;">${esc(call.antall_ring||0)}</div>
+      <div class="rapport-col-motedato" style="font-size:12px;color:var(--muted)">${esc(call.motedato||"—")}</div>
+      <div style="font-size:12px;color:var(--muted)">${esc(call.kommentar||"—")}</div>
       <div class="rapport-col-tid" style="font-size:12px;color:var(--muted2);display:flex;align-items:center;justify-content:space-between;">${dato}<span style="color:var(--accent2);font-size:11px;">✎</span></div>
     </div>`;
   }).join("") || `<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">Ingen samtaler logget ennå</div>`;
