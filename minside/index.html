@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>Min side — dialr</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,6 +98,17 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .log-field input[type=date]{background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 16px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;}
 .mote-date-wrap{display:none;}
 .next-btn{width:100%;height:52px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;}
+.nav-btns{display:flex;gap:8px;margin-top:8px;}
+.nav-btn-prev{flex:0 0 auto;height:52px;padding:0 20px;background:transparent;border:1.5px solid var(--border2);border-radius:12px;color:var(--muted);font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.nav-btn-prev:hover:not(:disabled){border-color:var(--accent);color:var(--accent2)}
+.nav-btn-prev:disabled{opacity:0.3;cursor:default;}
+.ring-counter{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;}
+.ring-counter-label{font-size:13px;color:var(--muted);flex:1;}
+.ring-counter-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);}
+.ring-counter-btn{padding:6px 14px;background:var(--accent-bg);border:1.5px solid var(--accent-border);border-radius:8px;color:var(--accent2);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.ring-counter-btn:hover{background:var(--accent);color:#fff;}
+.result-btn.active-ikke-interessert{border-color:#f87171;background:rgba(248,113,113,0.08);color:#f87171;}
+.result-btn.active-ring{border-color:var(--blue);background:rgba(96,165,250,0.08);color:var(--blue);}
 .next-btn:hover{background:var(--accent2)}
 .done-card{padding:40px;text-align:center;}
 .done-icon{font-size:48px;margin-bottom:16px;}
@@ -330,12 +341,18 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 
     <div class="log-card" id="logCard">
       <div class="log-title">Logg samtale</div>
+      <div class="ring-counter">
+        <span class="ring-counter-label">📞 Ringeforsøk</span>
+        <span class="ring-counter-num" id="antallRingNum">0</span>
+        <button class="ring-counter-btn" onclick="incrementRing()">+1 Ring</button>
+      </div>
       <div class="result-btns">
         <button class="result-btn" onclick="setResultat('svarte')" id="btn-svarte">✓ Svarte</button>
         <button class="result-btn" onclick="setResultat('ikke svarte')" id="btn-ikke svarte">✗ Svarte ikke</button>
         <button class="result-btn" onclick="setResultat('telefonsvarer')" id="btn-telefonsvarer">📱 Telefonsvarer</button>
         <button class="result-btn" onclick="setResultat('møte')" id="btn-møte">📅 Møte</button>
         <button class="result-btn" onclick="setResultat('ring tilbake')" id="btn-ring tilbake">📞 Ring tilbake</button>
+        <button class="result-btn" onclick="setResultat('ikke interessert')" id="btn-ikke interessert">🚫 Ikke interessert</button>
       </div>
       <div class="ring-back-date-wrap" id="ringBackDateWrap">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -372,7 +389,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
         <label>Kommentar</label>
         <textarea id="callKommentar" rows="3" placeholder="Hva ble sagt? Notater fra samtalen..."></textarea>
       </div>
-      <button class="next-btn" onclick="saveAndNext()">Lagre og neste &#8594;</button>
+      <div class="nav-btns">
+        <button class="nav-btn-prev" id="prevBtn" onclick="prevCompany()" disabled>&#8592;</button>
+        <button class="next-btn" onclick="saveAndNext()">Lagre og neste &#8594;</button>
+      </div>
+      <button onclick="skipCompany()" style="width:100%;margin-top:8px;padding:10px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:Inter,sans-serif;transition:all 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Hopp over →</button>
     </div>
   </div>
 </div>
@@ -435,7 +456,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <button class="btn-secondary" style="padding:8px 16px;font-size:12px;" onclick="downloadRapport()">&#8595; Last ned Excel</button>
     </div>
     <div class="rapport-row rapport-row-header">
-      <div>Selskap</div><div class="rapport-col-bransje">Bransje</div><div>Resultat</div><div class="rapport-col-motedato">Møtedato</div><div>Kommentar</div><div class="rapport-col-tid">Tidspunkt</div>
+      <div>Selskap</div><div class="rapport-col-bransje">Bransje</div><div>Resultat</div><div>Forsøk</div><div class="rapport-col-motedato">Møtedato</div><div>Kommentar</div><div class="rapport-col-tid">Tidspunkt</div>
     </div>
     <div id="rapportRows"></div>
   </div>
@@ -456,6 +477,8 @@ let currentCompanies = [];
 let filteredCompanies = [];
 let currentIndex = 0;
 let currentResultat = null;
+let currentAntallRing = 0;
+let callsCache = {}; // company_id -> call row
 let kunMedTlf = false;
 let listToDelete = null;
 let rapportData = [];
@@ -579,9 +602,13 @@ async function startRing(listId, listName){
     .select("*").eq("list_id", listId).order("sort_order");
 
   const { data: calls } = await sb.from("calls")
-    .select("company_id").eq("user_id", currentUser.id);
+    .select("*").eq("user_id", currentUser.id);
 
-  const calledIds = new Set((calls || []).map(c => c.company_id));
+  // Bygg cache: company_id -> call
+  callsCache = {};
+  (calls || []).forEach(c => { callsCache[c.company_id] = c; });
+
+  const calledIds = new Set(Object.keys(callsCache));
   currentCompanies = companies || [];
   currentList = { id: listId, name: listName };
   applyFilter();
@@ -668,22 +695,66 @@ function showCurrentCompany(){
   document.getElementById("ringRegnskap").textContent = c.regnskapsforer || "Ikke funnet";
   document.getElementById("ringKommune").textContent = c.kommune || "Ikke funnet";
 
-  currentResultat = null;
-  document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
-  document.getElementById("callKommentar").value = "";
-  document.getElementById("moteDato").value = "";
-  document.getElementById("moteDateWrap").style.display = "none";
-  document.getElementById("ringBackDato").value = "";
-  document.getElementById("ringBackDateWrap").style.display = "none";
+  // Prev-knapp
+  document.getElementById("prevBtn").disabled = currentIndex === 0;
+
+  // Pre-fyll eksisterende data fra cache
+  const existing = callsCache[c.id];
+  if(existing){
+    currentResultat = existing.resultat;
+    currentAntallRing = existing.antall_ring || 0;
+    document.getElementById("antallRingNum").textContent = currentAntallRing;
+    document.getElementById("callKommentar").value = existing.kommentar || "";
+    document.getElementById("moteDato").value = existing.motedato || "";
+    document.getElementById("moteDateWrap").style.display = existing.resultat === "møte" ? "block" : "none";
+    const ringBackDato = existing.tilbakeringing_dato ? existing.tilbakeringing_dato.split("T")[0] : "";
+    const ringBackKlokke = existing.tilbakeringing_dato ? existing.tilbakeringing_dato.split("T")[1]?.slice(0,5) : "09:00";
+    document.getElementById("ringBackDato").value = ringBackDato;
+    document.getElementById("ringBackKlokke").value = ringBackKlokke || "09:00";
+    document.getElementById("ringBackDateWrap").style.display = existing.resultat === "ring tilbake" ? "block" : "none";
+    // Sett aktiv knapp
+    document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
+    const clsMap = {svarte:"active-svarte",møte:"active-mote",telefonsvarer:"active-telefonsvarer","ring tilbake":"active-ring","ikke interessert":"active-ikke-interessert","ikke svarte":"active-ikke"};
+    const btn = document.getElementById(`btn-${existing.resultat}`);
+    if(btn) btn.className = `result-btn ${clsMap[existing.resultat]||"active-ikke"}`;
+  } else {
+    currentResultat = null;
+    currentAntallRing = 0;
+    document.getElementById("antallRingNum").textContent = 0;
+    document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
+    document.getElementById("callKommentar").value = "";
+    document.getElementById("moteDato").value = "";
+    document.getElementById("moteDateWrap").style.display = "none";
+    document.getElementById("ringBackDato").value = "";
+    document.getElementById("ringBackDateWrap").style.display = "none";
+  }
 }
 
 function setResultat(val){
   currentResultat = val;
   document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
-  const cls = val==="svarte"?"active-svarte":val==="møte"?"active-mote":val==="telefonsvarer"?"active-telefonsvarer":val==="ring tilbake"?"active-ring":"active-ikke";
-  document.getElementById(`btn-${val}`).className = `result-btn ${cls}`;
+  const clsMap = {svarte:"active-svarte",møte:"active-mote",telefonsvarer:"active-telefonsvarer","ring tilbake":"active-ring","ikke interessert":"active-ikke-interessert","ikke svarte":"active-ikke"};
+  const btn = document.getElementById(`btn-${val}`);
+  if(btn) btn.className = `result-btn ${clsMap[val]||"active-ikke"}`;
   document.getElementById("moteDateWrap").style.display = val==="møte" ? "block" : "none";
   document.getElementById("ringBackDateWrap").style.display = val==="ring tilbake" ? "block" : "none";
+}
+
+function incrementRing(){
+  currentAntallRing++;
+  document.getElementById("antallRingNum").textContent = currentAntallRing;
+}
+
+function prevCompany(){
+  if(currentIndex > 0){
+    currentIndex--;
+    showCurrentCompany();
+  }
+}
+
+function skipCompany(){
+  currentIndex++;
+  showCurrentCompany();
 }
 
 function apneOutlook(){
@@ -730,14 +801,26 @@ async function saveAndNext(){
     const t = document.getElementById("ringBackKlokke").value || "09:00";
     tilbakeringing_dato = d + "T" + t + ":00";
   }
-  await sb.from("calls").insert({
+
+  const payload = {
     company_id: c.id,
     user_id: currentUser.id,
     resultat: currentResultat,
     kommentar: document.getElementById("callKommentar").value.trim(),
     motedato: currentResultat==="møte" && document.getElementById("moteDato").value ? document.getElementById("moteDato").value : null,
-    tilbakeringing_dato: tilbakeringing_dato
-  });
+    tilbakeringing_dato: tilbakeringing_dato,
+    antall_ring: currentAntallRing
+  };
+
+  const existing = callsCache[c.id];
+  if(existing){
+    const { data } = await sb.from("calls").update(payload).eq("id", existing.id).select().single();
+    if(data) callsCache[c.id] = data;
+  } else {
+    const { data } = await sb.from("calls").insert(payload).select().single();
+    if(data) callsCache[c.id] = data;
+  }
+
   currentIndex++;
   showCurrentCompany();
 }
@@ -930,13 +1013,14 @@ async function updateRapport(){
   document.getElementById("rIkke").textContent = c.filter(x=>x.resultat==="ikke svarte").length;
   document.getElementById("rMote").textContent = c.filter(x=>x.resultat==="møte").length;
 
-  const colors = {svarte:"var(--green)","ikke svarte":"var(--red)",telefonsvarer:"var(--yellow)",møte:"var(--accent2)"};
+  const colors = {svarte:"var(--green)","ikke svarte":"var(--red)",telefonsvarer:"var(--yellow)",møte:"var(--accent2)","ikke interessert":"var(--red)","ring tilbake":"var(--blue)"};
   document.getElementById("rapportRows").innerHTML = c.map((call, i) => {
     const dato = new Date(call.created_at).toLocaleDateString("no",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
     return `<div class="rapport-row" style="cursor:pointer;" onclick="openEditModal(${i})" title="Klikk for å redigere">
       <div style="font-weight:500">${call.firmanavn||"—"}</div>
       <div class="rapport-col-bransje" style="font-size:12px;color:var(--muted)">${call.bransje||"—"}</div>
       <div style="color:${colors[call.resultat]||"var(--muted)"};font-size:12px;font-weight:500">${call.resultat}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;text-align:center;">${call.antall_ring||0}</div>
       <div class="rapport-col-motedato" style="font-size:12px;color:var(--muted)">${call.motedato||"—"}</div>
       <div style="font-size:12px;color:var(--muted)">${call.kommentar||"—"}</div>
       <div class="rapport-col-tid" style="font-size:12px;color:var(--muted2);display:flex;align-items:center;justify-content:space-between;">${dato}<span style="color:var(--accent2);font-size:11px;">✎</span></div>
@@ -1012,6 +1096,7 @@ function downloadRapport(){
     "Regnskapsfører": r.companies?.regnskapsforer || "",
     "Kommune": r.companies?.kommune || "",
     "Resultat": r.resultat,
+    "Forsøk": r.antall_ring || 0,
     "Møtedato": r.motedato || "",
     "Kommentar": r.kommentar || "",
     "Tidspunkt": new Date(r.created_at).toLocaleString("no")
