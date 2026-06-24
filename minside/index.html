@@ -515,6 +515,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 let currentUser = null;
 let allLists = [];
