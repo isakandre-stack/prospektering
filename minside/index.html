@@ -890,7 +890,9 @@ async function loadIdag(){
   const allCalls = calls || [];
 
   // Count ringt i dag
-  const ringtIdag = allCalls.filter(c => c.created_at && c.created_at.startsWith(todayStr)).length;
+  const ringtIdag = allCalls
+    .filter(c => c.created_at && c.created_at.startsWith(todayStr))
+    .reduce((sum, c) => sum + Math.max(c.antall_ring || 0, 1), 0);
   const moterBooket = allCalls.filter(c => c.resultat === "møte").length;
 
   // Tilbakeringinger
