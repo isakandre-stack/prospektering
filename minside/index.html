@@ -31,8 +31,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .nav-right{display:flex;align-items:center;gap:8px;}
 .nav-btn{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;text-decoration:none;}
 .nav-btn:hover{border-color:var(--accent);color:var(--accent2)}
-#view-idag,#view-lists,#view-ring,#view-rapport{display:none;}
-#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active{display:block;}
+#view-idag,#view-lists,#view-ring,#view-rapport,#view-prospekt{display:none;}
+#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active,#view-prospekt.active{display:block;}
 .page-title{font-size:28px;font-weight:600;margin-bottom:8px;}
 .page-sub{font-size:15px;color:var(--muted);margin-bottom:32px;}
 .list-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:20px;box-shadow:var(--card-shadow);}
@@ -119,6 +119,28 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .rapport-stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;box-shadow:var(--card-shadow);}
 .rapport-stat-n{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--accent2);line-height:1;margin-bottom:6px;}
 .rapport-stat-l{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.07em;}
+.prospekt-tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.prospekt-tab{padding:10px 4px;margin-right:24px;border:none;background:transparent;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;position:relative;bottom:-1px;border-bottom:2px solid transparent;transition:all 0.15s;}
+.prospekt-tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.prospekt-tab:not(.active):hover{color:var(--text)}
+.prospekt-panel{display:none}
+.prospekt-panel.active{display:block}
+.prospekt-search-row{display:flex;gap:10px;}
+.prospekt-search-input{flex:1;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;padding:0 16px;height:48px;font-family:'DM Mono',monospace;font-size:16px;color:var(--text);outline:none;letter-spacing:0.05em;transition:border-color 0.15s,box-shadow 0.15s;}
+.prospekt-search-input::placeholder{color:var(--muted2);font-size:14px;letter-spacing:0}
+.prospekt-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,247,0.15)}
+.prospekt-search-btn{height:48px;padding:0 24px;display:inline-flex;align-items:center;gap:8px;}
+.prospekt-err-pill{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 16px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:10px;font-size:13px;color:var(--red);}
+.prospekt-dropzone{border:1.5px dashed var(--border2);border-radius:14px;padding:40px 32px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg3);}
+.prospekt-dropzone:hover,.prospekt-dropzone.over{border-color:var(--accent);background:var(--accent-bg);}
+.prospekt-dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.prospekt-filepill{display:none;align-items:center;gap:10px;margin-top:14px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;}
+.prospekt-filepill-dot{width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;}
+.prospekt-tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:10px;font-family:'DM Mono',monospace;}
+.prospekt-source-nettside{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.prospekt-source-1881{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.prospekt-source-brreg{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}
+.prospekt-source-empty{background:var(--bg3);color:var(--muted2);border:1px solid var(--border2)}
 .rapport-table{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;box-shadow:var(--card-shadow);}
 .rapport-table-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
 .rapport-row{display:grid;grid-template-columns:1.5fr 1fr 100px 110px 1.5fr 110px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:13px;align-items:center;}
@@ -354,7 +376,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
     <button class="sidebar-link" id="nav-idag" onclick="showIdag()"><span class="ic">📊</span> Dashboard</button>
     <button class="sidebar-link" id="nav-lister" onclick="showLists()"><span class="ic">📋</span> Mine lister</button>
     <button class="sidebar-link" id="nav-rapport" onclick="showRapport()"><span class="ic">📈</span> Rapport</button>
-    <a href="/" class="sidebar-link"><span class="ic">🔍</span> Oppslag</a>
+    <button class="sidebar-link" id="nav-prospekt" onclick="showProspekt()"><span class="ic">🔍</span> Prospektering</button>
   </nav>
 
   <div class="sidebar-spacer"></div>
@@ -804,6 +826,108 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   </div>
 </div>
 
+<!-- PROSPEKTERING -->
+<div id="view-prospekt">
+  <div class="page-title">Prospektering</div>
+  <div class="page-sub">Slå opp org.nr og få direktenummer til daglig leder eller økonomisjef automatisk.</div>
+
+  <div class="prospekt-tabs">
+    <button class="prospekt-tab active" id="ptab-single" onclick="switchProspektTab('single')">Enkeltoppslag</button>
+    <button class="prospekt-tab" id="ptab-bulk" onclick="switchProspektTab('bulk')">Masseoppslag</button>
+  </div>
+
+  <div class="prospekt-panel active" id="ppanel-single">
+    <div class="prospekt-search-row">
+      <input class="prospekt-search-input" id="pSingleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
+      <button class="btn-primary prospekt-search-btn" id="pSingleBtn" onclick="doProspektSingle()">
+        <span class="spin" id="pSSpin" style="display:none"></span>
+        <span id="pSBtnTxt">Søk opp</span>
+      </button>
+    </div>
+    <div class="prospekt-err-pill" id="pSErr" style="display:none"><span>⚠</span><span id="pSErrTxt"></span></div>
+
+    <div class="ring-card" id="pResultCard" style="display:none;margin-top:20px;">
+      <div class="ring-card-header">
+        <div>
+          <div class="ring-company" id="pResFirm"></div>
+          <div class="ring-bransje" id="pResOrgnr"></div>
+        </div>
+      </div>
+      <div class="ring-grid">
+        <div class="ring-cell"><div class="ring-label">Bransje</div><div class="ring-value" id="pResBransje"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder tittel</div><div class="ring-value" id="pResTittel"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="pResKontakt"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder tlf</div><div class="ring-value" id="pResTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Daglig leder e-post</div><div class="ring-value" id="pResDLEpost"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef</div><div class="ring-value" id="pResOko"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef tlf</div><div class="ring-value" id="pResOkoTlf"></div></div>
+        <div class="ring-cell"><div class="ring-label">Økonomisjef e-post</div><div class="ring-value" id="pResOkoEpost"></div></div>
+        <div class="ring-cell"><div class="ring-label">Ansatte</div><div class="ring-value" id="pResAnsatte"></div></div>
+        <div class="ring-cell"><div class="ring-label">Driftsinntekter</div><div class="ring-value" id="pResInntekter"></div></div>
+        <div class="ring-cell"><div class="ring-label">Regnskapsfører</div><div class="ring-value" id="pResRegnskap"></div></div>
+        <div class="ring-cell"><div class="ring-label">Kommune</div><div class="ring-value" id="pResKommune"></div></div>
+        <div class="ring-cell" style="border-bottom:none;"><div class="ring-label">Kilde daglig leder</div><div class="ring-value" id="pResKilde"></div></div>
+        <div class="ring-cell" style="border-bottom:none;"><div class="ring-label">Kilde økonomisjef</div><div class="ring-value" id="pResKildeOko"></div></div>
+      </div>
+      <div id="pResRollerWrap" style="display:none;border-top:1px solid var(--border);">
+        <div style="padding:14px 24px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="toggleProspektRoller()">
+          <div class="ring-label" style="margin:0;">Andre roller daglig leder</div>
+          <span id="pRollerArrow" style="color:var(--muted);font-size:12px;">&#9660;</span>
+        </div>
+        <div id="pRollerList" style="display:none;padding:0 24px 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prospekt-panel" id="ppanel-bulk">
+    <div id="prospektUploadSection">
+      <div class="prospekt-dropzone" id="pDropZone">
+        <input type="file" id="pFileInput" accept=".xlsx,.xls">
+        <div style="font-size:24px;margin-bottom:8px;">📊</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Dra og slipp Excel-fil her</div>
+        <div style="font-size:12px;color:var(--muted);">eller klikk for å velge</div>
+      </div>
+      <div class="prospekt-filepill" id="pFilePill"><div class="prospekt-filepill-dot"></div><span id="pFName"></span><span style="margin-left:auto;color:var(--muted)" id="pFCount"></span></div>
+      <div class="prospekt-err-pill" id="pBErr" style="display:none"><span>⚠</span><span id="pBErrTxt"></span></div>
+      <div style="margin-top:16px;">
+        <div class="ring-label" style="margin-bottom:8px;">Gi listen et navn</div>
+        <input class="prospekt-search-input" id="pListName" type="text" placeholder="F.eks. Akvakultur juni 2026" style="width:100%;">
+      </div>
+      <button class="btn-primary" id="pRunBtn" disabled style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;">
+        <span class="spin" id="pRSpin" style="display:none"></span>
+        <span id="pRTxt">Start oppslag</span>
+      </button>
+    </div>
+
+    <div id="prospektJobSection" style="display:none;">
+      <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:8px;">✓ Jobb startet på serveren!</div>
+        <div style="font-size:13px;color:var(--muted);">Du kan lukke PC-en. Kom tilbake og skriv inn jobb-ID-en for å laste ned resultatet.</div>
+        <div style="margin-top:12px;padding:12px 16px;background:var(--bg3);border-radius:8px;font-family:'DM Mono',monospace;font-size:18px;color:var(--text);text-align:center;letter-spacing:0.1em;" id="pJobIdDisplay"></div>
+        <div style="font-size:11px;color:var(--muted2);text-align:center;margin-top:6px;">Jobb-ID — ta vare på denne</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+          <span style="font-size:12.5px;color:var(--muted);font-weight:600;">Fremdrift</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent2);" id="pProgCount">0 / 0</span>
+        </div>
+        <div class="goal-total-track"><div class="goal-total-fill" id="pBarFill" style="width:0%"></div></div>
+        <div style="margin-top:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:18px;" id="pProgCur">Starter...</div>
+      </div>
+      <button class="btn-primary" id="pDlJobBtn" style="display:none;margin-top:16px;background:var(--green);">&#8595; Last ned Excel</button>
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+      <div class="ring-label" style="margin-bottom:8px;">Har du allerede en jobb-ID?</div>
+      <div class="prospekt-search-row">
+        <input class="prospekt-search-input" id="pJobIdInput" type="text" placeholder="Jobb-ID (f.eks. a3f9b2c1)" style="font-family:'DM Mono',monospace;letter-spacing:0.08em;">
+        <button class="btn-secondary" onclick="checkProspektJobStatus()">Sjekk status</button>
+      </div>
+      <div id="pJobStatusResult" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /content-body -->
 </div><!-- /main-content -->
 </div><!-- /app-shell -->
@@ -865,18 +989,18 @@ async function doLogout(){
 }
 
 function setActiveView(viewId){
-  ["view-idag","view-lists","view-ring","view-rapport"].forEach(id => document.getElementById(id).classList.remove("active"));
+  ["view-idag","view-lists","view-ring","view-rapport","view-prospekt"].forEach(id => document.getElementById(id).classList.remove("active"));
   document.getElementById(viewId).classList.add("active");
-  ["nav-idag","nav-lister","nav-rapport"].forEach(id => {
+  ["nav-idag","nav-lister","nav-rapport","nav-prospekt"].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.classList.remove("active");
   });
-  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport"};
+  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport","view-prospekt":"nav-prospekt"};
   if(navMap[viewId]){
     const el = document.getElementById(navMap[viewId]);
     if(el) el.classList.add("active");
   }
-  const labelMap = {"view-idag":"Dashboard","view-lists":"Mine lister","view-ring":"Ring-modus","view-rapport":"Rapport"};
+  const labelMap = {"view-idag":"Dashboard","view-lists":"Mine lister","view-ring":"Ring-modus","view-rapport":"Rapport","view-prospekt":"Prospektering"};
   const topbarEl = document.getElementById("topbarLabel");
   if(topbarEl) topbarEl.textContent = labelMap[viewId] || "";
 }
@@ -896,6 +1020,10 @@ function showRapport(){
   loadRapport();
 }
 
+function showProspekt(){
+  setActiveView("view-prospekt");
+}
+
 async function loadLists(){
   const { data: lists } = await sb.from("lists")
     .select("*, companies(count)")
@@ -911,7 +1039,7 @@ async function renderLists(){
     container.innerHTML = `<div class="empty-state">
       <div class="empty-icon">📋</div>
       <div class="empty-title">Ingen lister ennå</div>
-      <div class="empty-sub">Gå til <a href="/" style="color:var(--accent2)">oppslag</a> og kjør et masseoppslag.</div>
+      <div class="empty-sub">Gå til <a href="#" onclick="showProspekt();return false;" style="color:var(--accent2)">oppslag</a> og kjør et masseoppslag.</div>
     </div>`;
     return;
   }
@@ -1936,6 +2064,232 @@ async function uploadManualList() {
     showManualErr("Feil ved opplasting: " + err.message);
     btn.disabled = false;
     btn.textContent = "Last opp liste";
+  }
+}
+
+// ===== PROSPEKTERING =====
+const PROSPEKT_API = "https://kontakt-api-production.up.railway.app";
+let prospektOrgnrs = [], prospektBulkFile = null, prospektPollInterval = null;
+
+const prospektEsc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
+function switchProspektTab(t){
+  document.querySelectorAll(".prospekt-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".prospekt-panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("ptab-"+t).classList.add("active");
+  document.getElementById("ppanel-"+t).classList.add("active");
+}
+
+async function prospektAuthHeaders(){
+  const {data:{session}} = await sb.auth.getSession();
+  return session?.access_token ? {Authorization:`Bearer ${session.access_token}`} : {};
+}
+
+async function prospektDownloadJob(jobId){
+  try{
+    const r = await fetch(`${PROSPEKT_API}/download/${jobId}`, {headers: await prospektAuthHeaders()});
+    if(!r.ok) throw new Error("download feilet");
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `dialr-${jobId}.xlsx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){ alert("Kunne ikke laste ned filen. Prøv igjen."); }
+}
+
+document.getElementById("pSingleInput").addEventListener("keydown",e=>{if(e.key==="Enter")doProspektSingle()});
+async function doProspektSingle(){
+  const org=document.getElementById("pSingleInput").value.replace(/[\s.]/g,"");
+  if(org.length<8){document.getElementById("pSErrTxt").textContent="Skriv inn et gyldig org.nr";document.getElementById("pSErr").style.display="flex";return;}
+  document.getElementById("pSErr").style.display="none";
+  document.getElementById("pResultCard").style.display="none";
+  document.getElementById("pSSpin").style.display="inline-block";
+  document.getElementById("pSBtnTxt").textContent="Henter...";
+  document.getElementById("pSingleBtn").disabled=true;
+  try{
+    const r=await fetch(`${PROSPEKT_API}/lookup?orgnr=${org}`, {headers: await prospektAuthHeaders()});
+    const d=await r.json();
+    document.getElementById("pResFirm").textContent=d["Firmanavn"]||"Ukjent";
+    document.getElementById("pResOrgnr").textContent=d["Org.nr"]||org;
+    prospektSetVal("pResBransje",d["Bransje"]);
+    prospektSetVal("pResKontakt",d["Daglig leder"]);
+    prospektSetVal("pResTittel",d["Daglig leder tittel"]);
+    const tlf=d["Daglig leder telefon"];
+    const tEl=document.getElementById("pResTlf");
+    if(tlf){tEl.innerHTML=`<a href="tel:${prospektEsc(tlf)}">${prospektEsc(tlf)}</a>`;tEl.className="ring-value";}
+    else{tEl.textContent="Ikke funnet";tEl.className="ring-value empty";}
+    prospektSetVal("pResOko",d["Økonomisjef"]);
+    const okoTlf=d["Økonomisjef telefon"];
+    const oEl=document.getElementById("pResOkoTlf");
+    if(okoTlf){oEl.innerHTML=`<a href="tel:${prospektEsc(okoTlf)}">${prospektEsc(okoTlf)}</a>`;oEl.className="ring-value";}
+    else{oEl.textContent="Ikke funnet";oEl.className="ring-value empty";}
+    const dlEpost=d["Daglig leder e-post"];
+    const dlEEl=document.getElementById("pResDLEpost");
+    if(dlEpost){dlEEl.innerHTML=`<a href="mailto:${prospektEsc(dlEpost)}" style="font-size:13px;">${prospektEsc(dlEpost)}</a>`;dlEEl.className="ring-value";}
+    else{dlEEl.textContent="Ikke funnet";dlEEl.className="ring-value empty";}
+    const okoEpost=d["Økonomisjef e-post"];
+    const okoEEl=document.getElementById("pResOkoEpost");
+    if(okoEpost){okoEEl.innerHTML=`<a href="mailto:${prospektEsc(okoEpost)}" style="font-size:13px;">${prospektEsc(okoEpost)}</a>`;okoEEl.className="ring-value";}
+    else{okoEEl.textContent="Ikke funnet";okoEEl.className="ring-value empty";}
+    prospektSetVal("pResAnsatte",d["Ansatte"]);
+    const innt=d["Driftsinntekter"];
+    const inntEl=document.getElementById("pResInntekter");
+    if(innt){inntEl.textContent=Number(innt).toLocaleString("no")+" kr";inntEl.className="ring-value";}
+    else{inntEl.textContent="Ikke funnet";inntEl.className="ring-value empty";}
+    prospektSetVal("pResRegnskap",d["Regnskapsfører"]);
+    prospektSetVal("pResKommune",d["Kommune"]);
+    document.getElementById("pResKilde").innerHTML=`<span class="prospekt-tag ${prospektTagClass(d["Kilde daglig leder"]||"")}">${prospektEsc(d["Kilde daglig leder"]||"Ukjent")}</span>`;
+    document.getElementById("pResKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="prospekt-tag ${prospektTagClass(d["Kilde økonomisjef"])}">${prospektEsc(d["Kilde økonomisjef"])}</span>`:`<span class="ring-value empty">Ikke funnet</span>`;
+    const roller = d["Andre roller"] || [];
+    const rollerWrap = document.getElementById("pResRollerWrap");
+    const rollerList = document.getElementById("pRollerList");
+    if(roller.length > 0){
+      rollerList.innerHTML = roller.map(r=>`
+        <div style="display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--muted);min-width:120px;font-family:'DM Mono',monospace;font-size:11px;">${prospektEsc(r.rolle)}</span>
+          <span style="font-weight:500;flex:1;">${prospektEsc(r.firma)}</span>
+          <span style="color:var(--muted);font-size:12px;">${prospektEsc(r.bransje)}</span>
+        </div>`).join('');
+      rollerWrap.style.display = "block";
+    } else {
+      rollerWrap.style.display = "none";
+    }
+    document.getElementById("pResultCard").style.display="block";
+  }catch{document.getElementById("pSErrTxt").textContent="Noe gikk galt.";document.getElementById("pSErr").style.display="flex";}
+  document.getElementById("pSSpin").style.display="none";
+  document.getElementById("pSBtnTxt").textContent="Søk opp";
+  document.getElementById("pSingleBtn").disabled=false;
+}
+
+function toggleProspektRoller(){
+  const list = document.getElementById("pRollerList");
+  const arrow = document.getElementById("pRollerArrow");
+  if(list.style.display === "none"){
+    list.style.display = "block";
+    arrow.innerHTML = "&#9650;";
+  } else {
+    list.style.display = "none";
+    arrow.innerHTML = "&#9660;";
+  }
+}
+
+function prospektSetVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="ring-value"+(val?"":" empty");}
+function prospektTagClass(k){const l=(k||"").toLowerCase();if(l.includes("nettside"))return"prospekt-tag prospekt-source-nettside";if(l.includes("1881"))return"prospekt-tag prospekt-source-1881";if(l.includes("br"))return"prospekt-tag prospekt-source-brreg";return"prospekt-tag prospekt-source-empty";}
+
+// BULK
+const pDz=document.getElementById("pDropZone");
+pDz.addEventListener("dragover",e=>{e.preventDefault();pDz.classList.add("over")});
+pDz.addEventListener("dragleave",()=>pDz.classList.remove("over"));
+pDz.addEventListener("drop",e=>{e.preventDefault();pDz.classList.remove("over");handleProspektFile(e.dataTransfer.files[0])});
+document.getElementById("pFileInput").addEventListener("change",e=>handleProspektFile(e.target.files[0]));
+
+function handleProspektFile(file){
+  if(!file)return;
+  prospektBulkFile = file;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1});
+      let col=0;
+      if(data.length>0){const h=data[0].map(x=>String(x||"").toLowerCase());const f=h.findIndex(x=>x.includes("org"));if(f>=0)col=f;}
+      prospektOrgnrs=data.slice(1).map(r=>String(r[col]||"").replace(/[\s.]/g,"")).filter(n=>n.length>=8);
+      if(!prospektOrgnrs.length){document.getElementById("pBErrTxt").textContent="Fant ingen org.nr.";document.getElementById("pBErr").style.display="flex";return;}
+      document.getElementById("pBErr").style.display="none";
+      document.getElementById("pFName").textContent=file.name;
+      document.getElementById("pFCount").textContent=`${prospektOrgnrs.length} selskaper`;
+      document.getElementById("pFilePill").style.display="flex";
+      document.getElementById("pRunBtn").disabled=false;
+    }catch{document.getElementById("pBErrTxt").textContent="Kunne ikke lese filen.";document.getElementById("pBErr").style.display="flex";}
+  };
+  rd.readAsBinaryString(file);
+}
+
+document.getElementById("pRunBtn").addEventListener("click",async()=>{
+  if(!prospektBulkFile)return;
+  document.getElementById("pRunBtn").disabled=true;
+  document.getElementById("pRSpin").style.display="inline-block";
+  document.getElementById("pRTxt").textContent="Sender til server...";
+
+  try{
+    const formData = new FormData();
+    formData.append("file", prospektBulkFile);
+    const listName = document.getElementById("pListName").value.trim() || "Ny liste";
+    formData.append("list_name", listName);
+    const {data:{session}} = await sb.auth.getSession();
+    if(!session || !session.user?.id){
+      document.getElementById("pBErrTxt").textContent="Sesjon utløpt. Logg ut og inn igjen og prøv på nytt.";
+      document.getElementById("pBErr").style.display="flex";
+      document.getElementById("pRunBtn").disabled=false;
+      document.getElementById("pRSpin").style.display="none";
+      document.getElementById("pRTxt").textContent="Start oppslag";
+      return;
+    }
+    const r = await fetch(`${PROSPEKT_API}/upload`, {method:"POST", body:formData, headers: await prospektAuthHeaders()});
+    const d = await r.json();
+    if(d.error){
+      document.getElementById("pBErrTxt").textContent=d.error;
+      document.getElementById("pBErr").style.display="flex";
+      document.getElementById("pRunBtn").disabled=false;
+      document.getElementById("pRSpin").style.display="none";
+      document.getElementById("pRTxt").textContent="Start oppslag";
+      return;
+    }
+    document.getElementById("prospektUploadSection").style.display="none";
+    document.getElementById("prospektJobSection").style.display="block";
+    document.getElementById("pJobIdDisplay").textContent=d.job_id;
+    document.getElementById("pProgCount").textContent=`0 / ${d.total}`;
+    pollProspektJobStatus(d.job_id, d.total);
+  }catch(e){
+    document.getElementById("pBErrTxt").textContent="Kunne ikke starte jobb. Prøv igjen.";
+    document.getElementById("pBErr").style.display="flex";
+    document.getElementById("pRunBtn").disabled=false;
+    document.getElementById("pRSpin").style.display="none";
+    document.getElementById("pRTxt").textContent="Start oppslag";
+  }
+});
+
+function pollProspektJobStatus(jobId, total){
+  prospektPollInterval = setInterval(async()=>{
+    try{
+      const r = await fetch(`${PROSPEKT_API}/status/${jobId}`, {headers: await prospektAuthHeaders()});
+      const d = await r.json();
+      const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
+      document.getElementById("pProgCount").textContent=`${d.progress} / ${total}`;
+      document.getElementById("pBarFill").style.width=`${pct}%`;
+      document.getElementById("pProgCur").textContent=d.current ? `Slår opp ${d.current}` : "";
+      if(d.status === "done"){
+        clearInterval(prospektPollInterval);
+        document.getElementById("pProgCur").textContent="Ferdig!";
+        document.getElementById("pBarFill").style.width="100%";
+        document.getElementById("pProgCount").textContent=`${total} / ${total}`;
+        document.getElementById("pDlJobBtn").style.display="inline-flex";
+        document.getElementById("pDlJobBtn").onclick=()=>prospektDownloadJob(jobId);
+      }
+    }catch(e){}
+  }, 3000);
+}
+
+async function checkProspektJobStatus(){
+  const jobId = document.getElementById("pJobIdInput").value.trim();
+  if(!jobId)return;
+  try{
+    const r = await fetch(`${PROSPEKT_API}/status/${jobId}`, {headers: await prospektAuthHeaders()});
+    const d = await r.json();
+    if(d.error){
+      document.getElementById("pJobStatusResult").innerHTML=`<span style="color:var(--red)">Jobb ikke funnet</span>`;
+      return;
+    }
+    const statusText = d.status === "done" ? "Ferdig" : d.status === "running" ? "Kjører" : "Venter";
+    const pct = d.total > 0 ? Math.round((d.progress/d.total)*100) : 0;
+    document.getElementById("pJobStatusResult").innerHTML=`
+      <div style="color:var(--text);margin-bottom:8px;">Status: <strong>${statusText}</strong> — ${d.progress}/${d.total} (${pct}%)</div>
+      ${d.status==="done" ? `<button onclick="prospektDownloadJob('${prospektEsc(jobId)}')" class="btn-primary">&#8595; Last ned Excel</button>` : ""}
+    `;
+  }catch(e){
+    document.getElementById("pJobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
   }
 }
 
