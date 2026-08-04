@@ -171,107 +171,15 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   </div>
 </div>
 
-<div class="login-required" id="loginRequired">
-  🔒 Du må <a href="/login/">opprette en bruker</a> for å kunne bruke dette.
-</div>
-
 <div class="app-shell">
   <div class="app-header">
     <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
   </div>
-  <div class="app-tabs">
-    <button class="app-tab active" id="ftab-single" onclick="switchTab('single')">Enkeltoppslag</button>
-    <button class="app-tab" id="ftab-bulk" onclick="switchTab('bulk')">Masseoppslag</button>
-  </div>
-  <div class="app-body">
-
-    <div class="tab-panel active" id="fpanel-single">
-      <div class="search-row">
-        <input class="search-input" id="singleInput" type="text" placeholder="Organisasjonsnummer" maxlength="12">
-        <button class="search-btn" id="singleBtn" onclick="doSingle()">
-          <span class="spin" id="sSpin" style="display:none"></span>
-          <span id="sBtnTxt">Søk opp</span>
-        </button>
-      </div>
-      <div class="err-pill" id="sErr" style="display:none"><span>⚠</span><span id="sErrTxt"></span></div>
-      <div class="result-card" id="resultCard">
-        <div class="result-header"><div class="result-company" id="resFirm"></div><div class="result-orgnr" id="resOrgnr"></div></div>
-        <div class="result-grid">
-          <div class="result-cell"><div class="result-label">Bransje</div><div class="result-value" id="resBransje"></div></div>
-          <div class="result-cell"><div class="result-label">Daglig leder tittel</div><div class="result-value" id="resTittel"></div></div>
-          <div class="result-cell"><div class="result-label">Daglig leder</div><div class="result-value" id="resKontakt"></div></div>
-          <div class="result-cell"><div class="result-label">Daglig leder tlf</div><div class="result-value" id="resTlf"></div></div>
-          <div class="result-cell"><div class="result-label">Daglig leder e-post</div><div class="result-value" id="resDLEpost"></div></div>
-          <div class="result-cell"><div class="result-label">Økonomisjef</div><div class="result-value" id="resOko"></div></div>
-          <div class="result-cell"><div class="result-label">Økonomisjef tlf</div><div class="result-value" id="resOkoTlf"></div></div>
-          <div class="result-cell"><div class="result-label">Økonomisjef e-post</div><div class="result-value" id="resOkoEpost"></div></div>
-          <div class="result-cell"><div class="result-label">Ansatte</div><div class="result-value" id="resAnsatte"></div></div>
-          <div class="result-cell"><div class="result-label">Driftsinntekter</div><div class="result-value" id="resInntekter"></div></div>
-          <div class="result-cell"><div class="result-label">Regnskapsfører</div><div class="result-value" id="resRegnskap"></div></div>
-          <div class="result-cell"><div class="result-label">Kommune</div><div class="result-value" id="resKommune"></div></div>
-          <div class="result-cell"><div class="result-label">Kilde daglig leder</div><div class="result-value" id="resKilde"></div></div>
-          <div class="result-cell"><div class="result-label">Kilde økonomisjef</div><div class="result-value" id="resKildeOko"></div></div>
-        </div>
-        <div id="resRollerWrap" style="display:none;border-top:1px solid var(--border);">
-          <div style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="toggleRoller()">
-            <div class="result-label" style="margin:0;">Andre roller daglig leder</div>
-            <span id="rollerArrow" style="color:var(--muted);font-size:12px;">&#9660;</span>
-          </div>
-          <div id="rollerList" style="display:none;padding:0 20px 16px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-panel" id="fpanel-bulk">
-      <!-- Last opp og start -->
-      <div id="bulkUploadSection">
-        <div class="drop-zone" id="dropZone">
-          <input type="file" id="fileInput" accept=".xlsx,.xls">
-          <div class="drop-icon">📊</div>
-          <div class="drop-title">Dra og slipp Excel-fil her</div>
-          <div class="drop-sub">eller klikk for å velge</div>
-        </div>
-        <div class="file-pill" id="filePill"><div class="file-pill-dot"></div><span id="fName"></span><span style="margin-left:auto;color:var(--muted)" id="fCount"></span></div>
-        <div class="err-pill" id="bErr" style="display:none"><span>⚠</span><span id="bErrTxt"></span></div>
-        <div style="margin-top:16px;">
-          <div class="result-label" style="margin-bottom:8px;">Gi listen et navn</div>
-          <input class="search-input" id="listName" type="text" placeholder="F.eks. Akvakultur juni 2026" style="font-size:15px;height:48px;">
-        </div>
-        <button class="run-btn" id="runBtn" disabled>
-          <span class="spin" id="rSpin" style="display:none"></span>
-          <span id="rTxt">Start oppslag</span>
-        </button>
-      </div>
-
-      <!-- Jobb startet -->
-      <div id="bulkJobSection" style="display:none;">
-        <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:20px;margin-bottom:16px;">
-          <div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:8px;">✓ Jobb startet på serveren!</div>
-          <div style="font-size:13px;color:var(--muted);">Du kan lukke PC-en. Kom tilbake og skriv inn jobb-ID-en for å laste ned resultatet.</div>
-          <div style="margin-top:12px;padding:12px 16px;background:var(--bg3);border-radius:8px;font-family:'DM Mono',monospace;font-size:18px;color:var(--text);text-align:center;letter-spacing:0.1em;" id="jobIdDisplay"></div>
-          <div style="font-size:11px;color:var(--muted2);text-align:center;margin-top:6px;">Jobb-ID — ta vare på denne</div>
-        </div>
-        <div class="progress-wrap" id="progWrap" style="display:block;">
-          <div class="progress-top"><div class="progress-lbl">Fremdrift</div><div class="progress-count" id="progCount">0 / 0</div></div>
-          <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
-          <div class="progress-cur" id="progCur">Starter...</div>
-        </div>
-        <button class="run-btn" id="dlJobBtn" style="display:none;background:var(--green);">
-          &#8595; Last ned Excel
-        </button>
-      </div>
-
-      <!-- Hent eksisterende jobb -->
-      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
-        <div class="result-label" style="margin-bottom:8px;">Har du allerede en jobb-ID?</div>
-        <div class="search-row">
-          <input class="search-input" id="jobIdInput" type="text" placeholder="Jobb-ID (f.eks. a3f9b2c1)" style="font-family:'DM Mono',monospace;font-size:15px;letter-spacing:0.08em;">
-          <button class="search-btn" onclick="checkJobStatus()">Sjekk status</button>
-        </div>
-        <div id="jobStatusResult" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
-      </div>
-    </div>
-
+  <div class="app-body" style="text-align:center;padding:56px 32px;">
+    <div style="width:56px;height:56px;margin:0 auto 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>
+    <div style="font-size:19px;font-weight:600;margin-bottom:10px;">Logg inn for å bruke oppslagsverktøyet</div>
+    <div style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 28px;line-height:1.6;">Enkelt- og masseoppslag finner du nå inne på Min side. Opprett en bruker eller logg inn for å komme i gang.</div>
+    <a href="/login/" class="run-btn" style="text-decoration:none;">Logg inn / Opprett bruker</a>
   </div>
 </div>
 
@@ -287,19 +195,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
 </div>
 
 <script>
-const API = "https://kontakt-api-production.up.railway.app";
-let orgnrs = [], results = [], isLoggedIn = false;
-
-// Escape dynamisk tekst før innsetting i innerHTML (mot XSS fra scrapede data)
-const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-
-// TABS
-function switchTab(t){
-  document.querySelectorAll(".app-tab").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-  document.getElementById("ftab-"+t).classList.add("active");
-  document.getElementById("fpanel-"+t).classList.add("active");
-}
+let isLoggedIn = false;
 
 // DROPDOWN
 document.querySelectorAll(".dropdown-btn").forEach(btn=>{
@@ -313,35 +209,7 @@ document.querySelectorAll(".dropdown-btn").forEach(btn=>{
 });
 document.addEventListener("click",()=>document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("open")));
 
-// AUTH CHECK
-function requireLogin(){
-  const el=document.getElementById("loginRequired");
-  el.style.display="flex";
-  setTimeout(()=>el.style.display="none",4000);
-}
-
 let sb = null;
-
-// Hent ferskt access-token og bygg Authorization-header
-async function authHeaders(){
-  if(!sb) return {};
-  const {data:{session}} = await sb.auth.getSession();
-  return session?.access_token ? {Authorization:`Bearer ${session.access_token}`} : {};
-}
-
-// Last ned jobb-Excel med auth-header (kan ikke bruke window.location som ikke sender headere)
-async function downloadJob(jobId){
-  try{
-    const r = await fetch(`${API}/download/${jobId}`, {headers: await authHeaders()});
-    if(!r.ok) throw new Error("download feilet");
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `dialr-${jobId}.xlsx`;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  }catch(e){ alert("Kunne ikke laste ned filen. Prøv igjen."); }
-}
 
 // Load Supabase and check auth
 (function(){
@@ -373,208 +241,6 @@ async function doLogout(){
   document.getElementById("logoutNavBtn").style.display="none";
 }
 
-// SINGLE
-document.getElementById("singleInput").addEventListener("keydown",e=>{if(e.key==="Enter")doSingle()});
-async function doSingle(){
-  if(!isLoggedIn){requireLogin();return;}
-  const org=document.getElementById("singleInput").value.replace(/[\s.]/g,"");
-  if(org.length<8){document.getElementById("sErrTxt").textContent="Skriv inn et gyldig org.nr";document.getElementById("sErr").style.display="flex";return;}
-  document.getElementById("sErr").style.display="none";
-  document.getElementById("resultCard").style.display="none";
-  document.getElementById("sSpin").style.display="inline-block";
-  document.getElementById("sBtnTxt").textContent="Henter...";
-  document.getElementById("singleBtn").disabled=true;
-  try{
-    const r=await fetch(`${API}/lookup?orgnr=${org}`, {headers: await authHeaders()});
-    const d=await r.json();
-    document.getElementById("resFirm").textContent=d["Firmanavn"]||"Ukjent";
-    document.getElementById("resOrgnr").textContent=d["Org.nr"]||org;
-    setVal("resBransje",d["Bransje"]);
-    setVal("resKontakt",d["Daglig leder"]);
-    setVal("resTittel",d["Daglig leder tittel"]);
-    const tlf=d["Daglig leder telefon"];
-    const tEl=document.getElementById("resTlf");
-    if(tlf){tEl.innerHTML=`<a href="tel:${esc(tlf)}" style="color:var(--accent2);text-decoration:none">${esc(tlf)}</a>`;tEl.className="result-value phone";}
-    else{tEl.textContent="Ikke funnet";tEl.className="result-value empty";}
-    setVal("resOko",d["Økonomisjef"]);
-    const okoTlf=d["Økonomisjef telefon"];
-    const oEl=document.getElementById("resOkoTlf");
-    if(okoTlf){oEl.innerHTML=`<a href="tel:${esc(okoTlf)}" style="color:var(--accent2);text-decoration:none">${esc(okoTlf)}</a>`;oEl.className="result-value phone";}
-    else{oEl.textContent="Ikke funnet";oEl.className="result-value empty";}
-    const dlEpost=d["Daglig leder e-post"];
-    const dlEEl=document.getElementById("resDLEpost");
-    if(dlEpost){dlEEl.innerHTML=`<a href="mailto:${esc(dlEpost)}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${esc(dlEpost)}</a>`;dlEEl.className="result-value";}
-    else{dlEEl.textContent="Ikke funnet";dlEEl.className="result-value empty";}
-    const okoEpost=d["Økonomisjef e-post"];
-    const okoEEl=document.getElementById("resOkoEpost");
-    if(okoEpost){okoEEl.innerHTML=`<a href="mailto:${esc(okoEpost)}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${esc(okoEpost)}</a>`;okoEEl.className="result-value";}
-    else{okoEEl.textContent="Ikke funnet";okoEEl.className="result-value empty";}
-    setVal("resAnsatte",d["Ansatte"]);
-    const innt=d["Driftsinntekter"];
-    const inntEl=document.getElementById("resInntekter");
-    if(innt){inntEl.textContent=Number(innt).toLocaleString("no")+" kr";inntEl.className="result-value";}
-    else{inntEl.textContent="Ikke funnet";inntEl.className="result-value empty";}
-    setVal("resRegnskap",d["Regnskapsfører"]);
-    setVal("resKommune",d["Kommune"]);
-    document.getElementById("resKilde").innerHTML=`<span class="tag ${tagClass(d["Kilde daglig leder"]||"")}">${esc(d["Kilde daglig leder"]||"Ukjent")}</span>`;
-    document.getElementById("resKildeOko").innerHTML=d["Kilde økonomisjef"]?`<span class="tag ${tagClass(d["Kilde økonomisjef"])}">${esc(d["Kilde økonomisjef"])}</span>`:`<span class="result-value empty">Ikke funnet</span>`;
-    // Andre roller
-    const roller = d["Andre roller"] || [];
-    const rollerWrap = document.getElementById("resRollerWrap");
-    const rollerList = document.getElementById("rollerList");
-    if(roller.length > 0){
-      rollerList.innerHTML = roller.map(r=>`
-        <div style="display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-          <span style="color:var(--muted);min-width:120px;font-family:'DM Mono',monospace;font-size:11px;">${esc(r.rolle)}</span>
-          <span style="font-weight:500;flex:1;">${esc(r.firma)}</span>
-          <span style="color:var(--muted);font-size:12px;">${esc(r.bransje)}</span>
-        </div>`).join('');
-      rollerWrap.style.display = "block";
-    } else {
-      rollerWrap.style.display = "none";
-    }
-    document.getElementById("resultCard").style.display="block";
-  }catch{document.getElementById("sErrTxt").textContent="Noe gikk galt.";document.getElementById("sErr").style.display="flex";}
-  document.getElementById("sSpin").style.display="none";
-  document.getElementById("sBtnTxt").textContent="Søk opp";
-  document.getElementById("singleBtn").disabled=false;
-}
-
-function toggleRoller(){
-  const list = document.getElementById("rollerList");
-  const arrow = document.getElementById("rollerArrow");
-  if(list.style.display === "none"){
-    list.style.display = "block";
-    arrow.innerHTML = "&#9650;";
-  } else {
-    list.style.display = "none";
-    arrow.innerHTML = "&#9660;";
-  }
-}
-
-function setVal(id,val){const el=document.getElementById(id);el.textContent=val||"Ikke funnet";el.className="result-value"+(val?"":" empty");}
-function tagClass(k){const l=(k||"").toLowerCase();if(l.includes("nettside"))return"tag source-nettside";if(l.includes("1881"))return"tag source-1881";if(l.includes("br"))return"tag source-brreg";return"tag source-empty";}
-
-// BULK - drag and drop
-const dz=document.getElementById("dropZone");
-let bulkFile = null;
-dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});
-dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
-dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");handleFile(e.dataTransfer.files[0])});
-document.getElementById("fileInput").addEventListener("change",e=>handleFile(e.target.files[0]));
-
-function handleFile(file){
-  if(!file)return;
-  bulkFile = file;
-  const rd=new FileReader();
-  rd.onload=e=>{
-    try{
-      const wb=XLSX.read(e.target.result,{type:"binary"});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const data=XLSX.utils.sheet_to_json(ws,{header:1});
-      let col=0;
-      if(data.length>0){const h=data[0].map(x=>String(x||"").toLowerCase());const f=h.findIndex(x=>x.includes("org"));if(f>=0)col=f;}
-      orgnrs=data.slice(1).map(r=>String(r[col]||"").replace(/[\s.]/g,"")).filter(n=>n.length>=8);
-      if(!orgnrs.length){document.getElementById("bErrTxt").textContent="Fant ingen org.nr.";document.getElementById("bErr").style.display="flex";return;}
-      document.getElementById("bErr").style.display="none";
-      document.getElementById("fName").textContent=file.name;
-      document.getElementById("fCount").textContent=`${orgnrs.length} selskaper`;
-      document.getElementById("filePill").style.display="flex";
-      document.getElementById("runBtn").disabled=false;
-    }catch{document.getElementById("bErrTxt").textContent="Kunne ikke lese filen.";document.getElementById("bErr").style.display="flex";}
-  };
-  rd.readAsBinaryString(file);
-}
-
-document.getElementById("runBtn").addEventListener("click",async()=>{
-  if(!isLoggedIn){requireLogin();return;}
-  if(!bulkFile)return;
-  document.getElementById("runBtn").disabled=true;
-  document.getElementById("rSpin").style.display="inline-block";
-  document.getElementById("rTxt").textContent="Sender til server...";
-
-  try{
-    const formData = new FormData();
-    formData.append("file", bulkFile);
-    const listName = document.getElementById("listName").value.trim() || "Ny liste";
-    formData.append("list_name", listName);
-    // Get user_id from Supabase session
-    const {data:{session}} = await sb.auth.getSession();
-    if(!session || !session.user?.id){
-      document.getElementById("bErrTxt").textContent="Sesjon utløpt. Logg ut og inn igjen og prøv på nytt.";
-      document.getElementById("bErr").style.display="flex";
-      document.getElementById("runBtn").disabled=false;
-      document.getElementById("rSpin").style.display="none";
-      document.getElementById("rTxt").textContent="Start oppslag";
-      return;
-    }
-    const r = await fetch(`${API}/upload`, {method:"POST", body:formData, headers: await authHeaders()});
-    const d = await r.json();
-    if(d.error){
-      document.getElementById("bErrTxt").textContent=d.error;
-      document.getElementById("bErr").style.display="flex";
-      document.getElementById("runBtn").disabled=false;
-      document.getElementById("rSpin").style.display="none";
-      document.getElementById("rTxt").textContent="Start oppslag";
-      return;
-    }
-    // Show job section
-    document.getElementById("bulkUploadSection").style.display="none";
-    document.getElementById("bulkJobSection").style.display="block";
-    document.getElementById("jobIdDisplay").textContent=d.job_id;
-    document.getElementById("progCount").textContent=`0 / ${d.total}`;
-    pollJobStatus(d.job_id, d.total);
-  }catch(e){
-    document.getElementById("bErrTxt").textContent="Kunne ikke starte jobb. Prøv igjen.";
-    document.getElementById("bErr").style.display="flex";
-    document.getElementById("runBtn").disabled=false;
-    document.getElementById("rSpin").style.display="none";
-    document.getElementById("rTxt").textContent="Start oppslag";
-  }
-});
-
-let pollInterval = null;
-function pollJobStatus(jobId, total){
-  pollInterval = setInterval(async()=>{
-    try{
-      const r = await fetch(`${API}/status/${jobId}`, {headers: await authHeaders()});
-      const d = await r.json();
-      const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
-      document.getElementById("progCount").textContent=`${d.progress} / ${total}`;
-      document.getElementById("barFill").style.width=`${pct}%`;
-      document.getElementById("progCur").textContent=d.current ? `Slår opp ${d.current}` : "";
-      if(d.status === "done"){
-        clearInterval(pollInterval);
-        document.getElementById("progCur").textContent="Ferdig!";
-        document.getElementById("barFill").style.width="100%";
-        document.getElementById("progCount").textContent=`${total} / ${total}`;
-        document.getElementById("dlJobBtn").style.display="inline-flex";
-        document.getElementById("dlJobBtn").onclick=()=>downloadJob(jobId);
-      }
-    }catch(e){}
-  }, 3000);
-}
-
-async function checkJobStatus(){
-  const jobId = document.getElementById("jobIdInput").value.trim();
-  if(!jobId)return;
-  try{
-    const r = await fetch(`${API}/status/${jobId}`, {headers: await authHeaders()});
-    const d = await r.json();
-    if(d.error){
-      document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Jobb ikke funnet</span>`;
-      return;
-    }
-    const statusText = d.status === "done" ? "Ferdig" : d.status === "running" ? "Kjører" : "Venter";
-    const pct = d.total > 0 ? Math.round((d.progress/d.total)*100) : 0;
-    document.getElementById("jobStatusResult").innerHTML=`
-      <div style="color:var(--text);margin-bottom:8px;">Status: <strong>${statusText}</strong> — ${d.progress}/${d.total} (${pct}%)</div>
-      ${d.status==="done" ? `<button onclick="downloadJob('${esc(jobId)}')" class="run-btn" style="display:inline-flex;">&#8595; Last ned Excel</button>` : ""}
-    `;
-  }catch(e){
-    document.getElementById("jobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
-  }
-}
 </script>
 </body>
 </html>
