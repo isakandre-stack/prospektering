@@ -917,13 +917,16 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <button class="btn-primary" id="pDlJobBtn" style="display:none;margin-top:16px;background:var(--green);">&#8595; Last ned Excel</button>
     </div>
 
-    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
-      <div class="ring-label" style="margin-bottom:8px;">Har du allerede en jobb-ID?</div>
-      <div class="prospekt-search-row">
-        <input class="prospekt-search-input" id="pJobIdInput" type="text" placeholder="Jobb-ID (f.eks. a3f9b2c1)" style="font-family:'DM Mono',monospace;letter-spacing:0.08em;">
-        <button class="btn-secondary" onclick="checkProspektJobStatus()">Sjekk status</button>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="ring-label" style="margin:0;">Dine jobber</div>
+        <button class="btn-secondary" style="padding:6px 12px;font-size:11px;" onclick="loadProspektJobs()">&#8635; Oppdater</button>
       </div>
-      <div id="pJobStatusResult" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
+      <div id="pJobsList">
+        <div class="empty-state" style="padding:24px 0;">
+          <div style="font-size:13px;">Laster jobber...</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2078,6 +2081,7 @@ function switchProspektTab(t){
   document.querySelectorAll(".prospekt-panel").forEach(p=>p.classList.remove("active"));
   document.getElementById("ptab-"+t).classList.add("active");
   document.getElementById("ppanel-"+t).classList.add("active");
+  if(t === "bulk") loadProspektJobs();
 }
 
 async function prospektAuthHeaders(){
@@ -2242,6 +2246,7 @@ document.getElementById("pRunBtn").addEventListener("click",async()=>{
     document.getElementById("pJobIdDisplay").textContent=d.job_id;
     document.getElementById("pProgCount").textContent=`0 / ${d.total}`;
     pollProspektJobStatus(d.job_id, d.total);
+    loadProspektJobs();
   }catch(e){
     document.getElementById("pBErrTxt").textContent="Kunne ikke starte jobb. Prøv igjen.";
     document.getElementById("pBErr").style.display="flex";
@@ -2252,45 +2257,95 @@ document.getElementById("pRunBtn").addEventListener("click",async()=>{
 });
 
 function pollProspektJobStatus(jobId, total){
-  prospektPollInterval = setInterval(async()=>{
+  if(prospektPollInterval) clearInterval(prospektPollInterval);
+  const tick = async()=>{
     try{
       const r = await fetch(`${PROSPEKT_API}/status/${jobId}`, {headers: await prospektAuthHeaders()});
       const d = await r.json();
-      const pct = total > 0 ? Math.round((d.progress/total)*100) : 0;
-      document.getElementById("pProgCount").textContent=`${d.progress} / ${total}`;
+      if(d.error) return;
+      const t = d.total || total;
+      const pct = t > 0 ? Math.round((d.progress/t)*100) : 0;
+      document.getElementById("pProgCount").textContent=`${d.progress||0} / ${t}`;
       document.getElementById("pBarFill").style.width=`${pct}%`;
       document.getElementById("pProgCur").textContent=d.current ? `Slår opp ${d.current}` : "";
       if(d.status === "done"){
         clearInterval(prospektPollInterval);
-        document.getElementById("pProgCur").textContent="Ferdig!";
+        document.getElementById("pProgCur").textContent = d.error ? `Feilet: ${d.error}` : "Ferdig!";
         document.getElementById("pBarFill").style.width="100%";
-        document.getElementById("pProgCount").textContent=`${total} / ${total}`;
-        document.getElementById("pDlJobBtn").style.display="inline-flex";
-        document.getElementById("pDlJobBtn").onclick=()=>prospektDownloadJob(jobId);
+        document.getElementById("pProgCount").textContent=`${t} / ${t}`;
+        if(!d.error && d.list_id){
+          document.getElementById("pDlJobBtn").style.display="inline-flex";
+          document.getElementById("pDlJobBtn").onclick=()=>prospektDownloadJob(jobId);
+        }
+        loadProspektJobs();
       }
     }catch(e){}
-  }, 3000);
+  };
+  tick();
+  prospektPollInterval = setInterval(tick, 3000);
 }
 
-async function checkProspektJobStatus(){
-  const jobId = document.getElementById("pJobIdInput").value.trim();
-  if(!jobId)return;
+// ===== DINE JOBBER (overlever refresh - hentes fra Supabase via job-id) =====
+async function loadProspektJobs(){
+  const listEl = document.getElementById("pJobsList");
   try{
-    const r = await fetch(`${PROSPEKT_API}/status/${jobId}`, {headers: await prospektAuthHeaders()});
-    const d = await r.json();
-    if(d.error){
-      document.getElementById("pJobStatusResult").innerHTML=`<span style="color:var(--red)">Jobb ikke funnet</span>`;
-      return;
-    }
-    const statusText = d.status === "done" ? "Ferdig" : d.status === "running" ? "Kjører" : "Venter";
-    const pct = d.total > 0 ? Math.round((d.progress/d.total)*100) : 0;
-    document.getElementById("pJobStatusResult").innerHTML=`
-      <div style="color:var(--text);margin-bottom:8px;">Status: <strong>${statusText}</strong> — ${d.progress}/${d.total} (${pct}%)</div>
-      ${d.status==="done" ? `<button onclick="prospektDownloadJob('${prospektEsc(jobId)}')" class="btn-primary">&#8595; Last ned Excel</button>` : ""}
-    `;
+    const r = await fetch(`${PROSPEKT_API}/jobs`, {headers: await prospektAuthHeaders()});
+    const jobs = await r.json();
+    renderProspektJobs(Array.isArray(jobs) ? jobs : []);
   }catch(e){
-    document.getElementById("pJobStatusResult").innerHTML=`<span style="color:var(--red)">Feil ved henting av status</span>`;
+    listEl.innerHTML = `<div class="empty-state" style="padding:24px 0;"><div style="font-size:13px;color:var(--red);">Kunne ikke laste jobber.</div></div>`;
   }
+}
+
+function prospektStatusBadge(job){
+  if(job.error) return `<span class="idag-badge red" style="margin-left:8px;">Feilet</span>`;
+  if(job.status === "done") return `<span class="idag-badge green" style="margin-left:8px;">Ferdig</span>`;
+  if(job.status === "running") return `<span class="idag-badge accent" style="margin-left:8px;">Kjører</span>`;
+  return `<span class="idag-badge accent" style="margin-left:8px;">I kø</span>`;
+}
+
+function prospektRelTime(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString("no", {day:"numeric", month:"short", year:"numeric"}) + " " + d.toLocaleTimeString("no", {hour:"2-digit", minute:"2-digit"});
+}
+
+function renderProspektJobs(jobs){
+  const listEl = document.getElementById("pJobsList");
+  if(!jobs.length){
+    listEl.innerHTML = `<div class="empty-state" style="padding:24px 0;">
+      <div style="font-size:13px;">Ingen jobber ennå. Last opp en Excel-fil over for å starte et masseoppslag.</div>
+    </div>`;
+    return;
+  }
+  listEl.innerHTML = jobs.map(job => {
+    const name = job.list_name || "Uten navn";
+    const when = prospektRelTime(job.created_at);
+    const progress = `${job.progress||0} / ${job.total||0} selskaper`;
+    let action = "";
+    if(job.status === "done" && !job.error && job.list_id){
+      action = `<button class="btn-primary" onclick="prospektDownloadJob('${job.id}')">&#8595; Last ned</button>`;
+    } else if(job.status === "queued" || job.status === "running"){
+      action = `<button class="btn-secondary" onclick="resumeProspektJob('${job.id}', ${job.total||0})">Se fremdrift</button>`;
+    }
+    return `<div class="list-card">
+      <div class="list-info">
+        <div class="list-name">${prospektEsc(name)}</div>
+        <div class="list-meta">${when} &nbsp;·&nbsp; ${progress}${prospektStatusBadge(job)}</div>
+      </div>
+      <div class="list-actions">${action}</div>
+    </div>`;
+  }).join("");
+}
+
+function resumeProspektJob(jobId, total){
+  document.getElementById("prospektUploadSection").style.display="none";
+  document.getElementById("prospektJobSection").style.display="block";
+  document.getElementById("pJobIdDisplay").textContent=jobId;
+  document.getElementById("pProgCount").textContent=`0 / ${total}`;
+  document.getElementById("pBarFill").style.width="0%";
+  document.getElementById("pDlJobBtn").style.display="none";
+  pollProspektJobStatus(jobId, total);
 }
 
 init();
