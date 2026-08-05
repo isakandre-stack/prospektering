@@ -939,7 +939,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 <script>
 const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// sessionStorage i stedet for localStorage: sesjonen holder seg mens fanen
+// er apen, men huskes ikke neste gang siden apnes - da ma man logge inn pa nytt.
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.sessionStorage } });
 
 let currentUser = null;
 let allLists = [];
