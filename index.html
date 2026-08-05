@@ -218,16 +218,20 @@ let sb = null;
   script.onload=async function(){
     const SUPABASE_URL="https://lvhlslkiaazuytezajsw.supabase.co";
     const SUPABASE_KEY="sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
-    sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    // Bruker sessionStorage i stedet for localStorage: sesjonen folger deg
+    // mellom sidene mens fanen er apen, men huskes ikke neste gang du apner
+    // nettsiden i en ny fane/okt - da ma man logge inn pa nytt.
+    sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:window.sessionStorage}});
     window._sb=sb;
     const {data:{session}}=await sb.auth.getSession();
     if(session){
       const {data:profile}=await sb.from("profiles").select("approved").eq("email",session.user.email).single();
       if(profile&&profile.approved){
         isLoggedIn=true;
-        document.getElementById("loginNavBtn").style.display="none";
-        document.getElementById("minSideNavBtn").style.display="flex";
-        document.getElementById("logoutNavBtn").style.display="block";
+        // Kast innloggede brukere rett inn pa Min side i stedet for a vise
+        // forsiden med en "logg inn"-boks som uansett ikke er relevant lenger.
+        window.location.href="/minside/";
+        return;
       }
     }
   };
