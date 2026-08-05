@@ -175,7 +175,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);displ
   <div class="app-header">
     <div class="app-dot"></div><div class="app-dot"></div><div class="app-dot"></div>
   </div>
-  <div class="app-body" style="text-align:center;padding:56px 32px;">
+  <div class="app-body" style="text-align:center;padding:56px 32px;" id="appCta">
     <div style="width:56px;height:56px;margin:0 auto 20px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>
     <div style="font-size:19px;font-weight:600;margin-bottom:10px;">Logg inn for å bruke oppslagsverktøyet</div>
     <div style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 28px;line-height:1.6;">Enkelt- og masseoppslag finner du nå inne på Min side. Opprett en bruker eller logg inn for å komme i gang.</div>
@@ -228,10 +228,21 @@ let sb = null;
       const {data:profile}=await sb.from("profiles").select("approved").eq("email",session.user.email).single();
       if(profile&&profile.approved){
         isLoggedIn=true;
-        // Kast innloggede brukere rett inn pa Min side i stedet for a vise
-        // forsiden med en "logg inn"-boks som uansett ikke er relevant lenger.
-        window.location.href="/minside/";
-        return;
+        document.getElementById("loginNavBtn").style.display="none";
+        document.getElementById("minSideNavBtn").style.display="flex";
+        document.getElementById("logoutNavBtn").style.display="block";
+        // Ikke tving innloggede brukere videre - de skal fortsatt kunne
+        // besoke forsiden (f.eks. via logo-lenken) uten a bli kastet rett
+        // tilbake til Min side. Bytt bare ut CTA-boksen med en som peker dit.
+        const cta=document.getElementById("appCta");
+        if(cta){
+          cta.innerHTML=`
+            <div style="width:56px;height:56px;margin:0 auto 20px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;">✅</div>
+            <div style="font-size:19px;font-weight:600;margin-bottom:10px;">Du er logget inn</div>
+            <div style="font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 28px;line-height:1.6;">Enkelt- og masseoppslag finner du inne på Min side.</div>
+            <a href="/minside/" class="run-btn" style="text-decoration:none;">Gå til Min side</a>
+          `;
+        }
       }
     }
   };
@@ -240,9 +251,7 @@ let sb = null;
 
 async function doLogout(){
   if(window._sb) await window._sb.auth.signOut();
-  isLoggedIn=false;
-  document.getElementById("loginNavBtn").style.display="flex";
-  document.getElementById("logoutNavBtn").style.display="none";
+  window.location.reload();
 }
 
 </script>
