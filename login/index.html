@@ -108,7 +108,9 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 const SUPABASE_URL = "https://lvhlslkiaazuytezajsw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_FsGNBrVWfEYf4O0a6A3dTw_DiW7YITe";
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+// sessionStorage i stedet for localStorage: sesjonen holder seg mens fanen
+// er apen, men huskes ikke neste gang siden apnes - da ma man logge inn pa nytt.
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.sessionStorage } });
 
 function switchAuthTab(t) {
   document.getElementById('loginTab').classList.toggle('active', t === 'login');
@@ -142,7 +144,7 @@ async function doLogin() {
     return;
   }
 
-  window.location.href = '/';
+  window.location.href = '/minside/';
 }
 
 async function doRegister() {
@@ -196,7 +198,7 @@ sb.auth.getSession().then(async ({ data: { session } }) => {
   if(session) {
     const { data: profile } = await sb.from('profiles').select('approved').eq('email', session.user.email).single();
     if(profile && profile.approved) {
-      window.location.href = '/';
+      window.location.href = '/minside/';
     } else if(session && !profile) {
       // New Google user — insert into profiles as not approved
       await sb.from('profiles').insert({ email: session.user.email, approved: false, access_level: 'full' });
