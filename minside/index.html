@@ -195,6 +195,30 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .idag-empty{text-align:center;padding:32px;color:var(--muted);font-size:14px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;}
 .idag-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
 
+/* ===== BRANSJEINNSIKT (ringevindu) ===== */
+.insight-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--card-shadow);margin-top:20px;}
+.insight-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.insight-icon{width:38px;height:38px;border-radius:10px;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.insight-title{font-size:16px;font-weight:600;}
+.insight-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.insight-badge{margin-left:auto;font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px;background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border);font-family:'DM Mono',monospace;letter-spacing:0.03em;white-space:nowrap;}
+.insight-body{padding:24px;display:flex;flex-direction:column;gap:24px;}
+.insight-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+@media(max-width:700px){.insight-row{grid-template-columns:1fr;}}
+.insight-block-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
+.insight-list{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.insight-list li{font-size:13.5px;line-height:1.5;padding-left:16px;position:relative;color:var(--text);}
+.insight-list li::before{content:'';position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--muted2);}
+.insight-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.insight-tag{font-size:12px;padding:5px 11px;border-radius:100px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;}
+.insight-footer{padding:14px 24px;background:var(--bg3);border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+.q-list{list-style:none;display:flex;flex-direction:column;gap:14px;}
+.q-list li{padding-left:16px;position:relative;}
+.q-list li::before{content:'';position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--accent2);}
+.q-text{font-size:13.5px;font-weight:500;color:var(--text);line-height:1.4;}
+.q-reveals{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.q-reveals b{color:var(--accent2);font-weight:600;}
+
 /* ===== SIDEBAR (mørk, som i skjermbildet) ===== */
 .app-shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh;position:relative;z-index:1;}
 .sidebar{background:var(--sidebar-bg);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
@@ -717,6 +741,39 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <button class="next-btn" onclick="saveAndNext()">Lagre og neste &#8594;</button>
     </div>
   </div>
+
+  <!-- BRANSJEINNSIKT -->
+  <div class="insight-card" id="insightCardWrap" style="display:none;">
+    <div class="insight-header">
+      <div class="insight-icon">💡</div>
+      <div>
+        <div class="insight-title">Bransjeinnsikt</div>
+        <div class="insight-sub" id="insightSub"></div>
+      </div>
+      <div class="insight-badge" id="insightBadge"></div>
+    </div>
+    <div class="insight-body">
+      <div>
+        <div class="insight-block-title">🔍 Spørsmål for å avdekke utfordringer med dagens regnskapsfører</div>
+        <ul class="q-list" id="insightQList"></ul>
+      </div>
+      <div class="insight-row">
+        <div>
+          <div class="insight-block-title">🖥️ Vanlige systemer</div>
+          <div class="insight-tags" id="insightSystemer"></div>
+        </div>
+        <div>
+          <div class="insight-block-title">🧩 Tilleggssystemer</div>
+          <div class="insight-tags" id="insightTilleggssystemer"></div>
+        </div>
+        <div>
+          <div class="insight-block-title">🎯 Viktig for bransjen</div>
+          <ul class="insight-list" id="insightViktig"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="insight-footer">Bransjeinnsikt er et utkast basert på generell research — juster gjerne innholdet i Supabase når du lærer mer fra faktiske samtaler.</div>
+  </div>
 </div>
 
 <!-- TILPASS DASHBOARD MODAL -->
@@ -958,6 +1015,7 @@ let forfaltListData = [];
 let tilbakeIdagListData = [];
 let kommendeListData = [];
 let hiddenWidgets = [];
+let industryInsights = null; // cache av rader fra industry_insights, hentet én gang
 
 const DASHBOARD_WIDGETS = [
   {id:"statCardRingt", label:"Ringt i dag (stat-kort)"},
@@ -1097,9 +1155,68 @@ async function confirmDelete(){
 }
 
 // RING MODE
+// BRANSJEINNSIKT
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[ch]));
+}
+
+async function loadIndustryInsights(){
+  if(industryInsights) return industryInsights;
+  try{
+    const { data, error } = await sb.from("industry_insights").select("*");
+    if(error) throw error;
+    industryInsights = data || [];
+  } catch(e){
+    console.error("Kunne ikke hente bransjeinnsikt:", e);
+    industryInsights = [];
+  }
+  return industryInsights;
+}
+
+function matchIndustryInsight(bransjeTekst){
+  if(!bransjeTekst || !industryInsights || !industryInsights.length) return null;
+  const tekst = bransjeTekst.toLowerCase();
+  return industryInsights.find(cat =>
+    (cat.nokkelord || []).some(kw => tekst.includes(String(kw).toLowerCase()))
+  ) || null;
+}
+
+async function renderInsightCard(company){
+  const wrap = document.getElementById("insightCardWrap");
+  if(!wrap) return;
+  // Sørg for at innsikt er lastet (cachet etter første kall - vanligvis
+  // allerede klar siden startRing() forhåndslaster den).
+  await loadIndustryInsights();
+
+  const match = matchIndustryInsight(company && company.bransje);
+  if(!match){
+    wrap.style.display = "none";
+    return;
+  }
+
+  wrap.style.display = "block";
+  document.getElementById("insightBadge").textContent = (match.navn || "").toUpperCase();
+  document.getElementById("insightSub").textContent = `Matchet automatisk på "${company.bransje}"`;
+
+  document.getElementById("insightQList").innerHTML = (match.avdekking_sporsmal || []).map(q => `
+    <li>
+      <div class="q-text">${escapeHtml(q.tekst || "")}</div>
+      ${q.avdekker ? `<div class="q-reveals">→ avdekker: <b>${escapeHtml(q.avdekker)}</b></div>` : ""}
+    </li>`).join("");
+
+  const tagsHtml = arr => (arr || []).map(t => `<span class="insight-tag">${escapeHtml(t)}</span>`).join("");
+  document.getElementById("insightSystemer").innerHTML = tagsHtml(match.systemer);
+  document.getElementById("insightTilleggssystemer").innerHTML = tagsHtml(match.tilleggssystemer);
+  document.getElementById("insightViktig").innerHTML = (match.viktig_for_bransjen || [])
+    .map(v => `<li>${escapeHtml(v)}</li>`).join("");
+}
+
 async function startRing(listId, listName){
   setActiveView("view-ring");
   document.getElementById("ringListName").textContent = listName;
+  loadIndustryInsights(); // henter/cacher i bakgrunnen, blokkerer ikke visning
 
   const { data: companies } = await sb.from("companies")
     .select("*").eq("list_id", listId).order("sort_order");
@@ -1148,6 +1265,7 @@ function showCurrentCompany(){
       </div>`;
     document.getElementById("logCard").style.display = "none";
     document.getElementById("ringProgress").textContent = `${filteredCompanies.length} / ${filteredCompanies.length}`;
+    document.getElementById("insightCardWrap").style.display = "none";
     return;
   }
 
@@ -1205,6 +1323,8 @@ function showCurrentCompany(){
   document.getElementById("ringInntekter").textContent = c.driftsinntekter ? Number(c.driftsinntekter).toLocaleString("no") + " kr" : "Ikke funnet";
   document.getElementById("ringRegnskap").textContent = c.regnskapsforer || "Ikke funnet";
   document.getElementById("ringKommune").textContent = c.kommune || "Ikke funnet";
+
+  renderInsightCard(c);
 
   currentResultat = null;
   document.querySelectorAll(".result-btn").forEach(b => b.className = "result-btn");
