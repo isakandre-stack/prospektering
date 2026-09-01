@@ -31,8 +31,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .nav-right{display:flex;align-items:center;gap:8px;}
 .nav-btn{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;text-decoration:none;}
 .nav-btn:hover{border-color:var(--accent);color:var(--accent2)}
-#view-idag,#view-lists,#view-ring,#view-rapport,#view-prospekt{display:none;}
-#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active,#view-prospekt.active{display:block;}
+#view-idag,#view-lists,#view-ring,#view-rapport,#view-prospekt,#view-import{display:none;}
+#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active,#view-prospekt.active,#view-import.active{display:block;}
 .page-title{font-size:28px;font-weight:600;margin-bottom:8px;}
 .page-sub{font-size:15px;color:var(--muted);margin-bottom:32px;}
 .list-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:20px;box-shadow:var(--card-shadow);}
@@ -401,6 +401,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
     <button class="sidebar-link" id="nav-lister" onclick="showLists()"><span class="ic">📋</span> Mine lister</button>
     <button class="sidebar-link" id="nav-rapport" onclick="showRapport()"><span class="ic">📈</span> Rapport</button>
     <button class="sidebar-link" id="nav-prospekt" onclick="showProspekt()"><span class="ic">🔍</span> Prospektering</button>
+    <button class="sidebar-link" id="nav-import" onclick="showImport()"><span class="ic">📥</span> Importer</button>
   </nav>
 
   <div class="sidebar-spacer"></div>
@@ -651,6 +652,59 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   </div>
 </div>
 
+<!-- IMPORTER -->
+<div id="view-import">
+  <div class="page-title">Importer ringte lister</div>
+  <div class="page-sub">Last opp lister som er ringt utenfor Dialr. De telles i statistikken din, men blir ikke en aktiv ringeliste i Ring-modus.</div>
+
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:32px;">
+    <div style="margin-bottom:16px;">
+      <div class="result-label" style="margin-bottom:8px;">Navn på import</div>
+      <input id="importBatchName" type="text" placeholder="F.eks. Ringeliste fra gammelt system - august" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px 16px;font-family:Inter,sans-serif;font-size:14px;color:var(--text);outline:none;">
+    </div>
+    <div style="border:1.5px dashed var(--border2);border-radius:12px;padding:32px;text-align:center;cursor:pointer;position:relative;margin-bottom:16px;" id="importDropZone">
+      <input type="file" id="importFileInput" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+      <div style="font-size:24px;margin-bottom:8px;">📥</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Dra og slipp Excel-fil her</div>
+      <div style="font-size:12px;color:var(--muted);">eller klikk for å velge · trenger minst org.nr og dato ringt</div>
+    </div>
+    <div id="importFilePill" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;">
+      <div style="width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;"></div>
+      <span id="importFileName"></span>
+      <span style="margin-left:auto;" id="importFileCount"></span>
+    </div>
+    <div id="importErr" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:12px 16px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;font-size:13px;color:var(--red);">
+      <span id="importErrTxt"></span>
+    </div>
+
+    <div id="importMapWrap" style="display:none;">
+      <div style="font-size:15px;font-weight:600;margin:24px 0 12px;">Koble kolonner</div>
+      <div id="importColumnMap" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px;"></div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:20px;">* Org.nr og Dato ringt er påkrevd. Resten er valgfritt.</div>
+
+      <div id="importResultatMapWrap" style="display:none;">
+        <div style="font-size:15px;font-weight:600;margin:8px 0 12px;">Koble resultatverdier</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Fant unike verdier i resultat-kolonnen. Koble hver til riktig Dialr-kategori.</div>
+        <div id="importResultatMap" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+      </div>
+
+      <button class="btn-primary" id="importRunBtn" onclick="runImport()">Kjør import</button>
+    </div>
+
+    <div id="importResultWrap" style="display:none;margin-top:20px;padding:16px 20px;background:var(--bg3);border-radius:12px;font-size:13px;line-height:1.9;"></div>
+  </div>
+
+  <div>
+    <div style="font-size:18px;font-weight:600;margin-bottom:16px;">Tidligere importer</div>
+    <div id="importHistoryContainer">
+      <div class="empty-state">
+        <div class="spin" style="width:24px;height:24px;border-color:rgba(124,106,247,0.3);border-top-color:var(--accent);margin:0 auto 16px;"></div>
+        <div>Laster historikk...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- RING MODE -->
 <div id="view-ring">
   <div class="ring-header">
@@ -845,7 +899,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 <div class="modal-overlay" id="companyInfoModal">
   <div class="modal" style="max-width:520px;">
     <div class="modal-title" id="ciCompanyName">—</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="ciBransje"></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;" id="ciBransje"></div>
+    <div id="ciEksternBadge" style="display:none;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--accent2);background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:100px;padding:3px 10px;white-space:nowrap;">☎️ Siste resultat ringt utenfor Dialr</div>
     <div class="ring-grid" style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;">
       <div class="ring-cell"><div class="ring-label">Daglig leder</div><div class="ring-value" id="ciDL"></div></div>
       <div class="ring-cell"><div class="ring-label">Daglig leder telefon</div><div class="ring-value" id="ciDLTlf"></div></div>
@@ -1113,18 +1168,18 @@ async function doLogout(){
 }
 
 function setActiveView(viewId){
-  ["view-idag","view-lists","view-ring","view-rapport","view-prospekt"].forEach(id => document.getElementById(id).classList.remove("active"));
+  ["view-idag","view-lists","view-ring","view-rapport","view-prospekt","view-import"].forEach(id => document.getElementById(id).classList.remove("active"));
   document.getElementById(viewId).classList.add("active");
-  ["nav-idag","nav-lister","nav-rapport","nav-prospekt"].forEach(id => {
+  ["nav-idag","nav-lister","nav-rapport","nav-prospekt","nav-import"].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.classList.remove("active");
   });
-  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport","view-prospekt":"nav-prospekt"};
+  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport","view-prospekt":"nav-prospekt","view-import":"nav-import"};
   if(navMap[viewId]){
     const el = document.getElementById(navMap[viewId]);
     if(el) el.classList.add("active");
   }
-  const labelMap = {"view-idag":"Dashboard","view-lists":"Mine lister","view-ring":"Ring-modus","view-rapport":"Rapport","view-prospekt":"Prospektering"};
+  const labelMap = {"view-idag":"Dashboard","view-lists":"Mine lister","view-ring":"Ring-modus","view-rapport":"Rapport","view-prospekt":"Prospektering","view-import":"Importer"};
   const topbarEl = document.getElementById("topbarLabel");
   if(topbarEl) topbarEl.textContent = labelMap[viewId] || "";
 }
@@ -1152,6 +1207,7 @@ async function loadLists(){
   const { data: lists } = await sb.from("lists")
     .select("*, companies(count)")
     .eq("user_id", currentUser.id)
+    .neq("kilde", "import")
     .order("created_at", { ascending: false });
   allLists = lists || [];
   renderLists();
@@ -1289,6 +1345,13 @@ async function startRing(listId, listName){
   currentList = { id: listId, name: listName };
   applyFilter();
 
+  // Hent alle firmaer man allerede har logget en samtale på (inkl. via
+  // import, som kan ha registrert firmaer utenfor rekkefølge). Brukes som
+  // et ekstra sikkerhetsnett i tillegg til bokmerket under.
+  const { data: calls } = await sb.from("calls")
+    .select("company_id").eq("user_id", currentUser.id);
+  const calledIds = new Set((calls || []).map(c => c.company_id));
+
   if(listRow && listRow.last_ringt_sort_order != null){
     // Bruk bokmerket posisjon - dette respekterer rekkefølgen uansett
     // hvilket resultat (inkl. telefonsvarer) som ble registrert, og
@@ -1300,12 +1363,17 @@ async function startRing(listId, listName){
     // Fallback for lister som ikke har fått bokmerke ennå (f.eks. lister
     // man allerede er i gang med før denne funksjonen fantes): finn
     // første firma uten et loggført resultat i det hele tatt.
-    const { data: calls } = await sb.from("calls")
-      .select("company_id").eq("user_id", currentUser.id);
-    const calledIds = new Set((calls || []).map(c => c.company_id));
     currentIndex = filteredCompanies.findIndex(c => !calledIds.has(c.id));
     if(currentIndex === -1) currentIndex = filteredCompanies.length;
   }
+
+  // Hopp videre forbi ethvert firma som allerede har fått et resultat
+  // (f.eks. via en import som traff midt i listen), selv om det er foran
+  // bokmerket.
+  while(currentIndex < filteredCompanies.length && calledIds.has(filteredCompanies[currentIndex].id)){
+    currentIndex++;
+  }
+
   showCurrentCompany();
 }
 
@@ -2056,6 +2124,16 @@ function showCompanyInfo(company){
   document.getElementById("ciOrgnr").textContent = company.orgnr || "Ikke funnet";
   updateOppfolgingUI(company);
   document.getElementById("companyInfoModal").classList.add("open");
+
+  // Vis badge hvis nyeste registrerte resultat kommer fra en import (ringt utenfor Dialr)
+  document.getElementById("ciEksternBadge").style.display = "none";
+  sb.from("calls").select("kilde").eq("company_id", company.id)
+    .order("created_at", { ascending: false }).limit(1).maybeSingle()
+    .then(({ data }) => {
+      if(data && data.kilde === "ekstern"){
+        document.getElementById("ciEksternBadge").style.display = "inline-block";
+      }
+    });
 }
 
 function closeCompanyInfoModal(){
@@ -2410,6 +2488,355 @@ async function uploadManualList() {
     btn.disabled = false;
     btn.textContent = "Last opp liste";
   }
+}
+
+// ===== IMPORTER (allerede ringte lister utenfor Dialr) =====
+let importRows = [];
+let importHeaders = [];
+let importColMapping = {};
+let importResultatValues = [];
+let importResultatMapping = {};
+
+// Rangering fra minst til mest informativt resultat. Brukes til å avgjøre
+// om et importert resultat skal overskrive det som allerede ligger i Dialr.
+const RESULTAT_RANK = { "ringt eksternt": 0, "telefonsvarer": 1, "ikke svarte": 2, "ring tilbake": 3, "svarte": 4, "møte": 5 };
+const RESULTAT_LABELS = { "svarte": "Svarte", "møte": "Møte", "telefonsvarer": "Telefonsvarer", "ring tilbake": "Ring tilbake", "ikke svarte": "Ikke svarte" };
+
+document.getElementById("importDropZone").addEventListener("dragover", e => { e.preventDefault(); document.getElementById("importDropZone").style.borderColor = "var(--accent)"; });
+document.getElementById("importDropZone").addEventListener("dragleave", () => { document.getElementById("importDropZone").style.borderColor = "var(--border2)"; });
+document.getElementById("importDropZone").addEventListener("drop", e => { e.preventDefault(); document.getElementById("importDropZone").style.borderColor = "var(--border2)"; handleImportFile(e.dataTransfer.files[0]); });
+document.getElementById("importFileInput").addEventListener("change", e => handleImportFile(e.target.files[0]));
+
+function showImportErr(msg){
+  document.getElementById("importErrTxt").textContent = msg;
+  document.getElementById("importErr").style.display = "flex";
+}
+
+function handleImportFile(file){
+  if(!file) return;
+  document.getElementById("importErr").style.display = "none";
+  document.getElementById("importResultWrap").style.display = "none";
+  const rd = new FileReader();
+  rd.onload = e => {
+    try{
+      const wb = XLSX.read(e.target.result, { type: "binary" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if(data.length < 2){ showImportErr("Filen er tom"); return; }
+
+      importHeaders = data[0].map(h => String(h || "").trim());
+      importRows = data.slice(1).filter(r => r.some(c => c));
+      if(!importRows.length){ showImportErr("Fant ingen rader i filen"); return; }
+
+      document.getElementById("importFilePill").style.display = "flex";
+      document.getElementById("importFileName").textContent = file.name;
+      document.getElementById("importFileCount").textContent = importRows.length + " rader";
+
+      renderImportColumnMap();
+      document.getElementById("importMapWrap").style.display = "block";
+    }catch(err){
+      showImportErr("Kunne ikke lese filen: " + err.message);
+    }
+  };
+  rd.readAsBinaryString(file);
+}
+
+function renderImportColumnMap(){
+  const fields = [
+    { key: "orgnr", label: "Org.nr", required: true },
+    { key: "dato", label: "Dato ringt", required: true },
+    { key: "resultat", label: "Resultat", required: false },
+    { key: "firmanavn", label: "Firmanavn", required: false },
+    { key: "bransje", label: "Bransje", required: false },
+    { key: "daglig_leder_telefon", label: "Telefon (daglig leder)", required: false },
+    { key: "daglig_leder_epost", label: "E-post (daglig leder)", required: false },
+    { key: "kommentar", label: "Kommentar", required: false },
+  ];
+
+  const lc = importHeaders.map(h => h.toLowerCase());
+  const guess = key => {
+    if(key === "orgnr") return lc.findIndex(h => h.includes("org"));
+    if(key === "dato") return lc.findIndex(h => h.includes("dato"));
+    if(key === "resultat") return lc.findIndex(h => h.includes("resultat") || h.includes("utfall"));
+    if(key === "firmanavn") return lc.findIndex(h => h.includes("firma") || h.includes("selskap") || h.includes("navn"));
+    if(key === "bransje") return lc.findIndex(h => h.includes("bransje"));
+    if(key === "daglig_leder_telefon") return lc.findIndex(h => h.includes("telefon") || h.includes("tlf"));
+    if(key === "daglig_leder_epost") return lc.findIndex(h => h.includes("epost") || h.includes("e-post") || h.includes("mail"));
+    if(key === "kommentar") return lc.findIndex(h => h.includes("kommentar") || h.includes("notat"));
+    return -1;
+  };
+
+  importColMapping = {};
+  const container = document.getElementById("importColumnMap");
+  container.innerHTML = fields.map(f => {
+    const g = guess(f.key);
+    importColMapping[f.key] = g;
+    const opts = `<option value="-1">${f.required ? "Velg kolonne..." : "(ikke i bruk)"}</option>` +
+      importHeaders.map((h, i) => `<option value="${i}" ${i === g ? "selected" : ""}>${escapeHtml(h || "Kolonne " + (i + 1))}</option>`).join("");
+    return `<div>
+      <div class="result-label" style="margin-bottom:6px;">${f.label}${f.required ? " *" : ""}</div>
+      <select data-field="${f.key}" onchange="onImportColChange(this)" style="width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px;color:var(--text);">${opts}</select>
+    </div>`;
+  }).join("");
+
+  updateImportResultatValues();
+}
+
+function onImportColChange(el){
+  importColMapping[el.dataset.field] = parseInt(el.value, 10);
+  if(el.dataset.field === "resultat") updateImportResultatValues();
+}
+
+function updateImportResultatValues(){
+  const idx = importColMapping.resultat;
+  const wrap = document.getElementById("importResultatMapWrap");
+  if(idx == null || idx < 0){
+    wrap.style.display = "none";
+    importResultatValues = [];
+    importResultatMapping = {};
+    return;
+  }
+  const set = new Set();
+  importRows.forEach(r => {
+    const v = String(r[idx] ?? "").trim();
+    if(v) set.add(v);
+  });
+  importResultatValues = [...set];
+  if(!importResultatValues.length){ wrap.style.display = "none"; return; }
+
+  wrap.style.display = "block";
+  const dialrOpts = `<option value="">Ukjent / tell ikke</option>` +
+    Object.entries(RESULTAT_LABELS).map(([k, label]) => `<option value="${k}">${label}</option>`).join("");
+  document.getElementById("importResultatMap").innerHTML = importResultatValues.map(v => `
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="min-width:140px;font-family:'DM Mono',monospace;font-size:13px;padding:8px 12px;background:var(--bg3);border-radius:8px;">${escapeHtml(v)}</div>
+      <span style="color:var(--muted);">→</span>
+      <select data-rawval="${escapeHtml(v)}" onchange="importResultatMapping[this.dataset.rawval] = this.value" style="flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:8px 12px;font-family:Inter,sans-serif;font-size:13px;color:var(--text);">${dialrOpts}</select>
+    </div>`).join("");
+  importResultatValues.forEach(v => { if(!(v in importResultatMapping)) importResultatMapping[v] = ""; });
+}
+
+function parseImportDate(val){
+  if(val == null || val === "") return null;
+  if(typeof val === "number"){
+    const d = XLSX.SSF.parse_date_code(val);
+    if(!d) return null;
+    return `${d.y}-${String(d.m).padStart(2, "0")}-${String(d.d).padStart(2, "0")}`;
+  }
+  const s = String(val).trim();
+  let m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/);
+  if(m){
+    let [, d, mo, y] = m;
+    if(y.length === 2) y = "20" + y;
+    return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return s.slice(0, 10);
+  return null;
+}
+
+function cleanImportOrgnr(val){
+  let digits = String(val ?? "").trim();
+  // Excel gjør ofte org.nr om til desimaltall, f.eks 987654321.0
+  if(/^\d+\.0+$/.test(digits)) digits = digits.split(".")[0];
+  digits = digits.replace(/[^\d]/g, "");
+  return digits.length === 9 ? digits : null;
+}
+
+async function findOrCreateImportList(){
+  const { data: existing } = await sb.from("lists")
+    .select("id").eq("user_id", currentUser.id).eq("kilde", "import").limit(1).maybeSingle();
+  if(existing) return existing.id;
+  const { data: created } = await sb.from("lists").insert({
+    user_id: currentUser.id,
+    name: "Importerte firmaer (ikke i egen liste)",
+    kilde: "import"
+  }).select().single();
+  return created.id;
+}
+
+async function runImport(){
+  if(importColMapping.orgnr < 0 || importColMapping.dato < 0){
+    showImportErr("Du må velge kolonne for Org.nr og Dato ringt");
+    return;
+  }
+
+  const btn = document.getElementById("importRunBtn");
+  btn.disabled = true;
+  btn.textContent = "Importerer...";
+  document.getElementById("importErr").style.display = "none";
+
+  const batchName = document.getElementById("importBatchName").value.trim() || ("Import " + new Date().toLocaleDateString("no"));
+
+  try{
+    // Hent alle egne firmaer (på tvers av lister) for org.nr-matching
+    const { data: myCompanies } = await sb.from("companies")
+      .select("id, orgnr, firmanavn, list_id, lists!inner(user_id)")
+      .eq("lists.user_id", currentUser.id);
+    const companyByOrgnr = new Map();
+    (myCompanies || []).forEach(c => { if(c.orgnr){ const clean = cleanImportOrgnr(c.orgnr); if(clean) companyByOrgnr.set(clean, c); } });
+
+    // Hent egne samtaler for å vite beste (høyest rangerte) eksisterende resultat per firma
+    const { data: myCalls } = await sb.from("calls")
+      .select("id, company_id, resultat").eq("user_id", currentUser.id);
+    const bestCallByCompany = new Map();
+    (myCalls || []).forEach(c => {
+      const rank = RESULTAT_RANK[c.resultat] ?? -1;
+      const existing = bestCallByCompany.get(c.company_id);
+      if(!existing || rank > existing.rank) bestCallByCompany.set(c.company_id, { id: c.id, rank });
+    });
+
+    let importListId = null;
+    let newCount = 0, updatedCount = 0, keptCount = 0, skippedCount = 0;
+    const batchRows = [];
+
+    for(const row of importRows){
+      const orgnrRaw = row[importColMapping.orgnr];
+      const orgnr = cleanImportOrgnr(orgnrRaw);
+      const dato = importColMapping.dato >= 0 ? parseImportDate(row[importColMapping.dato]) : null;
+
+      if(!orgnr || !dato){
+        skippedCount++;
+        batchRows.push({ orgnr: orgnrRaw ? String(orgnrRaw) : null, firmanavn: null, dato: dato, resultat_raw: null, resultat_mappet: null, action: "hoppet_over", company_id: null });
+        continue;
+      }
+
+      const resultatRaw = importColMapping.resultat >= 0 ? String(row[importColMapping.resultat] ?? "").trim() : "";
+      const resultatMappet = (resultatRaw && importResultatMapping[resultatRaw]) ? importResultatMapping[resultatRaw] : "ringt eksternt";
+      const rank = RESULTAT_RANK[resultatMappet] ?? 0;
+      const firmanavn = importColMapping.firmanavn >= 0 ? String(row[importColMapping.firmanavn] || "") : "";
+
+      let company = companyByOrgnr.get(orgnr);
+      let action;
+
+      if(!company){
+        if(!importListId) importListId = await findOrCreateImportList();
+        const { data: created } = await sb.from("companies").insert({
+          list_id: importListId,
+          orgnr: orgnr,
+          firmanavn: firmanavn || "Ukjent (import)",
+          bransje: importColMapping.bransje >= 0 ? String(row[importColMapping.bransje] || "") : "",
+          daglig_leder_telefon: importColMapping.daglig_leder_telefon >= 0 ? String(row[importColMapping.daglig_leder_telefon] || "") : "",
+          daglig_leder_epost: importColMapping.daglig_leder_epost >= 0 ? String(row[importColMapping.daglig_leder_epost] || "") : "",
+          sort_order: 0,
+          kilde: "import"
+        }).select().single();
+        company = created;
+        companyByOrgnr.set(orgnr, company);
+        action = "opprettet";
+        newCount++;
+      } else {
+        const existingBest = bestCallByCompany.get(company.id);
+        if(!existingBest || rank > existingBest.rank){
+          const toDelete = (myCalls || []).filter(c => c.company_id === company.id && (RESULTAT_RANK[c.resultat] ?? -1) < rank);
+          for(const del of toDelete){
+            await sb.from("calls").delete().eq("id", del.id);
+          }
+          action = existingBest ? "oppdatert" : "opprettet";
+          updatedCount++;
+        } else {
+          action = "beholdt";
+          keptCount++;
+        }
+      }
+
+      if(action !== "beholdt"){
+        const { data: newCall } = await sb.from("calls").insert({
+          company_id: company.id,
+          user_id: currentUser.id,
+          resultat: resultatMappet,
+          kommentar: importColMapping.kommentar >= 0 ? String(row[importColMapping.kommentar] || "") : "",
+          kilde: "ekstern",
+          created_at: dato + "T12:00:00"
+        }).select().single();
+        bestCallByCompany.set(company.id, { id: newCall.id, rank });
+      }
+
+      batchRows.push({ orgnr, firmanavn: firmanavn || company.firmanavn, dato, resultat_raw: resultatRaw, resultat_mappet: resultatMappet, action, company_id: company.id });
+    }
+
+    const { data: batch } = await sb.from("import_batches").insert({
+      user_id: currentUser.id,
+      name: batchName,
+      total_rows: importRows.length,
+      new_count: newCount,
+      updated_count: updatedCount,
+      kept_count: keptCount,
+      skipped_count: skippedCount
+    }).select().single();
+
+    if(batch){
+      const rowsToInsert = batchRows.map(r => ({ ...r, batch_id: batch.id }));
+      for(let i = 0; i < rowsToInsert.length; i += 50){
+        await sb.from("import_batch_rows").insert(rowsToInsert.slice(i, i + 50));
+      }
+    }
+
+    document.getElementById("importResultWrap").style.display = "block";
+    document.getElementById("importResultWrap").innerHTML = `
+      <div style="font-weight:600;margin-bottom:8px;">✓ Import fullført</div>
+      <div>${importRows.length} rader totalt</div>
+      <div>${newCount} nye firmaer opprettet</div>
+      <div>${updatedCount} eksisterende oppdatert (bedre resultat overskrev gammelt)</div>
+      <div>${keptCount} beholdt uendret (importresultat var ikke bedre)</div>
+      <div>${skippedCount} hoppet over (manglet org.nr eller dato)</div>`;
+
+    btn.textContent = "Kjør import";
+    btn.disabled = false;
+    document.getElementById("importMapWrap").style.display = "none";
+    document.getElementById("importFilePill").style.display = "none";
+    document.getElementById("importBatchName").value = "";
+    importRows = []; importHeaders = []; importColMapping = {}; importResultatMapping = {};
+    loadImportHistory();
+  }catch(err){
+    showImportErr("Feil under import: " + err.message);
+    btn.disabled = false;
+    btn.textContent = "Kjør import";
+  }
+}
+
+async function loadImportHistory(){
+  const container = document.getElementById("importHistoryContainer");
+  const { data: batches } = await sb.from("import_batches")
+    .select("*").eq("user_id", currentUser.id).order("imported_at", { ascending: false });
+
+  if(!batches || !batches.length){
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-title">Ingen importer ennå</div></div>`;
+    return;
+  }
+
+  container.innerHTML = batches.map(b => {
+    const dato = new Date(b.imported_at).toLocaleDateString("no", { day: "numeric", month: "short", year: "numeric" });
+    return `<div class="list-card">
+      <div class="list-info">
+        <div class="list-name">${escapeHtml(b.name)}</div>
+        <div class="list-meta">${dato} · ${b.total_rows} rader</div>
+      </div>
+      <div class="list-stats">
+        <div class="list-stat"><div class="list-stat-n">${b.new_count}</div><div class="list-stat-l">Nye</div></div>
+        <div class="list-stat"><div class="list-stat-n">${b.updated_count}</div><div class="list-stat-l">Oppdatert</div></div>
+        <div class="list-stat"><div class="list-stat-n">${b.skipped_count}</div><div class="list-stat-l">Hoppet over</div></div>
+      </div>
+      <div class="list-actions">
+        <button class="btn-secondary" onclick="toggleImportBatchDetail('${b.id}')">Se detaljer</button>
+      </div>
+    </div>
+    <div id="importBatchDetail-${b.id}" style="display:none;margin:-8px 0 16px;padding:16px;background:var(--bg3);border-radius:12px;font-size:12px;font-family:'DM Mono',monospace;max-height:300px;overflow-y:auto;"></div>`;
+  }).join("");
+}
+
+async function toggleImportBatchDetail(batchId){
+  const el = document.getElementById("importBatchDetail-" + batchId);
+  if(el.style.display === "block"){ el.style.display = "none"; return; }
+  el.style.display = "block";
+  el.innerHTML = "Laster...";
+  const { data: rows } = await sb.from("import_batch_rows").select("*").eq("batch_id", batchId).order("orgnr");
+  el.innerHTML = (rows || []).map(r => `<div style="padding:4px 0;border-bottom:1px solid var(--border);">${escapeHtml(r.orgnr || "-")} · ${escapeHtml(r.firmanavn || "-")} · ${r.dato || "-"} · ${escapeHtml(r.resultat_mappet || "-")} · <b>${r.action}</b></div>`).join("") || "Ingen rader";
+}
+
+function showImport(){
+  setActiveView("view-import");
+  loadImportHistory();
 }
 
 // ===== PROSPEKTERING =====
