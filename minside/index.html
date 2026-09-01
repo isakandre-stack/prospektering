@@ -666,7 +666,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <input type="file" id="importFileInput" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
       <div style="font-size:24px;margin-bottom:8px;">📥</div>
       <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Dra og slipp Excel-fil her</div>
-      <div style="font-size:12px;color:var(--muted);">eller klikk for å velge · trenger minst org.nr og dato ringt</div>
+      <div style="font-size:12px;color:var(--muted);">eller klikk for å velge · trenger minst org.nr</div>
     </div>
     <div id="importFilePill" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;">
       <div style="width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;"></div>
@@ -680,7 +680,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
     <div id="importMapWrap" style="display:none;">
       <div style="font-size:15px;font-weight:600;margin:24px 0 12px;">Koble kolonner</div>
       <div id="importColumnMap" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px;"></div>
-      <div style="font-size:11.5px;color:var(--muted);margin-bottom:20px;">* Org.nr og Dato ringt er påkrevd. Resten er valgfritt.</div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:20px;">* Org.nr er påkrevd. Mangler "Dato ringt" for en rad, brukes dagens dato. "Møtedato" brukes kun for rader med resultat Møte.</div>
 
       <div id="importResultatMapWrap" style="display:none;">
         <div style="font-size:15px;font-weight:600;margin:8px 0 12px;">Koble resultatverdier</div>
@@ -1207,7 +1207,6 @@ async function loadLists(){
   const { data: lists } = await sb.from("lists")
     .select("*, companies(count)")
     .eq("user_id", currentUser.id)
-    .neq("kilde", "import")
     .order("created_at", { ascending: false });
   allLists = lists || [];
   renderLists();
@@ -1215,7 +1214,8 @@ async function loadLists(){
 
 async function renderLists(){
   const container = document.getElementById("listsContainer");
-  if(!allLists.length){
+  const visibleLists = allLists.filter(l => l.kilde !== "import");
+  if(!visibleLists.length){
     container.innerHTML = `<div class="empty-state">
       <div class="empty-icon">📋</div>
       <div class="empty-title">Ingen lister ennå</div>
@@ -1228,7 +1228,7 @@ async function renderLists(){
     .select("company_id, resultat, antall_beslutningstakere, companies(list_id)")
     .eq("user_id", currentUser.id);
 
-  container.innerHTML = allLists.map(list => {
+  container.innerHTML = visibleLists.map(list => {
     const count = list.companies?.[0]?.count || 0;
     const listCalls = (calls || []).filter(c => c.companies?.list_id === list.id);
     const ringt = listCalls.length;
@@ -2239,7 +2239,7 @@ async function loadRapport(){
   container.innerHTML = allLists.map(l => `
     <div class="rapport-list-check">
       <input type="checkbox" id="check-${l.id}" checked onchange="updateRapport()">
-      <label for="check-${l.id}" class="rapport-list-name">${l.name}</label>
+      <label for="check-${l.id}" class="rapport-list-name">${l.name}${l.kilde === "import" ? ' <span style="color:var(--accent2);font-size:11px;">(import - utenfor Dialr)</span>' : ""}</label>
       <span class="rapport-list-meta">${new Date(l.created_at).toLocaleDateString("no")}</span>
     </div>`).join("");
   updateRapport();
@@ -2544,7 +2544,8 @@ function handleImportFile(file){
 function renderImportColumnMap(){
   const fields = [
     { key: "orgnr", label: "Org.nr", required: true },
-    { key: "dato", label: "Dato ringt", required: true },
+    { key: "dato", label: "Dato ringt (i dag brukes hvis tom)", required: false },
+    { key: "motedato", label: "Møtedato (kun relevant for møter)", required: false },
     { key: "resultat", label: "Resultat", required: false },
     { key: "firmanavn", label: "Firmanavn", required: false },
     { key: "bransje", label: "Bransje", required: false },
@@ -2556,7 +2557,8 @@ function renderImportColumnMap(){
   const lc = importHeaders.map(h => h.toLowerCase());
   const guess = key => {
     if(key === "orgnr") return lc.findIndex(h => h.includes("org"));
-    if(key === "dato") return lc.findIndex(h => h.includes("dato"));
+    if(key === "dato") return lc.findIndex(h => (h.includes("dato") || h.includes("ringt")) && !h.includes("møte"));
+    if(key === "motedato") return lc.findIndex(h => h.includes("møte") && (h.includes("dato") || h.includes("tid")));
     if(key === "resultat") return lc.findIndex(h => h.includes("resultat") || h.includes("utfall"));
     if(key === "firmanavn") return lc.findIndex(h => h.includes("firma") || h.includes("selskap") || h.includes("navn"));
     if(key === "bransje") return lc.findIndex(h => h.includes("bransje"));
@@ -2587,6 +2589,14 @@ function onImportColChange(el){
   if(el.dataset.field === "resultat") updateImportResultatValues();
 }
 
+function guessResultatMapping(raw){
+  const lc = String(raw || "").toLowerCase().trim();
+  for(const [key, label] of Object.entries(RESULTAT_LABELS)){
+    if(lc === key || lc === label.toLowerCase()) return key;
+  }
+  return "";
+}
+
 function updateImportResultatValues(){
   const idx = importColMapping.resultat;
   const wrap = document.getElementById("importResultatMapWrap");
@@ -2604,17 +2614,24 @@ function updateImportResultatValues(){
   importResultatValues = [...set];
   if(!importResultatValues.length){ wrap.style.display = "none"; return; }
 
+  // Gjett automatisk hvis rå-verdien er identisk med (eller matcher)
+  // en av Dialr sine kategorier, f.eks "Møte" -> "møte".
+  importResultatValues.forEach(v => {
+    if(!(v in importResultatMapping)) importResultatMapping[v] = guessResultatMapping(v);
+  });
+
   wrap.style.display = "block";
-  const dialrOpts = `<option value="">Ukjent / tell ikke</option>` +
-    Object.entries(RESULTAT_LABELS).map(([k, label]) => `<option value="${k}">${label}</option>`).join("");
+  const dialrOpts = (selected) => `<option value="" ${selected === "" ? "selected" : ""}>Ukjent / tell ikke</option>` +
+    Object.entries(RESULTAT_LABELS).map(([k, label]) => `<option value="${k}" ${selected === k ? "selected" : ""}>${label}</option>`).join("");
   document.getElementById("importResultatMap").innerHTML = importResultatValues.map(v => `
     <div style="display:flex;align-items:center;gap:12px;">
       <div style="min-width:140px;font-family:'DM Mono',monospace;font-size:13px;padding:8px 12px;background:var(--bg3);border-radius:8px;">${escapeHtml(v)}</div>
       <span style="color:var(--muted);">→</span>
-      <select data-rawval="${escapeHtml(v)}" onchange="importResultatMapping[this.dataset.rawval] = this.value" style="flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:8px 12px;font-family:Inter,sans-serif;font-size:13px;color:var(--text);">${dialrOpts}</select>
+      <select data-rawval="${escapeHtml(v)}" onchange="importResultatMapping[this.dataset.rawval] = this.value" style="flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:8px 12px;font-family:Inter,sans-serif;font-size:13px;color:var(--text);">${dialrOpts(importResultatMapping[v])}</select>
     </div>`).join("");
-  importResultatValues.forEach(v => { if(!(v in importResultatMapping)) importResultatMapping[v] = ""; });
 }
+
+const NO_MANEDER = { jan: 1, feb: 2, mar: 3, apr: 4, mai: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, nov: 11, des: 12 };
 
 function parseImportDate(val){
   if(val == null || val === "") return null;
@@ -2624,14 +2641,31 @@ function parseImportDate(val){
     return `${d.y}-${String(d.m).padStart(2, "0")}-${String(d.d).padStart(2, "0")}`;
   }
   const s = String(val).trim();
+
+  // dd.mm.åååå / dd/mm/åååå / dd-mm-åååå
   let m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/);
   if(m){
     let [, d, mo, y] = m;
     if(y.length === 2) y = "20" + y;
     return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
   }
+
+  // yyyy-mm-dd
   m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(m) return s.slice(0, 10);
+
+  // dd.månedsnavn eller dd.månedsnavn åååå, f.eks "07.sep" eller "7. september 2026"
+  // - mangler årstall antas inneværende år
+  m = s.match(/^(\d{1,2})[.\s]+([a-zæøåA-ZÆØÅ]{3,})\.?\s*(\d{2,4})?$/);
+  if(m){
+    const [, d, monRaw, yRaw] = m;
+    const mon = NO_MANEDER[monRaw.toLowerCase().slice(0, 3)];
+    if(mon){
+      const year = yRaw ? (yRaw.length === 2 ? "20" + yRaw : yRaw) : String(new Date().getFullYear());
+      return `${year}-${String(mon).padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+  }
+
   return null;
 }
 
@@ -2656,8 +2690,8 @@ async function findOrCreateImportList(){
 }
 
 async function runImport(){
-  if(importColMapping.orgnr < 0 || importColMapping.dato < 0){
-    showImportErr("Du må velge kolonne for Org.nr og Dato ringt");
+  if(importColMapping.orgnr < 0){
+    showImportErr("Du må velge kolonne for Org.nr");
     return;
   }
 
@@ -2667,6 +2701,7 @@ async function runImport(){
   document.getElementById("importErr").style.display = "none";
 
   const batchName = document.getElementById("importBatchName").value.trim() || ("Import " + new Date().toLocaleDateString("no"));
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   try{
     // Hent alle egne firmaer (på tvers av lister) for org.nr-matching
@@ -2693,17 +2728,29 @@ async function runImport(){
     for(const row of importRows){
       const orgnrRaw = row[importColMapping.orgnr];
       const orgnr = cleanImportOrgnr(orgnrRaw);
-      const dato = importColMapping.dato >= 0 ? parseImportDate(row[importColMapping.dato]) : null;
 
-      if(!orgnr || !dato){
+      if(!orgnr){
         skippedCount++;
-        batchRows.push({ orgnr: orgnrRaw ? String(orgnrRaw) : null, firmanavn: null, dato: dato, resultat_raw: null, resultat_mappet: null, action: "hoppet_over", company_id: null });
+        batchRows.push({ orgnr: orgnrRaw ? String(orgnrRaw) : null, firmanavn: null, dato: null, motedato: null, resultat_raw: null, resultat_mappet: null, action: "hoppet_over", company_id: null });
         continue;
       }
+
+      // Dato ringt: bruk kolonnen hvis den finnes og er gyldig, ellers dagens dato
+      const datoParsed = importColMapping.dato >= 0 ? parseImportDate(row[importColMapping.dato]) : null;
+      const callDato = datoParsed || todayStr;
 
       const resultatRaw = importColMapping.resultat >= 0 ? String(row[importColMapping.resultat] ?? "").trim() : "";
       const resultatMappet = (resultatRaw && importResultatMapping[resultatRaw]) ? importResultatMapping[resultatRaw] : "ringt eksternt";
       const rank = RESULTAT_RANK[resultatMappet] ?? 0;
+
+      // Møtedato: egen kolonne hvis tilgjengelig, ellers "Dato"-kolonnen (kun
+      // hvis den faktisk ble tolket som en dato), kun relevant for møter.
+      let motedato = null;
+      if(resultatMappet === "møte"){
+        motedato = importColMapping.motedato >= 0 ? parseImportDate(row[importColMapping.motedato]) : null;
+        if(!motedato && datoParsed) motedato = datoParsed;
+      }
+
       const firmanavn = importColMapping.firmanavn >= 0 ? String(row[importColMapping.firmanavn] || "") : "";
 
       let company = companyByOrgnr.get(orgnr);
@@ -2732,7 +2779,7 @@ async function runImport(){
           for(const del of toDelete){
             await sb.from("calls").delete().eq("id", del.id);
           }
-          action = existingBest ? "oppdatert" : "opprettet";
+          action = "oppdatert";
           updatedCount++;
         } else {
           action = "beholdt";
@@ -2746,13 +2793,14 @@ async function runImport(){
           user_id: currentUser.id,
           resultat: resultatMappet,
           kommentar: importColMapping.kommentar >= 0 ? String(row[importColMapping.kommentar] || "") : "",
+          motedato: motedato,
           kilde: "ekstern",
-          created_at: dato + "T12:00:00"
+          created_at: callDato + "T12:00:00"
         }).select().single();
         bestCallByCompany.set(company.id, { id: newCall.id, rank });
       }
 
-      batchRows.push({ orgnr, firmanavn: firmanavn || company.firmanavn, dato, resultat_raw: resultatRaw, resultat_mappet: resultatMappet, action, company_id: company.id });
+      batchRows.push({ orgnr, firmanavn: firmanavn || company.firmanavn, dato: callDato, motedato: motedato, resultat_raw: resultatRaw, resultat_mappet: resultatMappet, action, company_id: company.id });
     }
 
     const { data: batch } = await sb.from("import_batches").insert({
@@ -2831,7 +2879,7 @@ async function toggleImportBatchDetail(batchId){
   el.style.display = "block";
   el.innerHTML = "Laster...";
   const { data: rows } = await sb.from("import_batch_rows").select("*").eq("batch_id", batchId).order("orgnr");
-  el.innerHTML = (rows || []).map(r => `<div style="padding:4px 0;border-bottom:1px solid var(--border);">${escapeHtml(r.orgnr || "-")} · ${escapeHtml(r.firmanavn || "-")} · ${r.dato || "-"} · ${escapeHtml(r.resultat_mappet || "-")} · <b>${r.action}</b></div>`).join("") || "Ingen rader";
+  el.innerHTML = (rows || []).map(r => `<div style="padding:4px 0;border-bottom:1px solid var(--border);">${escapeHtml(r.orgnr || "-")} · ${escapeHtml(r.firmanavn || "-")} · ${r.dato || "-"}${r.motedato ? " · møte: " + r.motedato : ""} · ${escapeHtml(r.resultat_mappet || "-")} · <b>${r.action}</b></div>`).join("") || "Ingen rader";
 }
 
 function showImport(){
