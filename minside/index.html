@@ -1395,9 +1395,24 @@ function applyFilter(){
 }
 
 function toggleKunMedTlf(){
+  const visCompany = filteredCompanies[currentIndex]; // firmaet du faktisk står på nå, før filteret endres
+
   kunMedTlf = !kunMedTlf;
   document.getElementById("toggleKunTlf").className = "toggle" + (kunMedTlf ? " on" : "");
   applyFilter();
+
+  // Finn samme firma igjen i den nye, filtrerte lista - i stedet for å
+  // beholde det rå tallet, som nå ville pekt på et helt annet firma.
+  if(visCompany){
+    let newIdx = filteredCompanies.findIndex(c => c.id === visCompany.id);
+    if(newIdx === -1){
+      // Firmaet ble filtrert bort (f.eks. mangler telefon) - gå til
+      // nærmeste neste firma i rekkefølgen i stedet.
+      newIdx = filteredCompanies.findIndex(c => (c.sort_order ?? 0) >= (visCompany.sort_order ?? 0));
+    }
+    currentIndex = newIdx === -1 ? filteredCompanies.length : newIdx;
+  }
+
   showCurrentCompany();
 }
 
