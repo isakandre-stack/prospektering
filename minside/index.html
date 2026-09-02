@@ -804,6 +804,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
         <textarea id="callKommentar" rows="3" placeholder="Hva ble sagt? Notater fra samtalen..."></textarea>
       </div>
       <button class="next-btn" onclick="saveAndNext()">Lagre og neste &#8594;</button>
+      <button type="button" onclick="skipCompany()" style="width:100%;background:transparent;border:none;color:var(--muted);font-size:12.5px;font-family:Inter,sans-serif;cursor:pointer;padding:10px 0 0;text-decoration:underline;">Hopp videre uten å lagre resultat</button>
     </div>
   </div>
 
@@ -1538,6 +1539,16 @@ function apneOutlook(){
     url = `mailto:?subject=${subject}&body=${body}`;
   }
   window.location.href = url;
+}
+
+// Hopper til neste firma UTEN å lagre noe resultat. Skriver ikke til
+// calls og rører ikke bokmerket - firmaet vil derfor dukke opp igjen
+// neste gang lista åpnes (helt uendret, som om det aldri ble vist).
+// Kun ment som en midlertidig ventil i selve økten, f.eks. for å komme
+// forbi et firma man vil ringe senere i samme gjennomgang.
+function skipCompany(){
+  currentIndex++;
+  showCurrentCompany();
 }
 
 async function saveAndNext(){
