@@ -1783,8 +1783,16 @@ async function loadIdag(){
 
   loadGoals(now, todayStr, allCalls);
 
-  // Tilbakeringinger
-  const alleRingTilbake = allCalls.filter(c => c.resultat === "ring tilbake" && c.tilbakeringing_dato);
+  // Tilbakeringinger - kun basert på firmaets SISTE samtale, slik at et
+  // firma som er ringt på nytt (med et annet resultat) ikke blir stående
+  // igjen som "prioritert" på grunn av en gammel, utdatert samtale-rad.
+  const latestCallByCompany = new Map();
+  allCalls.forEach(c => {
+    if(!c.company_id) return;
+    const existing = latestCallByCompany.get(c.company_id);
+    if(!existing || new Date(c.created_at) > new Date(existing.created_at)) latestCallByCompany.set(c.company_id, c);
+  });
+  const alleRingTilbake = [...latestCallByCompany.values()].filter(c => c.resultat === "ring tilbake" && c.tilbakeringing_dato);
 
   // Forfalt = ALLE tilbakeringinger med passert tidspunkt, uansett hvilken dag de var satt til
   const forfalt = alleRingTilbake.filter(c => new Date(c.tilbakeringing_dato) < now)
