@@ -288,6 +288,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .idag-stat-icon svg{width:15px;height:15px;}
 .idag-stat-n{font-family:'Inter',sans-serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:5px;color:var(--text);}
 .idag-stat-sub{font-size:12px;color:var(--muted);}
+.moter-periode-toggle{display:flex;gap:4px;margin-top:6px;}
+.moter-periode-btn{font-family:Inter,sans-serif;font-size:11px;font-weight:500;padding:3px 9px;border-radius:100px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;}
+.moter-periode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* ===== TWO-COLUMN DASHBOARD GRID ===== */
 .dashboard-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start;}
@@ -458,7 +461,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
     <div class="idag-stat" id="statCardMoter">
       <div class="idag-stat-top"><div class="idag-stat-label">Møter booket</div><div class="idag-stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div></div>
       <div class="idag-stat-n" id="idagMoter">—</div>
-      <div class="idag-stat-sub">Dette kvartalet</div>
+      <div class="moter-periode-toggle">
+        <button class="moter-periode-btn active" id="moterBtnKvartal" onclick="setMoterPeriode('kvartal')">Kvartal</button>
+        <button class="moter-periode-btn" id="moterBtnManed" onclick="setMoterPeriode('maned')">Måned</button>
+      </div>
     </div>
     <div class="idag-stat" id="statCardTilbake">
       <div class="idag-stat-top"><div class="idag-stat-label">Ring tilbake</div><div class="idag-stat-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l3 2M9 2.5l-1.8 1.8M17 4.3l-1.8-1.8"/></svg></div></div>
@@ -666,7 +672,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
       <input type="file" id="importFileInput" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
       <div style="font-size:24px;margin-bottom:8px;">📥</div>
       <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Dra og slipp Excel-fil her</div>
-      <div style="font-size:12px;color:var(--muted);">eller klikk for å velge · trenger minst org.nr</div>
+      <div style="font-size:12px;color:var(--muted);">eller klikk for å velge · maks 100 rader per fil</div>
     </div>
     <div id="importFilePill" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;font-size:13px;color:var(--green);font-family:'DM Mono',monospace;">
       <div style="width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;"></div>
@@ -1114,6 +1120,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: 
 
 let currentUser = null;
 let allLists = [];
+let dashboardCalls = [];
+let moterPeriode = "kvartal";
 let currentList = null;
 let currentCompanies = [];
 let filteredCompanies = [];
@@ -1727,6 +1735,26 @@ async function toggleWidget(id){
 }
 
 // I DAG
+function computeMoterBooket(calls, periode){
+  const now = new Date();
+  const start = periode === "maned"
+    ? new Date(now.getFullYear(), now.getMonth(), 1)
+    : new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+  return calls.filter(c => c.resultat === "møte" && c.created_at && new Date(c.created_at) >= start)
+    .reduce((sum, c) => sum + (c.antall_beslutningstakere || 1), 0);
+}
+
+function renderMoterBooket(){
+  document.getElementById("idagMoter").textContent = computeMoterBooket(dashboardCalls, moterPeriode);
+  document.getElementById("moterBtnKvartal").classList.toggle("active", moterPeriode === "kvartal");
+  document.getElementById("moterBtnManed").classList.toggle("active", moterPeriode === "maned");
+}
+
+function setMoterPeriode(periode){
+  moterPeriode = periode;
+  renderMoterBooket();
+}
+
 async function loadIdag(){
   loadDashboardSettings();
   const now = new Date();
@@ -1747,11 +1775,11 @@ async function loadIdag(){
     .eq("user_id", currentUser.id);
 
   const allCalls = calls || [];
+  dashboardCalls = allCalls; // lagres globalt slik at kvartal/måned-bytte ikke krever ny spørring
 
   // Count ringt i dag
   const ringtIdag = allCalls.filter(c => c.created_at && c.created_at.startsWith(todayStr)).length;
-  const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1);
-  const moterBooket = allCalls.filter(c => c.resultat === "møte" && c.created_at && new Date(c.created_at) >= quarterStart).reduce((sum,c) => sum + (c.antall_beslutningstakere || 1), 0);
+  renderMoterBooket();
 
   loadGoals(now, todayStr, allCalls);
 
@@ -1772,7 +1800,6 @@ async function loadIdag(){
 
   // Oppdater stats
   document.getElementById("idagRingt").textContent = ringtIdag;
-  document.getElementById("idagMoter").textContent = moterBooket;
   document.getElementById("idagTilbake").textContent = alleRingTilbake.length;
   document.getElementById("idagForfalt").textContent = forfalt.length;
 
@@ -2527,6 +2554,13 @@ function handleImportFile(file){
       importHeaders = data[0].map(h => String(h || "").trim());
       importRows = data.slice(1).filter(r => r.some(c => c));
       if(!importRows.length){ showImportErr("Fant ingen rader i filen"); return; }
+      if(importRows.length > 100){
+        showImportErr(`Filen har ${importRows.length} rader. Maks 100 selskaper per import - del opp i flere filer og prøv igjen.`);
+        importRows = []; importHeaders = [];
+        document.getElementById("importFilePill").style.display = "none";
+        document.getElementById("importMapWrap").style.display = "none";
+        return;
+      }
 
       document.getElementById("importFilePill").style.display = "flex";
       document.getElementById("importFileName").textContent = file.name;
@@ -2692,6 +2726,10 @@ async function findOrCreateImportList(){
 async function runImport(){
   if(importColMapping.orgnr < 0){
     showImportErr("Du må velge kolonne for Org.nr");
+    return;
+  }
+  if(importRows.length > 100){
+    showImportErr(`Filen har ${importRows.length} rader. Maks 100 selskaper per import.`);
     return;
   }
 
