@@ -31,8 +31,25 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
 .nav-right{display:flex;align-items:center;gap:8px;}
 .nav-btn{padding:8px 18px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;text-decoration:none;}
 .nav-btn:hover{border-color:var(--accent);color:var(--accent2)}
-#view-idag,#view-lists,#view-ring,#view-rapport,#view-prospekt,#view-import{display:none;}
-#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active,#view-prospekt.active,#view-import.active{display:block;}
+#view-idag,#view-lists,#view-ring,#view-rapport,#view-prospekt,#view-import,#view-anbud{display:none;}
+#view-idag.active,#view-lists.active,#view-ring.active,#view-rapport.active,#view-prospekt.active,#view-import.active,#view-anbud.active{display:block;}
+.anbud-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;padding:0 5px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;}
+.anbud-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 16px;}
+.anbud-chip{padding:7px 14px;border:1px solid var(--border2);border-radius:999px;background:var(--bg2);font-size:12.5px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;}
+.anbud-chip.active{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent2);font-weight:600;}
+.anbud-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;box-shadow:var(--card-shadow);}
+.anbud-card.ny{border-left:3px solid var(--accent);}
+.anbud-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.anbud-pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);color:var(--muted);background:var(--bg3);}
+.anbud-pill.score-hoy{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.anbud-pill.score-mid{background:var(--yellow-bg);border-color:var(--yellow-border);color:var(--yellow);}
+.anbud-pill.frist-snart{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}
+.anbud-title{font-size:15px;font-weight:600;color:var(--text);text-decoration:none;}
+.anbud-title:hover{color:var(--accent2);}
+.anbud-meta{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6;}
+.anbud-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;}
+.anbud-actions .btn-secondary,.anbud-actions .btn-primary{padding:7px 12px;font-size:12px;}
+.anbud-actions select{padding:7px 10px;border:1px solid var(--border2);border-radius:8px;font-size:12px;font-family:'Inter',sans-serif;background:var(--bg2);color:var(--text);margin-left:auto;}
 .page-title{font-size:28px;font-weight:600;margin-bottom:8px;}
 .page-sub{font-size:15px;color:var(--muted);margin-bottom:32px;}
 .list-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:20px;box-shadow:var(--card-shadow);}
@@ -404,6 +421,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
     <button class="sidebar-link" id="nav-lister" onclick="showLists()"><span class="ic">📋</span> Mine lister</button>
     <button class="sidebar-link" id="nav-rapport" onclick="showRapport()"><span class="ic">📈</span> Rapport</button>
     <button class="sidebar-link" id="nav-prospekt" onclick="showProspekt()"><span class="ic">🔍</span> Prospektering</button>
+    <button class="sidebar-link" id="nav-anbud" onclick="showAnbud()"><span class="ic">📑</span> Anbud<span class="anbud-badge" id="anbudBadge" style="display:none;">0</span></button>
     <button class="sidebar-link" id="nav-import" onclick="showImport()"><span class="ic">📥</span> Importer</button>
   </nav>
 
@@ -1057,6 +1075,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0
   </div>
 </div>
 
+<!-- ANBUD -->
+<div id="view-anbud">
+  <div class="page-title">Anbud</div>
+  <div style="color:var(--muted);font-size:13.5px;">Regnskaps- og lønnsanbud fra Doffin. Oppdateres hver morgen.</div>
+  <div class="anbud-filters">
+    <button class="anbud-chip active" data-f="apne" onclick="setAnbudFilter('apne')">Åpne konkurranser</button>
+    <button class="anbud-chip" data-f="forhand" onclick="setAnbudFilter('forhand')">Forhåndskunngjøringer</button>
+    <button class="anbud-chip" data-f="tildeling" onclick="setAnbudFilter('tildeling')">Tildelinger</button>
+    <button class="anbud-chip" data-f="alle" onclick="setAnbudFilter('alle')">Alle</button>
+    <label style="margin-left:auto;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+      <input type="checkbox" id="anbudSkjulIkke" checked onchange="renderAnbud()"> Skjul ikke relevante
+    </label>
+  </div>
+  <div id="anbudList"></div>
+</div>
+
 <!-- PROSPEKTERING -->
 <div id="view-prospekt">
   <div class="page-title">Prospektering</div>
@@ -1227,6 +1261,7 @@ async function init(){
   if(nameEl) nameEl.textContent = displayName;
   if(emailEl) emailEl.textContent = currentUser.email;
   showIdag();
+  loadAnbud(false);
 }
 
 async function doLogout(){
@@ -1235,18 +1270,18 @@ async function doLogout(){
 }
 
 function setActiveView(viewId){
-  ["view-idag","view-lists","view-ring","view-rapport","view-prospekt","view-import"].forEach(id => document.getElementById(id).classList.remove("active"));
+  ["view-idag","view-lists","view-ring","view-rapport","view-prospekt","view-import","view-anbud"].forEach(id => document.getElementById(id).classList.remove("active"));
   document.getElementById(viewId).classList.add("active");
-  ["nav-idag","nav-lister","nav-rapport","nav-prospekt","nav-import"].forEach(id => {
+  ["nav-idag","nav-lister","nav-rapport","nav-prospekt","nav-import","nav-anbud"].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.classList.remove("active");
   });
-  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport","view-prospekt":"nav-prospekt","view-import":"nav-import"};
+  const navMap = {"view-idag":"nav-idag","view-lists":"nav-lister","view-rapport":"nav-rapport","view-prospekt":"nav-prospekt","view-import":"nav-import","view-anbud":"nav-anbud"};
   if(navMap[viewId]){
     const el = document.getElementById(navMap[viewId]);
     if(el) el.classList.add("active");
   }
-  const labelMap = {"view-idag":"Dashboard","view-lists":"Mine lister","view-ring":"Ring-modus","view-rapport":"Rapport","view-prospekt":"Prospektering","view-import":"Importer"};
+  const labelMap = {"view-idag":"Dashboard","view-lists":"Mine lister","view-ring":"Ring-modus","view-rapport":"Rapport","view-prospekt":"Prospektering","view-import":"Importer","view-anbud":"Anbud"};
   const topbarEl = document.getElementById("topbarLabel");
   if(topbarEl) topbarEl.textContent = labelMap[viewId] || "";
 }
@@ -1268,6 +1303,163 @@ function showRapport(){
 
 function showProspekt(){
   setActiveView("view-prospekt");
+}
+
+// ===== ANBUD =====
+let anbudData = [];
+let anbudStatus = {};
+let anbudFilter = "apne";
+
+function showAnbud(){
+  setActiveView("view-anbud");
+  loadAnbud(true);
+}
+
+async function loadAnbud(render){
+  const [{ data: tenders, error }, { data: statuser }] = await Promise.all([
+    sb.from("tenders").select("id,type,status,tittel,beskrivelse,kjoper,kjoper_orgnr,sted,verdi_nok,publisert,frist,score,grunn,url,first_seen")
+      .order("publisert", { ascending: false }).limit(500),
+    sb.from("tender_status").select("tender_id,status,company_id"),
+  ]);
+  if(error){
+    if(render) document.getElementById("anbudList").innerHTML = `<div class="empty-sub">Kunne ikke hente anbud: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  anbudData = tenders || [];
+  anbudStatus = {};
+  (statuser || []).forEach(s => { anbudStatus[s.tender_id] = s; });
+  updateAnbudBadge();
+  if(render) renderAnbud();
+}
+
+function anbudErApen(t){
+  if(t.status === "CANCELLED" || t.status === "EXPIRED" || t.status === "AWARDED") return false;
+  if(t.frist && new Date(t.frist) < new Date()) return false;
+  return true;
+}
+
+function updateAnbudBadge(){
+  const nye = anbudData.filter(t => t.score >= 3 && t.type !== "Tildeling" && anbudErApen(t) && !anbudStatus[t.id]).length;
+  const el = document.getElementById("anbudBadge");
+  if(!el) return;
+  el.textContent = nye;
+  el.style.display = nye > 0 ? "inline-flex" : "none";
+}
+
+function setAnbudFilter(f){
+  anbudFilter = f;
+  document.querySelectorAll(".anbud-chip").forEach(c => c.classList.toggle("active", c.dataset.f === f));
+  renderAnbud();
+}
+
+function renderAnbud(){
+  const skjulIkke = document.getElementById("anbudSkjulIkke").checked;
+  let liste = anbudData.filter(t => t.status !== "CANCELLED");
+  if(anbudFilter === "apne") liste = liste.filter(t => t.type === "Konkurranse" && anbudErApen(t));
+  if(anbudFilter === "forhand") liste = liste.filter(t => t.type === "Forhåndskunngjøring" || t.type === "Intensjon");
+  if(anbudFilter === "tildeling") liste = liste.filter(t => t.type === "Tildeling");
+  if(skjulIkke) liste = liste.filter(t => (anbudStatus[t.id]?.status) !== "ikke_relevant");
+  if(anbudFilter === "apne") liste.sort((a,b) => (a.frist||"9999") < (b.frist||"9999") ? -1 : 1);
+
+  const wrap = document.getElementById("anbudList");
+  if(!liste.length){
+    wrap.innerHTML = `<div class="anbud-card"><div class="empty-sub">Ingen anbud her akkurat nå.</div></div>`;
+    return;
+  }
+  wrap.innerHTML = liste.map(t => {
+    const st = anbudStatus[t.id];
+    const scoreKl = t.score >= 5 ? "score-hoy" : t.score >= 4 ? "score-mid" : "";
+    let fristTxt = "";
+    if(t.frist && t.type !== "Tildeling"){
+      const dager = Math.ceil((new Date(t.frist) - new Date()) / 864e5);
+      fristTxt = dager < 0 ? `<span class="anbud-pill">Frist utløpt</span>`
+        : `<span class="anbud-pill ${dager <= 7 ? "frist-snart" : ""}">Frist om ${dager} ${dager === 1 ? "dag" : "dager"}</span>`;
+    }
+    const verdi = t.verdi_nok ? (t.verdi_nok/1e6).toLocaleString("no", {maximumFractionDigits:1}) + " MNOK" : "Verdi ikke oppgitt";
+    const lagt = st?.company_id ? `<span class="anbud-pill score-hoy">I ringeliste</span>` : "";
+    return `<div class="anbud-card ${st ? "" : "ny"}">
+      <div class="anbud-top">
+        <span class="anbud-pill ${scoreKl}" title="${escapeHtml(t.grunn || "")}">Score ${t.score}</span>
+        <span class="anbud-pill">${escapeHtml(t.type || "")}</span>
+        ${fristTxt}${lagt}
+      </div>
+      <a class="anbud-title" href="${escapeHtml(t.url)}" target="_blank" rel="noopener">${escapeHtml(t.tittel || "Uten tittel")}</a>
+      <div class="anbud-meta">
+        ${escapeHtml(t.kjoper || "")}${t.kjoper_orgnr ? " · " + escapeHtml(t.kjoper_orgnr) : ""}${t.sted ? " · " + escapeHtml(t.sted) : ""}<br>
+        ${verdi} · Publisert ${t.publisert ? new Date(t.publisert).toLocaleDateString("no") : "-"}${t.frist ? " · " + (t.type === "Tildeling" ? "Dato" : "Frist") + " " + new Date(t.frist).toLocaleDateString("no") : ""}
+      </div>
+      <div class="anbud-actions">
+        ${t.kjoper_orgnr ? `<button class="btn-secondary" onclick="anbudFinnKontakt('${escapeHtml(t.kjoper_orgnr)}')">Finn beslutningstaker</button>` : ""}
+        ${t.kjoper_orgnr && !st?.company_id ? `<button class="btn-primary" id="anbudLegg-${t.id}" onclick="anbudLeggIRingeliste('${t.id}')">Legg i ringeliste</button>` : ""}
+        <select onchange="setAnbudStatus('${t.id}', this.value)">
+          ${[["ny","Ny"],["vurderer","Vurderer"],["relevant","Relevant"],["ikke_relevant","Ikke relevant"]]
+            .map(([v,l]) => `<option value="${v}" ${(st?.status || "ny") === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function setAnbudStatus(tenderId, status, companyId){
+  const rad = { user_id: currentUser.id, tender_id: tenderId, status, updated_at: new Date().toISOString() };
+  if(companyId !== undefined) rad.company_id = companyId;
+  else if(anbudStatus[tenderId]?.company_id) rad.company_id = anbudStatus[tenderId].company_id;
+  const { error } = await sb.from("tender_status").upsert(rad, { onConflict: "user_id,tender_id" });
+  if(error){ alert("Kunne ikke lagre status: " + error.message); return; }
+  anbudStatus[tenderId] = { tender_id: tenderId, status, company_id: rad.company_id || null };
+  updateAnbudBadge();
+  renderAnbud();
+}
+
+function anbudFinnKontakt(orgnr){
+  showProspekt();
+  document.getElementById("pSingleInput").value = orgnr;
+  doProspektSingle();
+}
+
+async function anbudLeggIRingeliste(tenderId){
+  const t = anbudData.find(x => x.id === tenderId);
+  if(!t) return;
+  const btn = document.getElementById("anbudLegg-" + tenderId);
+  if(btn){ btn.disabled = true; btn.textContent = "Henter kontakt..."; }
+  try{
+    let { data: liste } = await sb.from("lists").select("id").eq("user_id", currentUser.id).eq("name", "Anbud").maybeSingle();
+    if(!liste){
+      const ny = await sb.from("lists").insert({ user_id: currentUser.id, name: "Anbud", job_id: null }).select("id").single();
+      if(ny.error) throw ny.error;
+      liste = ny.data;
+    }
+    const firma = { list_id: liste.id, orgnr: t.kjoper_orgnr, firmanavn: t.kjoper, kilde: "anbud" };
+    try{
+      const r = await fetch(`${PROSPEKT_API}/lookup?orgnr=${encodeURIComponent(t.kjoper_orgnr)}`, { headers: await prospektAuthHeaders() });
+      if(r.ok){
+        const d = await r.json();
+        Object.assign(firma, {
+          firmanavn: d["Firmanavn"] || t.kjoper,
+          bransje: d["Bransje"] || null,
+          daglig_leder: d["Daglig leder"] || null,
+          daglig_leder_tittel: d["Daglig leder tittel"] || null,
+          daglig_leder_telefon: d["Daglig leder telefon"] || null,
+          daglig_leder_epost: d["Daglig leder e-post"] || null,
+          okonomisjef: d["Økonomisjef"] || null,
+          okonomisjef_telefon: d["Økonomisjef telefon"] || null,
+          okonomisjef_epost: d["Økonomisjef e-post"] || null,
+          ansatte: d["Ansatte"] != null ? String(d["Ansatte"]) : null,
+          driftsinntekter: d["Driftsinntekter"] != null ? String(d["Driftsinntekter"]) : null,
+          regnskapsforer: d["Regnskapsfører"] || null,
+          kommune: d["Kommune"] || null,
+          andre_roller: d["Andre roller"] || null,
+        });
+      }
+    }catch(e){ console.warn("Kontaktoppslag feilet, legger til uten kontaktinfo", e); }
+    const ins = await sb.from("companies").insert(firma).select("id").single();
+    if(ins.error) throw ins.error;
+    const st = anbudStatus[tenderId]?.status;
+    await setAnbudStatus(tenderId, st && st !== "ny" ? st : "relevant", ins.data.id);
+  }catch(e){
+    alert("Kunne ikke legge til i ringeliste: " + (e.message || e));
+    if(btn){ btn.disabled = false; btn.textContent = "Legg i ringeliste"; }
+  }
 }
 
 async function loadLists(){
